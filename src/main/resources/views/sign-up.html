@@ -3,25 +3,25 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
     <head>
-        <title>DeepaMehta Sign up</title>
+        <title>DeepaMehta 4 Sign-up</title>
 		<link rel="stylesheet" href="/org.deepamehta.sign-up/style/style.css" type="text/css" />
 		<script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
     </head>
 
     <body class="sign-up-page">
         <div id="sign-up-view">
-            <h2>DeepaMehta Sign up</h2>
+            <h2>Sign up</h2>
             <form class="sign-up-form" action="/sign-up/create" onsubmit="return createAccount()">
-                <label for="username">Username</label>
+                <!-- label for="username">Username</label-->
                 <input id="username" type="text" name="username" placeholder="Username" onchange="checkUserName()" class="sign-up username" />
-                <label for="pass-one">Password</label>
-                <input type="password" id="pass-one" name="pass-one" onchange="checkPassword()" class="sign-up password" />
-                <label for="pass-two">Password (Repeat)</label>
-                <input type="password" id="pass-two" name="pass-two" onchange="comparePasswords()" class="sign-up password" />
-                <label for="mailbox">Mailbox</label>
+                <!-- label for="pass-one">Password</label-->
+                <input type="password" id="pass-one" name="pass-one" placeholder="Password" onchange="checkPassword()" class="sign-up password" />
+                <!-- label for="pass-two">Password (Repeat)</label-->
+                <input type="password" id="pass-two" name="pass-two" placeholder="Password (Repeat)" onchange="comparePasswords()" class="sign-up password" />
+                <!--label for="mailbox">Mailbox</label-->
                 <input type="text" id="mailbox" name="mailbox" onchange="checkMailbox()" placeholder="E-Mail Address" class="sign-up mailbox" />
                 <div id="message-view"><span id="message"></span></div>
-                <input type="submit" value="Create account" class="sign-up ok" />
+                <input type="submit" value="Create account" class="sign-up ok" /> or <a href="/">log in</a>.
                 <!-- or sign up with <a href="/sign-on/openid/google">Google</a>. -->
             </form>
         </div>

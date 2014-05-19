@@ -18,12 +18,26 @@ import java.util.logging.Logger;
 import javax.ws.rs.*;
 import org.codehaus.jettison.json.JSONObject;
 
+
+/**
+ * Routes registerd by this plugin are:
+ *
+ * /        => login-form
+ * /sign-up => signup-form
+ * /ok      => info-page after account creation
+ *
+ * @name org.deepamehta-sign-up
+ * @website https://github.com/mukil/org.deepamehta-sign-up
+ * @version 1.0.0-SNAPSHOT
+ * @author malt
+ */
+
 @Path("/")
 public class SignupService extends WebActivatorPlugin {
 
     private static Logger log = Logger.getLogger(SignupService.class.getName());
 
-	/** see also @de.deepamehta.plugins.accesscontrol.model.Credentials */
+	/** @see also @de.deepamehta.plugins.accesscontrol.model.Credentials */
 	private static final String ENCRYPTED_PASSWORD_PREFIX = "-SHA256-";
 
     public final static String USERNAME_TYPE_URI = "dm4.accesscontrol.username";
@@ -34,7 +48,6 @@ public class SignupService extends WebActivatorPlugin {
 
     @Override
     public void init() {
-        log.info("Sign-upService Plugin INIT - Setting up the ThymeleafTemplateEngine... ");
         initTemplateEngine();
 	}
 
@@ -55,63 +68,32 @@ public class SignupService extends WebActivatorPlugin {
         }
     }
 
-    @GET
-    @Path("/sign-up/create")
-    public Viewable createSimpleUserAccount(@QueryParam("username") String username,
-            @QueryParam("mailbox") String mailbox, @QueryParam("pass-one") String password) {
-        try {
-			// fixme: owner and creator of this topic should be set to, well: _this_ (topic)
-			if (!isUsernameAvailable(username, null)) throw new WebApplicationException(412);
-			if (!isPasswordGood(password, null)) throw new WebApplicationException(412);
-            log.info("setting up user account composite value model");
-			CompositeValueModel userAccount = new CompositeValueModel()
-					.put(USERNAME_TYPE_URI, username)
-					.put(USER_PASSWORD_TYPE_URI, encryptPassword(password))
-                    .put(MAILBOX_TYPE_URI, mailbox);
-			/** CompositeValueModel personData =  new CompositeValueModel()
-					.put(MAILBOX_TYPE_URI, mailbox);
-			userAccount.put(PERSON_TYPE_URI, personData); **/
-			// fixme: userAccount.
-			// fixme: set user account to "Blocked" until verified
-			TopicModel userModel = new TopicModel(USER_ACCOUNT_TYPE_URI, userAccount);
-            log.info("creating topic model");
-			Topic user = dms.createTopic(userModel, null);
-            log.info("created topic");
-			return getReceivedView(null);
-        } catch (Exception e) {
-            log.warning(e.getMessage());
-            StackTraceElement[] traces = e.getStackTrace();
-            StringBuffer cause = new StringBuffer();
-            for (StackTraceElement trace : traces) {
-                cause.append(trace.toString() + "\r\n");
-            }
-            log.warning(cause.toString());
-            throw new WebApplicationException(e.getCause());
-        }
-    }
 
+    /**
+     * TODO: Maybe switch to QueryParams, like:
+     *  public Viewable createSimpleUserAccount(@QueryParam("username") String username,
+     *      @QueryParam("mailbox") String mailbox, @QueryParam("pass-one") String password)
+     */
     @GET
     @Path("/sign-up/create/{username}/{pass-one}/{mailbox}")
     public Viewable createSimpleUserAccount(@PathParam("username") String username, @PathParam("mailbox") String mailbox,
-            @PathParam("pass-one") String password, @HeaderParam("Cookie") ClientState clientState) {
+            @PathParam("pass-one") String password) {
 
         try {
-			// fixme: drop involvement of clientState
-			// fixme: owner and creator of this topic should be set to, well: _this_ (topic)
 			if (!isUsernameAvailable(username, null)) throw new WebApplicationException(412);
 			if (!isPasswordGood(password, null)) throw new WebApplicationException(412);
-            log.info("setting up user account composite value model");
+            log.info("Setting up new \"User Account\" composite value model");
 			CompositeValueModel userAccount = new CompositeValueModel()
 					.put(USERNAME_TYPE_URI, username)
-					.put(USER_PASSWORD_TYPE_URI, encryptPassword(password))
+					.put(USER_PASSWORD_TYPE_URI, password)
 					.put(MAILBOX_TYPE_URI, mailbox);
-			// fixme: userAccount.
-			// fixme: set user account to "Blocked" until verified
+			// ### set user account to "Blocked" until verified (introduce this in a new migration)
+            // fixme: owner and creator of this topic should be set to, well: _this_ (topic)
 			TopicModel userModel = new TopicModel(USER_ACCOUNT_TYPE_URI, userAccount);
-            log.info("creating topic model");
 			Topic user = dms.createTopic(userModel, null);
-            log.info("created topic");
-			return getReceivedView(null);
+            log.info("Created new \"User Account\" for " + username);
+            log.warning("ACL-Properties should be set for " + username);
+			return getAccountCreationOKView();
         } catch (Exception e) {
             log.warning(e.getMessage());
             StackTraceElement[] traces = e.getStackTrace();
@@ -124,20 +106,9 @@ public class SignupService extends WebActivatorPlugin {
         }
     }
 
-    @POST
-    @Path("/sign-up/login")
-    public Viewable doLogin(@FormParam("username") String username, @FormParam("password") String password,
-			@HeaderParam("Cookie") ClientState clientState) {
-        try {
-			// fixme: check login-credentials
-			return getReceivedView(clientState);
-        } catch (Exception e) {
-            log.warning(e.getMessage());
-            throw new WebApplicationException(e);
-        }
-    }
 
-	/** --- private helpers --- */
+
+    /** --- Private Helpers --- */
 
 	private boolean isUsernameAvailable(String username, ClientState clientState) {
 		// fixme: framework should also allow us to query case insensitve for a username
@@ -150,15 +121,13 @@ public class SignupService extends WebActivatorPlugin {
 		return (password.length() >= 8) ? true : false;
 	}
 
-	private String encryptPassword(String password) {
-        return ENCRYPTED_PASSWORD_PREFIX + JavaUtils.encodeSHA256(password);
-    }
 
-	/** --- routes --- */
+
+	/** --- Sign-up Routes --- */
 
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public Viewable getLoginView(@HeaderParam("Cookie") ClientState clientState) {
+    public Viewable getLoginFormView() {
 		// fixme: use acl service to check if a session already exists and if so, redirect to dm-webclient directly
         return view("login");
     }
@@ -166,7 +135,7 @@ public class SignupService extends WebActivatorPlugin {
     @GET
     @Path("/sign-up")
     @Produces(MediaType.TEXT_HTML)
-    public Viewable getSignupView(@HeaderParam("Cookie") ClientState clientState) {
+    public Viewable getSignupFormView() {
 		// fixme: use acl service to check if a session already exists and if so, redirect to dm-webclient directly
         return view("sign-up");
     }
@@ -174,7 +143,7 @@ public class SignupService extends WebActivatorPlugin {
     @GET
     @Path("/ok")
     @Produces(MediaType.TEXT_HTML)
-    public Viewable getReceivedView(@HeaderParam("Cookie") ClientState clientState) {
+    public Viewable getAccountCreationOKView() {
         return view("ok");
     }
 

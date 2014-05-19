@@ -3,35 +3,57 @@ body.log-in-page,
 body.receipt-page,
 body.ok-page {
 	margin: 20px;
-	font-family: "Myriad Pro","Myriad Web Pro Regular","Lucida Grande", "Geneva", "Trebuchet MS", "sans-serif";
+	font-family: Myriad Pro, Myriad Web Pro Regular, Lucida Grande, Geneva, Trebuchet MS, sans-serif;
 	color: rgba(39, 99, 140, 1.0);
 	font-size: 16px;
 }
 
 body.log-in-page a,
-body.sign-up-page a,
-body.ok-page a {
+body.receipt-page a,
+body.ok-page a{
 	color: rgba(39, 99, 140, 1.0);
 	margin: 0px;
 }
 
-div.log-in-view,
-div.sign-up-view {
-	margin-left: auto;
-	margin-right: auto;
+#sign-up-view,
+#log-in-view {
+    background-color: #fafafa;
+    width: 360px;
+    padding: 30px;
+    margin: 100px auto 0 auto;
+    border-radius: 3px;
+    -webkit-box-shadow: 0 0 2px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(0, 0, 0, .2);
+    -moz-box-shadow: 0 0 2px rgba(0, 0, 0, 0.2), 1px 1px 0 rgba(0, 0, 0, .1);
+    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(0, 0, 0, .2);
+}
+
+#sign-up-view form,
+#log-in-view form {
+    margin: 0 5px;
+    padding: 15px;
+    position: relative;
+}
+
+#sign-up-view h2,
+#log-in-view h2 {
+    text-align: center;
+    color: #666;
+    margin: 0 0 30px 0;
+    /** font: normal 26px/1 Verdana, Helvetica; **/
+    position: relative;
 }
 
 input.log-in,
 input.sign-up {
-	display: block;
-	padding-left: 10px;
-	padding: 5px;
-	margin-left: 10px;
-	margin: 5px;
-	border: 1px solid rgba(39, 99, 140, 1.0);
-	margin-bottom: 15px;
-	font-size: 16px;
-	padding-top: 7px;
+	font-size: 20px;
+    padding: 10px 15px 10px 15px;
+    margin: 0 0 15px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: #555;
+    -moz-box-shadow: 0 1px 1px #ccc inset, 0 1px 0 #fff;
+    -webkit-box-shadow: 0 1px 1px #ccc inset, 0 1px 0 #fff;
+    box-shadow: 0 1px 1px #ccc inset, 0 1px 0 #fff;
 }
 
 p,
@@ -62,4 +84,5 @@ input.sign-up.ok {
 #message-view {
 	padding: 5px;
 	margin-bottom: 10px;
+    color: rgba(39, 99, 140, 1.0);
 }
