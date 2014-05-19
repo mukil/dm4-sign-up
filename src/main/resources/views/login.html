@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <title>DeepaMehta Login</title>
+        <link rel="stylesheet" href="/org.deepamehta.sign-up/style/style.css" type="text/css" />
+        <script type="text/javascript" src="/de.deepamehta.accesscontrol/script/vendor/sha256.js"></script>
+        <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
+    </head>
+
+    <body class="log-in-page">
+        <div id="log-in-view">
+            <h2>DeepaMehta Login</h2>
+            <form class="log-in-form" action="/sign-up/login" onsubmit="return doLogin()">
+                <label for="username">Username</label>
+                <input id="username" type="text" name="username" placeholder="Username" class="log-in username" />
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" class="log-in password" />
+                <div id="message-view"><span id="message"></span></div>
+                <input type="submit" value="Login" class="log-in ok" /> or <a href="/sign-up/">create an account</a>.
+            </form>
+        </div>
+    </body>
+
+</html>
