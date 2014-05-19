@@ -15,12 +15,21 @@ body.ok-page a{
     margin: 0px;
 }
 
+#page-header {
+    text-align: center;
+}
+
+img.deepamehta-logo {
+    margin-top: 20px;
+}
+
+#receipt-view,
 #sign-up-view,
 #log-in-view {
     background-color: #fafafa;
     width: 360px;
     padding: 30px;
-    margin: 100px auto 0 auto;
+    margin: 30px auto 0 auto;
     border-radius: 3px;
     -webkit-box-shadow: 0 0 2px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(0, 0, 0, .2);
     -moz-box-shadow: 0 0 2px rgba(0, 0, 0, 0.2), 1px 1px 0 rgba(0, 0, 0, .1);
@@ -34,6 +43,7 @@ body.ok-page a{
     position: relative;
 }
 
+#receipt-view h2,
 #sign-up-view h2,
 #log-in-view h2 {
     text-align: center;
@@ -76,9 +86,13 @@ input.sign-up.ok {
     display: inline-block;
 }
 
+input[disabled] {
+    background-color: rgba(99, 99, 99, 1.0);
+}
+
 #message {
-    margin-left: 5px;
     color: rgba(200, 0, 0, 1.0);
+    line-height: 1.8em;
 }
 
 #message-view {

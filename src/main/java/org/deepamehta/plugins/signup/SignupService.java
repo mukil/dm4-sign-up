@@ -63,8 +63,7 @@ public class SignupService extends WebActivatorPlugin {
 			//
 			return response.toString();
         } catch (Exception e) {
-            log.warning(e.getMessage());
-            throw new WebApplicationException(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -76,7 +75,7 @@ public class SignupService extends WebActivatorPlugin {
      */
     @GET
     @Path("/sign-up/create/{username}/{pass-one}/{mailbox}")
-    public Viewable createSimpleUserAccount(@PathParam("username") String username, @PathParam("mailbox") String mailbox,
+    public String createSimpleUserAccount(@PathParam("username") String username, @PathParam("mailbox") String mailbox,
             @PathParam("pass-one") String password) {
 
         try {
@@ -93,16 +92,9 @@ public class SignupService extends WebActivatorPlugin {
 			Topic user = dms.createTopic(userModel, null);
             log.info("Created new \"User Account\" for " + username);
             log.warning("ACL-Properties should be set for " + username);
-			return getAccountCreationOKView();
+			return username;
         } catch (Exception e) {
-            log.warning(e.getMessage());
-            StackTraceElement[] traces = e.getStackTrace();
-            StringBuffer cause = new StringBuffer();
-            for (StackTraceElement trace : traces) {
-                cause.append(trace.toString() + "\r\n");
-            }
-            log.warning(cause.toString());
-            throw new WebApplicationException(e.getCause());
+            throw new RuntimeException(e);
         }
     }
 
