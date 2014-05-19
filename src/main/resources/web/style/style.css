@@ -1,18 +1,18 @@
 
 body.log-in-page,
-body.receipt-page,
+body.sign-up-page,
 body.ok-page {
-	margin: 20px;
-	font-family: Myriad Pro, Myriad Web Pro Regular, Lucida Grande, Geneva, Trebuchet MS, sans-serif;
-	color: rgba(39, 99, 140, 1.0);
-	font-size: 16px;
+    margin: 20px;
+    font-family: Myriad Pro, Myriad Web Pro Regular, Lucida Grande, Geneva, Trebuchet MS, sans-serif;
+    color: rgba(39, 99, 140, 1.0);
+    font-size: 16px;
 }
 
 body.log-in-page a,
-body.receipt-page a,
+body.sign-up-page a,
 body.ok-page a{
-	color: rgba(39, 99, 140, 1.0);
-	margin: 0px;
+    color: rgba(39, 99, 140, 1.0);
+    margin: 0px;
 }
 
 #sign-up-view,
@@ -45,7 +45,7 @@ body.ok-page a{
 
 input.log-in,
 input.sign-up {
-	font-size: 20px;
+    font-size: 20px;
     padding: 10px 15px 10px 15px;
     margin: 0 0 15px 0;
     border: 1px solid #ccc;
@@ -58,31 +58,31 @@ input.sign-up {
 
 p,
 label {
-	margin-left: 5px;
-	color: #a9a9a9;
-	padding-left: 5px;
+    margin-left: 5px;
+    color: #a9a9a9;
+    padding-left: 5px;
 }
 
 p {
-	line-height: 1.2em;
+    line-height: 1.2em;
 }
 
 input.log-in.ok,
 input.sign-up.ok {
-	margin-top: 20px;
-	background-color: rgba(39, 99, 140, 1.0);
-	color: rgba(255, 255, 255, 1.0);
-	cursor: pointer;
-	display: inline-block;
+    margin-top: 20px;
+    background-color: rgba(39, 99, 140, 1.0);
+    color: rgba(255, 255, 255, 1.0);
+    cursor: pointer;
+    display: inline-block;
 }
 
 #message {
-	margin-left: 5px;
-	color: rgba(200, 0, 0, 1.0);
+    margin-left: 5px;
+    color: rgba(200, 0, 0, 1.0);
 }
 
 #message-view {
-	padding: 5px;
-	margin-bottom: 10px;
+    padding: 5px;
+    margin-bottom: 10px;
     color: rgba(39, 99, 140, 1.0);
 }
