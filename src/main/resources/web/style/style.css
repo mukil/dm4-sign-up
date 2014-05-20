@@ -17,10 +17,36 @@ body.ok-page a{
 
 #page-header {
     text-align: center;
+    margin-top: 20px;
 }
 
-img.deepamehta-logo {
+#page-footer {
+    margin-left: auto;
+    margin-right: auto;
+    width: 320px;
     margin-top: 20px;
+    font-size: small;
+    color: #a9a9a9;
+}
+
+#page-footer a {
+    text-decoration: none;
+}
+
+#page-header .project-title {
+    margin-top: 20px;
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #a9a9a9;
+}
+
+#page-header .equals,
+#page-header .plus {
+    font-size: 3em;
+    font-weight: bold;
+    color: #a9a9a9;
+    position: relative;
+    top: -60px;
 }
 
 #receipt-view,
