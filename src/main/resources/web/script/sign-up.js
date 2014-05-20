@@ -19,9 +19,7 @@
                 if (xhr.response === "") {
                     console.log("Login successfull")
                     renderFriendlyMessage('Opening Webclient ...')
-                    setTimeout(function (e) {
-                        window.location.href = '/de.deepamehta.webclient'
-                    }, 1500)
+                    redirectToWebclientUI()
                 } else {
                     renderWarning(xhr.response)
                 }
@@ -38,10 +36,12 @@
 
     }
 
-	// fixme: empty passwords, disabled OK button if anything fails
-
+	// ### empty passwords
+    // ###
+    // form.onsubmit()-Implementation
 	function createAccount() {
 
+        checkUserName()
 		if (checkPassword() !== OK_STRING) return
 		if (comparePasswords() !== OK_STRING) return
         if (checkMailbox() == null) return
@@ -50,22 +50,26 @@
         var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
         var password = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
 
-		/** if (checkUserName(false) !== OK_STRING) return false
-		if (checkPassword() !== OK_STRING) return false
-		if (comparePasswords() !== OK_STRING) return false
-		if (checkMailbox() !== OK_STRING) return false **/
-
         xhr = new XMLHttpRequest()
         xhr.onload = function(e) {
-            // ### redirect to log-in form
-            console.log(xhr.response)
+            var username = xhr.response
+            if (username.indexOf("<html>") != 0) {
+                renderFriendlyMessage('Your account was created.')
+                redirectToLogin()
+            } else {
+                renderWarning("Account creation failed.")
+            }
         }
+        /** xhr.onerror = function (e) {
+            renderWarning("Account creation failed." + e)
+        } **/
         xhr.open("GET", "/sign-up/create/" + username + "/" + password + "/" + mailbox)
+        xhr.setRequestHeader("Content-Type", "text/plain")
         xhr.send()
 
 	}
 
-	function checkUserName(async) {
+	function checkUserName() {
 
 		this.usernameInput = document.getElementById("username") // fixme: maybe its better to acces the form element
 
@@ -79,15 +83,17 @@
 			var response = JSON.parse(xhr.response)
 			if (!response.isAvailable) {
 				renderWarning("This username is already taken.")
+                console.log("Username-Check FAILED")
                 disableSignupForm()
 				return null
 			} else {
+                console.log("Username OK")
                 enableSignupForm()
 				renderWarning(EMPTY_STRING)
 				return OK_STRING
 			}
 		}
-		xhr.open("GET", "/sign-up/check/" + userInput, async)
+		xhr.open("GET", "/sign-up/check/" + userInput, false)
 		xhr.send()
 
 		function isValidUsername(name) {
@@ -169,3 +175,16 @@
     function enableSignupForm () {
         document.getElementById("create").removeAttribute("disabled")
     }
+
+    function redirectToWebclientUI () {
+        setTimeout(function (e) {
+            window.location.href = '/de.deepamehta.webclient'
+        }, 1500)
+    }
+
+    function redirectToLogin () {
+        setTimeout(function (e) {
+            window.location.href = '/'
+        }, 1500)
+    }
+
