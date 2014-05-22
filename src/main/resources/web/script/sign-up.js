@@ -45,6 +45,7 @@
 		if (checkPassword() !== OK_STRING) return
 		if (comparePasswords() !== OK_STRING) return
         if (checkMailbox() == null) return
+        if (checkAgreements() !== OK_STRING) return
 
         var username = encodeURIComponent(document.getElementById("username").value)
         var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
@@ -83,11 +84,9 @@
 			var response = JSON.parse(xhr.response)
 			if (!response.isAvailable) {
 				renderWarning("This username is already taken.")
-                console.log("Username-Check FAILED")
                 disableSignupForm()
 				return null
 			} else {
-                console.log("Username OK")
                 enableSignupForm()
 				renderWarning(EMPTY_STRING)
 				return OK_STRING
@@ -148,6 +147,32 @@
 		}
 	}
 
+    function checkAgreements() {
+		var tosCheck = document.getElementById("toscheck").checked
+		var privateOk = document.getElementById("privateinfo").checked
+        //
+        console.log("Checked....." + tosCheck + " and " + privateOk)
+		if (tosCheck && privateOk) {
+            renderWarning(EMPTY_STRING)
+            enableSignupForm()
+			return OK_STRING
+		} else {
+            renderWarning("First, please check our terms and conditions.")
+            disableSignupForm()
+			return null
+		}
+	}
+
+    function showLabsPrivateText() {
+        var textArea = document.getElementById('private-info')
+            textArea.setAttribute("style", "display: block;")
+    }
+
+    function showLabsTermsText() {
+        var textArea = document.getElementById('account-info')
+            textArea.setAttribute("style", "display: block;")
+    }
+
 	function renderWarning(message) {
 		var textNode = document.createTextNode(message)
 		var messageElement = document.getElementById('message')
@@ -170,10 +195,12 @@
 
     function disableSignupForm () {
         document.getElementById("create").setAttribute("disabled", "true")
+        document.getElementById("create").setAttribute("style", "background-color: #a9a9a9;")
     }
 
     function enableSignupForm () {
         document.getElementById("create").removeAttribute("disabled")
+        document.getElementById("create").removeAttribute("style")
     }
 
     function redirectToWebclientUI () {
