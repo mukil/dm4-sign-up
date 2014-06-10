@@ -2,9 +2,7 @@ package org.deepamehta.plugins.signup;
 
 import com.sun.jersey.api.view.Viewable;
 import de.deepamehta.core.Topic;
-import de.deepamehta.core.model.CompositeValueModel;
-import de.deepamehta.core.model.SimpleValue;
-import de.deepamehta.core.model.TopicModel;
+import de.deepamehta.core.model.*;
 import de.deepamehta.core.service.ClientState;
 import de.deepamehta.core.util.JavaUtils;
 import de.deepamehta.plugins.webactivator.WebActivatorPlugin;
@@ -45,6 +43,9 @@ public class SignupService extends WebActivatorPlugin {
     public final static String USER_PASSWORD_TYPE_URI = "dm4.accesscontrol.password";
 
     public final static String MAILBOX_TYPE_URI = "dm4.contacts.email_address";
+
+    public final static String WS_DM_DEFAULT_URI = "de.workspaces.deepamehta";
+    public final static String WS_WIKIDATA_URI = "org.deepamehta.workspaces.wikidata";
 
     @Override
     public void init() {
@@ -92,6 +93,8 @@ public class SignupService extends WebActivatorPlugin {
 			Topic user = dms.createTopic(userModel, null);
             log.info("Created new \"User Account\" for " + username);
             log.warning("ACL-Properties should be set for " + username);
+            // ### postCreate - assign to Wikidata Workspace
+            // ### 
 			return username;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -112,6 +115,15 @@ public class SignupService extends WebActivatorPlugin {
 		// fixem: should be at least 13 chars long but actually we should work on implementing two-factor auth
 		return (password.length() >= 8) ? true : false;
 	}
+
+    private void assignToDefaultWorkspace(Topic topic) {
+        Topic defaultWorkspace = dms.getTopic("uri", new SimpleValue(WS_DM_DEFAULT_URI), false);
+        dms.createAssociation(new AssociationModel("dm4.core.aggregation",
+            new TopicRoleModel(topic.getId(), "dm4.core.parent"),
+            new TopicRoleModel(defaultWorkspace.getId(), "dm4.core.child")
+        ), null);
+    }
+
 
 
 

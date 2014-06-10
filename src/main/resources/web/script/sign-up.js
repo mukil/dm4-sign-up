@@ -50,6 +50,7 @@
         var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
         var password = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
 
+        // ### set default ws-topicid in cookie in dm4_workspace_id=
         xhr = new XMLHttpRequest()
         xhr.onload = function(e) {
             var username = xhr.response
