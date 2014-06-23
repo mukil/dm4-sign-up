@@ -1,15 +1,38 @@
 
-# org.deepamehta Sign-up Module
+# DeepaMehta 4 Sign-up
 
-This DeepaMehta 4 plugin provides a simple, template based, login and registration dialog for DeepaMehta 4 "User Accounts".
+This plugin provides service provides a simple, AJAX and HTML-Template based, `login` and `registration` dialog.
 
-It adds an "E-Mail Address"-Type aggregated (in a one to one relation) to "User Account"-Type Definition.
+This plugin adds:
+*    the `E-Mail Address`-Type to a `User Account`
+     (Aggregation Definition, with a _one_ to _one_ relation)
+
+The special features of the `registration` dialog is comprised of:
+*    A `Sign-up`-Link is hooked up into the DeepaMehta 4 Webclient
+*    Username existence check
+*    E-Mail Address and password validation check
+*    Simple GUI-Notification mechanism
+*    Minimal CSS Definition
+
+The special features of the `login` dialog is comprised of:
+*    Simple GUI-Notification mechanism
+*    Automatic redirect
+*    Minimal CSS Definition
+
+## Requirements
+
+DeepaMehta 4 is a platform for collaboration and knowledge management.
+https://github.com/jri/deepamehta
+
+To be able to install this module you first and additionally have to install the following DeepaMehta 4 Plugins.
+
+*    `dm43-webactivator-0.4.2`-Bundle - [Source Code](https://github.com/jri/dm4-webactivator), [Nightly Build](http://download.deepamehta.de/nightly/)
 
 ## Download & Installation
 
-This plugin is tested to work with [DeepaMehta 4.3-SNAPSHOT](https://github.com/jri/deepamehta) and depends on the installation of the [dm4-webactivator 0.4.2](https://github.com/jri/dm4-webactivator) plugin. 
+You can find the latest `dm42-sign-up-X.Y.Z.jar-`-Bundle to download at [http://download.deepamehta.de/nightly/](http://download.deepamehta.de/nightly/).
 
-You can find the latest ''dm42-sign-up-1.0.jar'' bundle to download at [http://download.deepamehta.de/nightly/](http://download.deepamehta.de/nightly/).
+After downloading the bundle-file, place it in the `bundles` folder of your DeepaMehta installation and restart DeepaMehta.
 
 ## Licensed under the GPL License 3.0
 
@@ -24,4 +47,3 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 
 -------------------------------
 Author: Malte Reißig, 2013-2014
-
