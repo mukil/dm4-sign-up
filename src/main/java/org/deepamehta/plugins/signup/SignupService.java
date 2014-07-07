@@ -2,20 +2,19 @@ package org.deepamehta.plugins.signup;
 
 import com.sun.jersey.api.view.Viewable;
 import de.deepamehta.core.Topic;
-import de.deepamehta.core.model.CompositeValueModel;
-import de.deepamehta.core.model.SimpleValue;
-import de.deepamehta.core.model.TopicModel;
+import de.deepamehta.core.model.*;
 import de.deepamehta.core.service.ClientState;
-import de.deepamehta.core.util.JavaUtils;
+import de.deepamehta.core.service.PluginService;
+import de.deepamehta.core.service.annotation.ConsumesService;
+import de.deepamehta.plugins.accesscontrol.model.ACLEntry;
+import de.deepamehta.plugins.accesscontrol.model.AccessControlList;
+import de.deepamehta.plugins.accesscontrol.model.Operation;
+import de.deepamehta.plugins.accesscontrol.model.UserRole;
+import de.deepamehta.plugins.accesscontrol.service.AccessControlService;
 import de.deepamehta.plugins.webactivator.WebActivatorPlugin;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
 import java.util.logging.Logger;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import org.codehaus.jettison.json.JSONObject;
 
 
@@ -40,11 +39,15 @@ public class SignupService extends WebActivatorPlugin {
 	/** @see also @de.deepamehta.plugins.accesscontrol.model.Credentials */
 	private static final String ENCRYPTED_PASSWORD_PREFIX = "-SHA256-";
 
-    public final static String USERNAME_TYPE_URI = "dm4.accesscontrol.username";
-    public final static String USER_ACCOUNT_TYPE_URI = "dm4.accesscontrol.user_account";
-    public final static String USER_PASSWORD_TYPE_URI = "dm4.accesscontrol.password";
+    public static final String USER_ACCOUNT_TYPE_URI = "dm4.accesscontrol.user_account";
+    public static final String MAILBOX_TYPE_URI = "dm4.contacts.email_address";
 
-    public final static String MAILBOX_TYPE_URI = "dm4.contacts.email_address";
+    private static final String USERNAME_TYPE_URI = "dm4.accesscontrol.username";
+    private static final String USER_PASSWORD_TYPE_URI = "dm4.accesscontrol.password";
+    private static final String WS_WIKIDATA_URI = "org.deepamehta.workspaces.wikidata";
+    private static final String WS_DEFAULT_URI = "de.workspaces.deepamehta";
+
+    private AccessControlService acService;
 
     @Override
     public void init() {
@@ -67,12 +70,6 @@ public class SignupService extends WebActivatorPlugin {
         }
     }
 
-
-    /**
-     * TODO: Maybe switch to QueryParams, like:
-     *  public Viewable createSimpleUserAccount(@QueryParam("username") String username,
-     *      @QueryParam("mailbox") String mailbox, @QueryParam("pass-one") String password)
-     */
     @GET
     @Path("/sign-up/create/{username}/{pass-one}/{mailbox}")
     public String createSimpleUserAccount(@PathParam("username") String username, @PathParam("mailbox") String mailbox,
@@ -90,8 +87,13 @@ public class SignupService extends WebActivatorPlugin {
             // fixme: owner and creator of this topic should be set to, well: _this_ (topic)
 			TopicModel userModel = new TopicModel(USER_ACCOUNT_TYPE_URI, userAccount);
 			Topic user = dms.createTopic(userModel, null);
-            log.info("Created new \"User Account\" for " + username);
-            log.warning("ACL-Properties should be set for " + username);
+            log.info("### Created new \"User Account\" for " + username);
+            acService.setACL(user, new AccessControlList( //
+                            new ACLEntry(Operation.WRITE, UserRole.OWNER)));
+            acService.setCreator(user, username);
+            acService.setOwner(user, username);
+            assignToDefaultWorkspace(user.getCompositeValue().getTopic(USERNAME_TYPE_URI)); // "Membership DeepaMehta"
+            assignToWikidataWorkspace(user.getCompositeValue().getTopic(USERNAME_TYPE_URI)); // Membership "Wikidata"
 			return username;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -137,6 +139,42 @@ public class SignupService extends WebActivatorPlugin {
     @Produces(MediaType.TEXT_HTML)
     public Viewable getAccountCreationOKView() {
         return view("ok");
+    }
+
+
+
+    /** --- Implementing PluginService Interfaces to consume AccessControlService --- */
+
+    @Override
+    @ConsumesService(de.deepamehta.plugins.accesscontrol.service.AccessControlService.class)
+    public void serviceArrived(PluginService service) {
+        if (service instanceof AccessControlService) {
+            acService = (AccessControlService) service;
+        }
+    }
+
+    @Override
+    @ConsumesService(de.deepamehta.plugins.accesscontrol.service.AccessControlService.class)
+    public void serviceGone(PluginService service) {
+        if (service == acService) {
+            acService = null;
+        }
+    }
+
+    private void assignToWikidataWorkspace(Topic topic) {
+        Topic defaultWorkspace = dms.getTopic("uri", new SimpleValue(WS_WIKIDATA_URI), false);
+        dms.createAssociation(new AssociationModel("dm4.core.aggregation",
+            new TopicRoleModel(topic.getId(), "dm4.core.parent"),
+            new TopicRoleModel(defaultWorkspace.getId(), "dm4.core.child")
+        ), null);
+    }
+
+    private void assignToDefaultWorkspace(Topic topic) {
+        Topic defaultWorkspace = dms.getTopic("uri", new SimpleValue(WS_DEFAULT_URI), false);
+        dms.createAssociation(new AssociationModel("dm4.core.aggregation",
+            new TopicRoleModel(topic.getId(), "dm4.core.parent"),
+            new TopicRoleModel(defaultWorkspace.getId(), "dm4.core.child")
+        ), null);
     }
 
 }
