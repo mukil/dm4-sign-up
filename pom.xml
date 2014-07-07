@@ -12,34 +12,34 @@
     <parent>
         <groupId>de.deepamehta</groupId>
         <artifactId>deepamehta-plugin-parent</artifactId>
-        <version>4.3-SNAPSHOT</version>
+        <version>4.4-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>de.deepamehta</groupId>
             <artifactId>deepamehta-core</artifactId>
-            <version>4.3-SNAPSHOT</version>
+            <version>4.4-SNAPSHOT</version>
         </dependency>
 		<dependency>
             <groupId>de.deepamehta</groupId>
             <artifactId>deepamehta-workspaces</artifactId>
-            <version>4.3-SNAPSHOT</version>
+            <version>4.4-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>de.deepamehta</groupId>
             <artifactId>deepamehta-contacts</artifactId>
-            <version>4.3-SNAPSHOT</version>
+            <version>4.4-SNAPSHOT</version>
         </dependency>
         <dependency>                                 <!-- depend on the DeepaMehta core module.     -->
             <groupId>de.deepamehta</groupId>         <!-- Copy this declaration as is.              -->
             <artifactId>deepamehta-accesscontrol</artifactId> <!-- Just update the version number, i-->
-            <version>4.3-SNAPSHOT</version>       <!-- newer version of DeepaMehta is available. -->
+            <version>4.4-SNAPSHOT</version>       <!-- newer version of DeepaMehta is available. -->
         </dependency>                                <!-- If your plugin has no Java code at all,   -->
         <dependency>
             <groupId>de.deepamehta</groupId>
-            <artifactId>dm43-webactivator</artifactId>
-            <version>0.4.3-SNAPSHOT</version>
+            <artifactId>dm44-webactivator</artifactId>
+            <version>0.4.4-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

@@ -1,14 +1,11 @@
 package org.deepamehta.plugins.signup.migrations;
 
 import de.deepamehta.core.AssociationDefinition;
-import java.util.logging.Logger;
-import de.deepamehta.core.service.Migration;
-import de.deepamehta.core.Topic;
 import de.deepamehta.core.TopicType;
-import de.deepamehta.core.model.*;
+import de.deepamehta.core.model.AssociationDefinitionModel;
+import de.deepamehta.core.service.Migration;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.logging.Logger;
 import org.deepamehta.plugins.signup.SignupService;
 
 public class Migration1 extends Migration {

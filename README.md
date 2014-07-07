@@ -4,8 +4,7 @@
 This plugin provides service provides a simple, AJAX and HTML-Template based, `login` and `registration` dialog.
 
 This plugin adds:
-*    An `E-Mail Address` to each `User Account`
-
+*    An `E-Mail Address` to each `User Account`   
      (Aggregation Definition, with a _one_ to _one_ relation)
 *    A `Sign-up`-link appears next to the `Login`-button in the DeepaMehta 4 Webclient
 
@@ -41,9 +40,9 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 
 # Version History
 
-1.0-SNAPSHOT
+1.0-SNAPSHOT, UPCOMING
 
-- compatible with 4.3-SNAPSHOT
+- compatible with 4.4-SNAPSHOT
 - basically working
 
 -------------------------------

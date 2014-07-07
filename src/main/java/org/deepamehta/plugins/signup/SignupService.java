@@ -4,16 +4,17 @@ import com.sun.jersey.api.view.Viewable;
 import de.deepamehta.core.Topic;
 import de.deepamehta.core.model.*;
 import de.deepamehta.core.service.ClientState;
-import de.deepamehta.core.util.JavaUtils;
+import de.deepamehta.core.service.PluginService;
+import de.deepamehta.core.service.annotation.ConsumesService;
+import de.deepamehta.plugins.accesscontrol.model.ACLEntry;
+import de.deepamehta.plugins.accesscontrol.model.AccessControlList;
+import de.deepamehta.plugins.accesscontrol.model.Operation;
+import de.deepamehta.plugins.accesscontrol.model.UserRole;
+import de.deepamehta.plugins.accesscontrol.service.AccessControlService;
 import de.deepamehta.plugins.webactivator.WebActivatorPlugin;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
 import java.util.logging.Logger;
 import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import org.codehaus.jettison.json.JSONObject;
 
 
@@ -47,10 +48,14 @@ public class SignupService extends WebActivatorPlugin {
     public final static String WS_DM_DEFAULT_URI = "de.workspaces.deepamehta";
     public final static String WS_WIKIDATA_URI = "org.deepamehta.workspaces.wikidata";
 
+    private AccessControlService acService = null;
+
     @Override
     public void init() {
         initTemplateEngine();
 	}
+
+    /** Plugin Service Implementation */
 
     @GET
     @Path("/sign-up/check/{username}")
@@ -68,12 +73,6 @@ public class SignupService extends WebActivatorPlugin {
         }
     }
 
-
-    /**
-     * TODO: Maybe switch to QueryParams, like:
-     *  public Viewable createSimpleUserAccount(@QueryParam("username") String username,
-     *      @QueryParam("mailbox") String mailbox, @QueryParam("pass-one") String password)
-     */
     @GET
     @Path("/sign-up/create/{username}/{pass-one}/{mailbox}")
     public String createSimpleUserAccount(@PathParam("username") String username, @PathParam("mailbox") String mailbox,
@@ -88,16 +87,38 @@ public class SignupService extends WebActivatorPlugin {
 					.put(USER_PASSWORD_TYPE_URI, password)
 					.put(MAILBOX_TYPE_URI, mailbox);
 			// ### set user account to "Blocked" until verified (introduce this in a new migration)
-            // fixme: owner and creator of this topic should be set to, well: _this_ (topic)
 			TopicModel userModel = new TopicModel(USER_ACCOUNT_TYPE_URI, userAccount);
 			Topic user = dms.createTopic(userModel, null);
             log.info("Created new \"User Account\" for " + username);
-            log.warning("ACL-Properties should be set for " + username);
-            // ### postCreate - assign to Wikidata Workspace
-            // ### 
+            acService.setACL(user, new AccessControlList( //
+                            new ACLEntry(Operation.WRITE, UserRole.OWNER)));
+            acService.setCreator(user, username);
+            acService.setOwner(user, username);
+            log.warning("ACL-Properties are now set for " + username);
+            assignToDefaultWorkspace(user.getCompositeValue().getTopic(USERNAME_TYPE_URI));
 			return username;
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+    }
+
+
+
+    /** --- Implementing PluginService Interfaces to consume AccessControlService --- */
+
+    @Override
+    @ConsumesService(de.deepamehta.plugins.accesscontrol.service.AccessControlService.class)
+    public void serviceArrived(PluginService service) {
+        if (service instanceof AccessControlService) {
+            acService = (AccessControlService) service;
+        }
+    }
+
+    @Override
+    @ConsumesService(de.deepamehta.plugins.accesscontrol.service.AccessControlService.class)
+    public void serviceGone(PluginService service) {
+        if (service == acService) {
+            acService = null;
         }
     }
 
@@ -123,7 +144,6 @@ public class SignupService extends WebActivatorPlugin {
             new TopicRoleModel(defaultWorkspace.getId(), "dm4.core.child")
         ), null);
     }
-
 
 
 
