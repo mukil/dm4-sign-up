@@ -58,6 +58,7 @@ body.ok-page p {
     font-size: small;
     color: #a9a9a9;
     text-align: center;
+    position: relative;
 }
 
 #pre-text a,
