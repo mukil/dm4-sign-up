@@ -50,6 +50,10 @@ body.ok-page p {
     margin-top: 20px;
 }
 
+#page-header a {
+    text-decoration: none;
+}
+
 #page-footer {
     margin-left: auto;
     margin-right: auto;

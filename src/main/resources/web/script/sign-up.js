@@ -55,8 +55,8 @@
         xhr.onload = function(e) {
             var username = xhr.response
             if (username.indexOf("<html>") != 0) {
-                renderFriendlyMessage('Your account was created.')
-                redirectToLogin()
+                renderFriendlyMessage('Submitting ..')
+                redirectToOK()
             } else {
                 renderWarning("Account creation failed.")
             }
@@ -209,9 +209,9 @@
         }, 1500)
     }
 
-    function redirectToLogin () {
+    function redirectToOK () {
         setTimeout(function (e) {
-            window.location.href = '/'
+            window.location.href = '/ok'
         }, 1500)
     }
 
