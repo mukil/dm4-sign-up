@@ -1,6 +1,6 @@
 
-	var EMPTY_STRING = ""
-	var OK_STRING = "OK"
+    var EMPTY_STRING = ""
+    var OK_STRING = "OK"
 
     function doLogin () {
 
@@ -36,14 +36,14 @@
 
     }
 
-	// ### empty passwords
+    // ### empty passwords
     // ###
     // form.onsubmit()-Implementation
-	function createAccount() {
+    function createAccount() {
 
         checkUserName()
-		if (checkPassword() !== OK_STRING) return
-		if (comparePasswords() !== OK_STRING) return
+        if (checkPassword() !== OK_STRING) return
+        if (comparePasswords() !== OK_STRING) return
         if (checkMailbox() == null) return
         if (checkAgreements() !== OK_STRING) return
 
@@ -69,100 +69,100 @@
         xhr.setRequestHeader("Content-Type", "text/plain")
         xhr.send()
 
-	}
+    }
 
-	function checkUserName() {
+    function checkUserName() {
 
-		this.usernameInput = document.getElementById("username") // fixme: maybe its better to acces the form element
+        this.usernameInput = document.getElementById("username") // fixme: maybe its better to acces the form element
 
-		var userInput = this.usernameInput.value
-		if (!isValidUsername(userInput)) {
-			renderWarning("This username would be invalid.")
-			return null
-		}
-		xhr = new XMLHttpRequest()
-		xhr.onload = function(e) {
-			var response = JSON.parse(xhr.response)
-			if (!response.isAvailable) {
-				renderWarning("This username is already taken.")
+        var userInput = this.usernameInput.value
+        if (!isValidUsername(userInput)) {
+            renderWarning("This username would be invalid.")
+            return null
+        }
+        xhr = new XMLHttpRequest()
+        xhr.onload = function(e) {
+            var response = JSON.parse(xhr.response)
+            if (!response.isAvailable) {
+                renderWarning("This username is already taken.")
                 disableSignupForm()
-				return null
-			} else {
+                return null
+            } else {
                 enableSignupForm()
-				renderWarning(EMPTY_STRING)
-				return OK_STRING
-			}
-		}
-		xhr.open("GET", "/sign-up/check/" + userInput, false)
-		xhr.send()
+                renderWarning(EMPTY_STRING)
+                return OK_STRING
+            }
+        }
+        xhr.open("GET", "/sign-up/check/" + userInput, false)
+        xhr.send()
 
-		function isValidUsername(name) {
-			if (name.length <= 1) {
+        function isValidUsername(name) {
+            if (name.length <= 1) {
                 disableSignupForm()
                 return false
             } else {
                 enableSignupForm()
                 return true
             }
-		}
+        }
 
-	}
+    }
 
-	function checkPassword () {
-		var passwordField = document.getElementById("pass-one") // fixme: maybe its better to acces the form element
-		if (passwordField.value.length <=7) {
-			renderWarning("Your password must be at least 8 characters long.")
+    function checkPassword () {
+        var passwordField = document.getElementById("pass-one") // fixme: maybe its better to acces the form element
+        if (passwordField.value.length <=7) {
+            renderWarning("Your password must be at least 8 characters long.")
             disableSignupForm()
-			return null
-		} else {
+            return null
+        } else {
             enableSignupForm()
             return OK_STRING
         }
-	}
+    }
 
-	function checkMailbox () { // fixme:
-		var mailboxField = document.getElementById("mailbox") // fixme: maybe its better to acces the form element
-		if (mailboxField.value.indexOf("@") == -1 || mailboxField.value.indexOf(".") == -1) {
-			renderWarning("This E-Mail Address would be invalid.")
+    function checkMailbox () { // fixme:
+        var mailboxField = document.getElementById("mailbox") // fixme: maybe its better to acces the form element
+        if (mailboxField.value.indexOf("@") == -1 || mailboxField.value.indexOf(".") == -1) {
+            renderWarning("This E-Mail Address would be invalid.")
             disableSignupForm()
-			return null
-		} else {
+            return null
+        } else {
             enableSignupForm()
-			renderWarning(EMPTY_STRING)
-			return OK_STRING
-		}
-	}
+            renderWarning(EMPTY_STRING)
+            return OK_STRING
+        }
+    }
 
-	function comparePasswords () {
-		var passwordFieldTwo = document.getElementById("pass-one") // fixme: maybe its better to acces the form element
-		var passwordFieldOne = document.getElementById("pass-two") // fixme: maybe its better to acces the form element
-		if (passwordFieldOne.value !== passwordFieldTwo.value) {
-			renderWarning("Your passwords do not match.")
+    function comparePasswords () {
+        var passwordFieldTwo = document.getElementById("pass-one") // fixme: maybe its better to acces the form element
+        var passwordFieldOne = document.getElementById("pass-two") // fixme: maybe its better to acces the form element
+        if (passwordFieldOne.value !== passwordFieldTwo.value) {
+            renderWarning("Your passwords do not match.")
             disableSignupForm()
-			return null
-		} else if (passwordFieldOne.value === passwordFieldTwo.value) {
-			renderWarning(EMPTY_STRING)
-            enableSignupForm()
-			checkPassword()
-			return OK_STRING
-		}
-	}
-
-    function checkAgreements() {
-		var tosCheck = document.getElementById("toscheck").checked
-		var privateOk = document.getElementById("privateinfo").checked
-        //
-        console.log("Checked....." + tosCheck + " and " + privateOk)
-		if (tosCheck && privateOk) {
+            return null
+        } else if (passwordFieldOne.value === passwordFieldTwo.value) {
             renderWarning(EMPTY_STRING)
             enableSignupForm()
-			return OK_STRING
-		} else {
+            checkPassword()
+            return OK_STRING
+        }
+    }
+
+    function checkAgreements() {
+        var tosCheck = document.getElementById("toscheck").checked
+        var privateOk = document.getElementById("privateinfo").checked
+        //
+        console.log("Checked....." + tosCheck + " and " + privateOk)
+        if (tosCheck && privateOk) {
+            renderWarning(EMPTY_STRING)
+            enableSignupForm()
+            return OK_STRING
+        } else {
             renderWarning("First, please check our terms and conditions.")
             disableSignupForm()
-			return null
-		}
-	}
+            return null
+        }
+    }
 
     function showLabsPrivateText() {
         var textArea = document.getElementById('private-info')
@@ -174,25 +174,25 @@
             textArea.setAttribute("style", "display: block;")
     }
 
-	function renderWarning(message) {
-		var textNode = document.createTextNode(message)
-		var messageElement = document.getElementById('message')
-		while(messageElement.hasChildNodes()) {
-			// looping over lastChild thx to http://stackoverflow.com/questions/5402525/remove-all-child-nodes
-			messageElement.removeChild(messageElement.lastChild);
-		}
-		messageElement.appendChild(textNode)
-	}
+    function renderWarning(message) {
+        var textNode = document.createTextNode(message)
+        var messageElement = document.getElementById('message')
+        while(messageElement.hasChildNodes()) {
+            // looping over lastChild thx to http://stackoverflow.com/questions/5402525/remove-all-child-nodes
+            messageElement.removeChild(messageElement.lastChild);
+        }
+        messageElement.appendChild(textNode)
+    }
 
     function renderFriendlyMessage(message) {
-		var textNode = document.createTextNode(message)
-		var messageElement = document.getElementById('message-view')
-		while(messageElement.hasChildNodes()) {
-			// looping over lastChild thx to http://stackoverflow.com/questions/5402525/remove-all-child-nodes
-			messageElement.removeChild(messageElement.lastChild);
-		}
-		messageElement.appendChild(textNode)
-	}
+        var textNode = document.createTextNode(message)
+        var messageElement = document.getElementById('message-view')
+        while(messageElement.hasChildNodes()) {
+            // looping over lastChild thx to http://stackoverflow.com/questions/5402525/remove-all-child-nodes
+            messageElement.removeChild(messageElement.lastChild);
+        }
+        messageElement.appendChild(textNode)
+    }
 
     function disableSignupForm () {
         document.getElementById("create").setAttribute("disabled", "true")
@@ -215,4 +215,3 @@
             window.location.href = '/ok'
         }, 1500)
     }
-
