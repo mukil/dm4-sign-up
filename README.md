@@ -33,6 +33,14 @@ To be able to install this module you first and additionally have to install the
 You can find the latest `dm44-sign-up-X.Y.Z.jar-`-Bundle to download at [http://download.deepamehta.de/nightly/](http://download.deepamehta.de/nightly/).
 
 After downloading the two bundle-files (webactivator and sign-up), place those in the `bundles` folder of your DeepaMehta installation and restart DeepaMehta.
+=======
+*    `dm44-webactivator-0.4.4`-Bundle - [Source Code](https://github.com/jri/dm4-webactivator), [Nightly Build](http://download.deepamehta.de/nightly/)
+
+## Download & Installation
+
+You can find the latest `dm44-sign-up-X.Y.Z.jar-`-Bundle to download at [http://download.deepamehta.de/nightly/](http://download.deepamehta.de/nightly/).
+
+After downloading the bundle-file, place it in the `bundles` folder of your DeepaMehta installation and restart DeepaMehta.
 
 ## Licensed under the GPL License 3.0
 
@@ -40,9 +48,9 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 
 # Version History
 
-1.0, November 17, 2014
+1.0.0-SNAPSHOT, UPCOMING
 
-- compatible with 4.4 releaase
+- compatible with 4.4-SNAPSHOT
 - basically working
 
 -------------------------------

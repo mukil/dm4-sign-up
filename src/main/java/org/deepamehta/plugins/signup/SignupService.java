@@ -6,6 +6,8 @@ import de.deepamehta.core.Topic;
 import de.deepamehta.core.model.*;
 import de.deepamehta.core.service.Inject;
 import de.deepamehta.core.service.Transactional;
+import de.deepamehta.core.service.PluginService;
+import de.deepamehta.core.service.annotation.ConsumesService;
 import de.deepamehta.plugins.accesscontrol.model.ACLEntry;
 import de.deepamehta.plugins.accesscontrol.model.AccessControlList;
 import de.deepamehta.plugins.accesscontrol.model.Operation;
@@ -28,7 +30,7 @@ import org.codehaus.jettison.json.JSONObject;
  *
  * @name dm4-sign-up
  * @website https://github.com/mukil/dm4-sign-up
- * @version 1.0.0
+ * @version 1.0.0-SNAPSHOT
  * @author <a href="mailto:malte@mikromedia.de">Malte Reissig</a>;
  */
 
@@ -40,14 +42,15 @@ public class SignupService extends WebActivatorPlugin {
     /** @see also @de.deepamehta.plugins.accesscontrol.model.Credentials */
     private static final String ENCRYPTED_PASSWORD_PREFIX = "-SHA256-";
 
-    public final static String USERNAME_TYPE_URI = "dm4.accesscontrol.username";
-    public final static String USER_ACCOUNT_TYPE_URI = "dm4.accesscontrol.user_account";
-    public final static String USER_PASSWORD_TYPE_URI = "dm4.accesscontrol.password";
+    public static final String USER_ACCOUNT_TYPE_URI = "dm4.accesscontrol.user_account";
+    public static final String MAILBOX_TYPE_URI = "dm4.contacts.email_address";
 
-    public final static String MAILBOX_TYPE_URI = "dm4.contacts.email_address";
+    private static final String USERNAME_TYPE_URI = "dm4.accesscontrol.username";
+    private static final String USER_PASSWORD_TYPE_URI = "dm4.accesscontrol.password";
+    private static final String WS_WIKIDATA_URI = "org.deepamehta.workspaces.wikidata";
+    private static final String WS_DEFAULT_URI = "de.workspaces.deepamehta";
 
     public final static String WS_DM_DEFAULT_URI = "de.workspaces.deepamehta";
-    public final static String WS_WIKIDATA_URI = "org.deepamehta.workspaces.wikidata";
     
     final String ADMINISTRATOR_USERNAME = "admin";
 
@@ -98,7 +101,7 @@ public class SignupService extends WebActivatorPlugin {
             acService.setCreator(user, username);
             acService.setOwner(user, username);
             // ### assign to custom workspace - make configurable
-            assignToDefaultWorkspace(user.getChildTopics().getTopic(USERNAME_TYPE_URI));
+            assignToWikidataWorkspace(user.getChildTopics().getTopic(USERNAME_TYPE_URI)); // Membership "Wikidata"
             return username;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -120,25 +123,6 @@ public class SignupService extends WebActivatorPlugin {
         return (password.length() >= 8);
     }
     
-    private boolean associationExists(String edge_type, Topic item, Topic user) {
-        List<Association> results = dms.getAssociations(item.getId(), user.getId(), edge_type);
-        return (results.size() > 0);
-    }
-
-    private void assignToDefaultWorkspace(Topic topic) {
-        Topic defaultWorkspace = dms.getTopic("uri", new SimpleValue(WS_DM_DEFAULT_URI));
-        if (!associationExists("dm4.core.aggregation", defaultWorkspace, topic)) {
-            dms.createAssociation(new AssociationModel("dm4.core.aggregation",
-                new TopicRoleModel(topic.getId(), "dm4.core.parent"),
-                new TopicRoleModel(defaultWorkspace.getId(), "dm4.core.child")
-            ));
-        } else {
-            log.warning("New User Account was already to default (\"DeepaMehta\") workspace "
-                + "(probably through already having a workspace cookie set?).");
-        }
-    }
-
-
 
     /** --- Sign-up Routes --- */
 
@@ -162,6 +146,35 @@ public class SignupService extends WebActivatorPlugin {
     @Produces(MediaType.TEXT_HTML)
     public Viewable getAccountCreationOKView() {
         return view("ok");
+    }
+
+
+    private boolean associationExists(String edge_type, Topic item, Topic user) {
+        List<Association> results = dms.getAssociations(item.getId(), user.getId(), edge_type);
+        return (results.size() > 0);
+    }
+
+    private void assignToDefaultWorkspace(Topic topic) {
+        Topic defaultWorkspace = dms.getTopic("uri", new SimpleValue(WS_DM_DEFAULT_URI));
+        if (!associationExists("dm4.core.aggregation", defaultWorkspace, topic)) {
+            dms.createAssociation(new AssociationModel("dm4.core.aggregation",
+                new TopicRoleModel(topic.getId(), "dm4.core.parent"),
+                new TopicRoleModel(defaultWorkspace.getId(), "dm4.core.child")
+            ));
+        } else {
+            log.warning("New User Account was already to default (\"DeepaMehta\") workspace "
+                + "(probably through already having a workspace cookie set?).");
+        }
+    }
+
+    private void assignToWikidataWorkspace(Topic topic) {
+        Topic wikidataWorkspace = dms.getTopic("uri", new SimpleValue(WS_WIKIDATA_URI));
+        if (!associationExists("dm4.core.aggregation", wikidataWorkspace, topic)) {
+            dms.createAssociation(new AssociationModel("dm4.core.aggregation",
+                new TopicRoleModel(topic.getId(), "dm4.core.parent"),
+                new TopicRoleModel(wikidataWorkspace.getId(), "dm4.core.child")
+            ));
+        }
     }
 
 }
