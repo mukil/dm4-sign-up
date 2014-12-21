@@ -5,7 +5,7 @@ This plugin provides service provides a simple, AJAX and HTML-Template based, `l
 
 This plugin adds:
 *    An `E-Mail Address` to each `User Account`   
-     (Aggregation Definition, with a _one_ to _one_ relation)
+     (Aggregation Definition, with a _one_ to _one_ relation, if not already present)
 *    A `Sign-up`-link next to the `Login`-button in the DeepaMehta 4 Webclient
 
 The special features of the `registration` dialog is comprised of:

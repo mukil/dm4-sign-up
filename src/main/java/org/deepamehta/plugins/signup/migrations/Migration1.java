@@ -17,7 +17,7 @@ public class Migration1 extends Migration {
 
         TopicType account = dms.getTopicType(SignupService.USER_ACCOUNT_TYPE_URI);
 
-		// If not already done, enrich the "User Account"-Type about a "E-Mail Address"-Type
+        // If not already done, enrich the "User Account"-Type about a "E-Mail Address"-Type
         Collection<AssociationDefinition> childTypes = account.getAssocDefs();
         boolean hasMailboxAsChild = false;
         for (AssociationDefinition child : childTypes) {
