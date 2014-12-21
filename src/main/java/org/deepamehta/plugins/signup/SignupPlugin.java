@@ -6,6 +6,7 @@ import de.deepamehta.core.Topic;
 import de.deepamehta.core.model.*;
 import de.deepamehta.core.service.Inject;
 import de.deepamehta.core.service.Transactional;
+import de.deepamehta.core.storage.spi.DeepaMehtaTransaction;
 import de.deepamehta.plugins.accesscontrol.model.ACLEntry;
 import de.deepamehta.plugins.accesscontrol.model.AccessControlList;
 import de.deepamehta.plugins.accesscontrol.model.Operation;
@@ -17,6 +18,7 @@ import java.util.logging.Logger;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import org.codehaus.jettison.json.JSONObject;
+import org.deepamehta.plugins.signup.service.SignupPluginService;
 
 
 /**
@@ -33,9 +35,9 @@ import org.codehaus.jettison.json.JSONObject;
  */
 
 @Path("/")
-public class SignupService extends WebActivatorPlugin {
+public class SignupPlugin extends WebActivatorPlugin implements SignupPluginService {
 
-    private static Logger log = Logger.getLogger(SignupService.class.getName());
+    private static Logger log = Logger.getLogger(SignupPlugin.class.getName());
 
     /** @see also @de.deepamehta.plugins.accesscontrol.model.Credentials */
     private static final String ENCRYPTED_PASSWORD_PREFIX = "-SHA256-";
@@ -45,12 +47,14 @@ public class SignupService extends WebActivatorPlugin {
 
     private static final String USERNAME_TYPE_URI = "dm4.accesscontrol.username";
     private static final String USER_PASSWORD_TYPE_URI = "dm4.accesscontrol.password";
-    private static final String WS_WIKIDATA_URI = "org.deepamehta.workspaces.wikidata";
-    private static final String WS_DEFAULT_URI = "de.workspaces.deepamehta";
+    // private static final String WS_WIKIDATA_URI = "org.deepamehta.workspaces.wikidata";
+    // private static final String WS_DEFAULT_URI = "de.workspaces.deepamehta";
 
     public final static String WS_DM_DEFAULT_URI = "de.workspaces.deepamehta";
     
     final String ADMINISTRATOR_USERNAME = "admin";
+    
+    private Topic currentModuleConfiguration = null;
 
     @Inject
     private AccessControlService acService;
@@ -58,6 +62,14 @@ public class SignupService extends WebActivatorPlugin {
     @Override
     public void init() {
         initTemplateEngine();
+        currentModuleConfiguration = getCurrentSignupConfiguration();
+        log.info("Sign-up: Set module configuration to (uri=" + currentModuleConfiguration.getUri() 
+                + ") " + currentModuleConfiguration.getSimpleValue());
+    }
+    
+    @Override
+    public void postInstall() {
+        checkACLsOfMigration();
     }
 
     /** Plugin Service Implementation */
@@ -66,7 +78,7 @@ public class SignupService extends WebActivatorPlugin {
     @Path("/sign-up/check/{username}")
     @Produces(MediaType.APPLICATION_JSON)
     public String getUsernameAvailability(@PathParam("username") String username) {
-		JSONObject response = new JSONObject();
+        JSONObject response = new JSONObject();
         try {
             response.put("isAvailable", true);
             if (!isUsernameAvailable(username)) response.put("isAvailable", false);
@@ -98,8 +110,8 @@ public class SignupService extends WebActivatorPlugin {
                             new ACLEntry(Operation.WRITE, UserRole.OWNER)));
             acService.setCreator(user, username);
             acService.setOwner(user, username);
-            // ### assign to custom workspace - make configurable
-            assignToWikidataWorkspace(user.getChildTopics().getTopic(USERNAME_TYPE_URI)); // Membership "Wikidata"
+            // ### assign to custom workspace - make configurable, e.g. Membership "Wikidata"
+            assignToDefaultWorkspace(user.getChildTopics().getTopic(USERNAME_TYPE_URI)); 
             return username;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -115,13 +127,42 @@ public class SignupService extends WebActivatorPlugin {
         Topic userName = dms.getTopic(USERNAME_TYPE_URI, new SimpleValue(username));
         return (userName == null);
     }
+    
+    private Topic getCurrentSignupConfiguration() {
+        Topic pluginTopic = dms.getTopic("uri", new SimpleValue("org.deepamehta.sign-up"));
+        return pluginTopic.getRelatedTopic("dm4.core.association", "dm4.core.default", "dm4.core.default", 
+                "org.deepamehta.signup.configuration");
+    }
 
     private boolean isPasswordGood(String password) {
         // fixem: should be at least 13 chars long but actually we should work on implementing two-factor auth
         return (password.length() >= 8);
     }
     
+    private void checkACLsOfMigration() {
+        Topic config = dms.getTopic("uri", new SimpleValue("org.deepamehta.signup.wikidata_topicmaps_configuration"));
+        if (acService.getCreator(config) == null) {
+            DeepaMehtaTransaction tx = dms.beginTx();
+            log.info("Sign-up: initial ACL update of configuration");
+            try {
+                Topic admin = acService.getUsername(ADMINISTRATOR_USERNAME);
+                String adminName = admin.getSimpleValue().toString();
+                acService.setCreator(config, adminName);
+                acService.setOwner(config, adminName);
+                acService.setACL(config, new AccessControlList(new ACLEntry(Operation.WRITE, UserRole.OWNER)));
+                tx.success();
+            } catch (Exception e) {
+                log.warning("Sign-up: could not update ACLs of migration due to a " 
+                    +  e.getClass().toString());
+            } finally {
+                tx.finish();
+            }
+            
+        }
+    }
 
+    
+    
     /** --- Sign-up Routes --- */
 
     @GET
@@ -165,7 +206,7 @@ public class SignupService extends WebActivatorPlugin {
         }
     }
 
-    private void assignToWikidataWorkspace(Topic topic) {
+    /** private void assignToWikidataWorkspace(Topic topic) {
         Topic wikidataWorkspace = dms.getTopic("uri", new SimpleValue(WS_WIKIDATA_URI));
         if (!associationExists("dm4.core.aggregation", wikidataWorkspace, topic)) {
             dms.createAssociation(new AssociationModel("dm4.core.aggregation",
@@ -173,6 +214,6 @@ public class SignupService extends WebActivatorPlugin {
                 new TopicRoleModel(wikidataWorkspace.getId(), "dm4.core.child")
             ));
         }
-    }
+    } **/
 
 }

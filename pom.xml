@@ -62,11 +62,12 @@
                             org.deepamehta.sign-up
                         </Bundle-SymbolicName>
                         <Bundle-Activator>
-                            org.deepamehta.plugins.signup.SignupService
+                            org.deepamehta.plugins.signup.SignupPlugin
                         </Bundle-Activator>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
 </project>
