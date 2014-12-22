@@ -127,12 +127,25 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             acService.setCreator(user, username);
             acService.setOwner(user, username);
             // ### assign to custom workspace - make configurable, e.g. Membership "Wikidata"
-            assignToDefaultWorkspace(user.getChildTopics().getTopic(USERNAME_TYPE_URI)); 
+            assignToConfiguredWorkspace(user.getChildTopics().getTopic(USERNAME_TYPE_URI)); 
             return username;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
+    
+    /**
+     * Re-load the sign-up configuration topic.
+     
+     */
+    @GET
+    @Path("/sign-up/config/reload")
+    public Topic reloadConfiguration() {
+        log.info("Sign-up: Reloading sign-up plugin configuration.");
+        currentModuleConfiguration = getCurrentSignupConfiguration();
+        return currentModuleConfiguration;
+    }
+
 
     
 
@@ -148,6 +161,12 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         Topic pluginTopic = dms.getTopic("uri", new SimpleValue("org.deepamehta.sign-up"));
         return pluginTopic.getRelatedTopic("dm4.core.association", "dm4.core.default", "dm4.core.default", 
                 "org.deepamehta.signup.configuration");
+    }
+    
+    private Topic getCurrentSignupWorkspace() {
+        Topic pluginConfiguration = getCurrentSignupConfiguration();
+        return pluginConfiguration.getRelatedTopic("dm4.core.association", "dm4.core.default", "dm4.core.default", 
+                "dm4.workspaces.workspace");
     }
 
     private boolean isPasswordGood(String password) {
@@ -224,7 +243,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
                 + "(probably through already having a workspace cookie set?).");
         }
     }
-
+    
     private void prepareSignupPage() {
         if (currentModuleConfiguration != null) {
             log.info("Preparing views according to current module configuration.");
@@ -245,14 +264,20 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     }
 
-    /** private void assignToWikidataWorkspace(Topic topic) {
-        Topic wikidataWorkspace = dms.getTopic("uri", new SimpleValue(WS_WIKIDATA_URI));
-        if (!associationExists("dm4.core.aggregation", wikidataWorkspace, topic)) {
-            dms.createAssociation(new AssociationModel("dm4.core.aggregation",
-                new TopicRoleModel(topic.getId(), "dm4.core.parent"),
-                new TopicRoleModel(wikidataWorkspace.getId(), "dm4.core.child")
-            ));
+    private void assignToConfiguredWorkspace(Topic topic) {
+        Topic configuredWorkspace = getCurrentSignupWorkspace();
+        if (configuredWorkspace != null) {
+            log.info("Sign-up: No workspace associated with \"Sign-up configuration\" topic. Assigning new "
+                    + "usernames to default workspace \"DeepaMehta\".");
+            if (!associationExists("dm4.core.aggregation", configuredWorkspace, topic)) {
+                dms.createAssociation(new AssociationModel("dm4.core.aggregation",
+                    new TopicRoleModel(topic.getId(), "dm4.core.parent"),
+                    new TopicRoleModel(configuredWorkspace.getId(), "dm4.core.child")
+                ));
+            }
+        } else {
+            assignToDefaultWorkspace(topic);
         }
-    } **/
+    }
 
 }

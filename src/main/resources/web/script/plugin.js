@@ -2,6 +2,27 @@
 (function ($, dm4c) {
 
     dm4c.add_plugin('org.deepamehta.sign-up', function () {
+        
+        dm4c.add_listener('topic_commands', function (topic) {
+            if (!dm4c.has_create_permission('org.deepamehta.signup.configuration')) {
+              return
+            }
+            var commands = []
+            if (topic.uri === 'org.deepamehta.sign-up') { // Plugin Topic
+                commands.push({is_separator: true, context: 'context-menu'})
+                commands.push({
+                    label: 'Reload configuration',
+                    handler: reloadSignupConfiguration,
+                    context: ['context-menu', 'detail-panel-show']
+                })
+            }
+            return commands
+       
+                function reloadSignupConfiguration() {
+                    dm4c.restc.request('GET', '/sign-up/config/reload')
+                }
+
+        })
 
         dm4c.add_listener("init_3", function() {
 
