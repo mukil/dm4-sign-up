@@ -3,18 +3,20 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
     <head>
-        <title>DeepaMehta 4 Account Created</title>
-        <link rel="stylesheet" href="/org.deepamehta.sign-up/style/style.css" type="text/css" />
+        <title th:text="${title}">DeepaMehta 4 Account Created</title>
+        <link rel="stylesheet" th:href="${css_path}" type="text/css" />
     </head>
 
     <body class="ok-page">
+        
         <div id="page-header">
-            <a href="/de.deepamehta.webclient" title="Launch Wikidata Topicmaps UI">
-                <img src="/org.deepamehta.sign-up/images/285px-Wikimedia_Labs_logo_notext.svg.png" class="wikimedia-labs-logo"
-                    title="Wikimedia Labs Unicorn" alt="Wikimedia Labs Unicorn" width="160" /><br/>
-                <span class="project-title" title="Click to Launch Wikidata Topicmaps UI">Wikidata Topicmaps</span>
+            <a href="/de.deepamehta.webclient" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
+                <img th:src="${logo_path}" src="/org.deepamehta.sign-up/images/deepamehta-logo.png" class="webapp-logo"
+                    th:title="${title} + ' Logo'" th:alt="${title} + ' Logo'" width="160" /><br/>
+                <span class="project-title" th:title="'Click to Launch ' + ${title}" th:text="${title}">DeepaMehta Webclient</span>
             </a>
         </div>
+        
         <div id="receipt-view">
             <h2>Account Created</h2>
             <p>

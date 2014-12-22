@@ -3,8 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 
     <head>
-        <title>DeepaMehta 4 Log in</title>
-        <link rel="stylesheet" href="/org.deepamehta.sign-up/style/style.css" type="text/css" />
+        <title th:text="${title}">DeepaMehta 4 Log in</title>
+        <link rel="stylesheet" th:href="${css_path}" type="text/css" />
         <script type="text/javascript" src="/de.deepamehta.accesscontrol/script/vendor/sha256.js"></script>
         <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
     </head>
@@ -12,10 +12,10 @@
     <body class="log-in-page">
 
         <div id="page-header">
-            <a href="/de.deepamehta.webclient" title="Launch Wikidata Topicmaps UI">
-                <img src="/org.deepamehta.sign-up/images/285px-Wikimedia_Labs_logo_notext.svg.png" class="wikimedia-labs-logo"
-                    title="Wikimedia Labs Unicorn" alt="Wikimedia Labs Unicorn" width="160" /><br/>
-                <span class="project-title" title="Click to Launch Wikidata Topicmaps UI">Wikidata Topicmaps</span>
+            <a href="/de.deepamehta.webclient" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
+                <img th:src="${logo_path}" src="/org.deepamehta.sign-up/images/deepamehta-logo.png" class="webapp-logo"
+                    th:title="${title} + ' Logo'" th:alt="${title} + ' Logo'" width="160" /><br/>
+                <span class="project-title" th:title="'Click to Launch ' + ${title}" th:text="${title}">DeepaMehta Webclient</span>
             </a>
         </div>
         <div id="log-in-view">
@@ -30,14 +30,7 @@
             </form>
         </div>
 
-        <div id="page-footer">
-            <a title="Read more about this wikidata-client" href="https://wikitech.wikimedia.org/wiki/Nova_Resource:Wikidata-topicmaps/Documentation">Wikidata Topicmaps UI</a> is a <a href="https://wikitech.wikimedia.org/wiki/Main_Page">Wikimedia Labs Project</a> built and supported by <a href="http://www.deepamehta.org">DeepaMehta e.V.</a>.
-            <br/><br/>
-            <img src="/org.deepamehta.sign-up/images/Wikidata-logo-en-135px.png" class="wikidata-logo"
-                title="Wikimedia Labs Unicorn" alt="Wikimedia Labs Unicorn" width="160" />
-            <span class="plus">+</span>
-            <img src="/org.deepamehta.sign-up/images/deepamehta-logo.png" class="deepamehta-logo"
-                title="DeepaMehta 4 Elephant" alt="DeepaMehta 4 Elephant" width="120" />
+        <div id="page-footer" th:utext="${footer}">
         </div>
 
     </body>

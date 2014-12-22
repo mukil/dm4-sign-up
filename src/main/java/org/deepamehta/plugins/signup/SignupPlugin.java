@@ -2,6 +2,7 @@ package org.deepamehta.plugins.signup;
 
 import com.sun.jersey.api.view.Viewable;
 import de.deepamehta.core.Association;
+import de.deepamehta.core.ChildTopics;
 import de.deepamehta.core.Topic;
 import de.deepamehta.core.model.*;
 import de.deepamehta.core.service.Inject;
@@ -39,6 +40,8 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     private static Logger log = Logger.getLogger(SignupPlugin.class.getName());
 
+    // --- DeepaMehta 4 related type URIs
+    
     /** @see also @de.deepamehta.plugins.accesscontrol.model.Credentials */
     private static final String ENCRYPTED_PASSWORD_PREFIX = "-SHA256-";
 
@@ -51,8 +54,20 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     // private static final String WS_DEFAULT_URI = "de.workspaces.deepamehta";
 
     public final static String WS_DM_DEFAULT_URI = "de.workspaces.deepamehta";
+    private final String ADMINISTRATOR_USERNAME = "admin";
     
-    final String ADMINISTRATOR_USERNAME = "admin";
+    // --- Sign-up related type URIs (Configuration, Template Data)
+    
+    private final String CONFIG_PROJECT_TITLE = "org.deepamehta.signup.config_project_title";
+    private final String CONFIG_WEBAPP_TITLE = "org.deepamehta.signup.config_webapp_title";
+    private final String CONFIG_LOGO_PATH = "org.deepamehta.signup.config_webapp_logo_path";
+    private final String CONFIG_CSS_PATH = "org.deepamehta.signup.config_custom_css_path";
+    private final String CONFIG_READ_MORE_URL = "org.deepamehta.signup.config_read_more_url";
+    private final String CONFIG_PAGES_FOOTER = "org.deepamehta.signup.config_pages_footer";
+    private final String CONFIG_TOS_LABEL = "org.deepamehta.signup.config_tos_label";
+    private final String CONFIG_TOS_DETAILS = "org.deepamehta.signup.config_tos_detail";
+    private final String CONFIG_PD_LABEL = "org.deepamehta.signup.config_pd_label";
+    private final String CONFIG_PD_DETAILS = "org.deepamehta.signup.config_pd_detail";
     
     private Topic currentModuleConfiguration = null;
 
@@ -63,6 +78,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     public void init() {
         initTemplateEngine();
         currentModuleConfiguration = getCurrentSignupConfiguration();
+        currentModuleConfiguration.loadChildTopics();
         log.info("Sign-up: Set module configuration to (uri=" + currentModuleConfiguration.getUri() 
                 + ") " + currentModuleConfiguration.getSimpleValue());
     }
@@ -169,6 +185,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     @Produces(MediaType.TEXT_HTML)
     public Viewable getLoginFormView() {
         // fixme: use acl service to check if a session already exists and if so, redirect to dm-webclient directly
+        prepareSignupPage();
         return view("login");
     }
 
@@ -177,6 +194,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     @Produces(MediaType.TEXT_HTML)
     public Viewable getSignupFormView() {
         // fixme: use acl service to check if a session already exists and if so, redirect to dm-webclient directly
+        prepareSignupPage();
         return view("sign-up");
     }
 
@@ -184,6 +202,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     @Path("/ok")
     @Produces(MediaType.TEXT_HTML)
     public Viewable getAccountCreationOKView() {
+        prepareSignupPage();
         return view("ok");
     }
 
@@ -204,6 +223,26 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             log.warning("New User Account was already to default (\"DeepaMehta\") workspace "
                 + "(probably through already having a workspace cookie set?).");
         }
+    }
+
+    private void prepareSignupPage() {
+        if (currentModuleConfiguration != null) {
+            log.info("Preparing views according to current module configuration.");
+            ChildTopics configuration = currentModuleConfiguration.getChildTopics();
+            viewData("title", configuration.getTopic(CONFIG_WEBAPP_TITLE).getSimpleValue().toString());
+            viewData("logo_path", configuration.getTopic(CONFIG_LOGO_PATH).getSimpleValue().toString());
+            viewData("css_path", configuration.getTopic(CONFIG_CSS_PATH).getSimpleValue().toString());
+            viewData("project_name", configuration.getTopic(CONFIG_PROJECT_TITLE).getSimpleValue().toString());
+            viewData("read_more_url", configuration.getTopic(CONFIG_READ_MORE_URL).getSimpleValue().toString());
+            viewData("tos_label", configuration.getTopic(CONFIG_TOS_LABEL).getSimpleValue().toString());
+            viewData("tos_details", configuration.getTopic(CONFIG_TOS_DETAILS).getSimpleValue().toString());
+            viewData("pd_label", configuration.getTopic(CONFIG_PD_LABEL).getSimpleValue().toString());
+            viewData("pd_details", configuration.getTopic(CONFIG_PD_DETAILS).getSimpleValue().toString());
+            viewData("footer", configuration.getTopic(CONFIG_PAGES_FOOTER).getSimpleValue().toString());
+        } else {
+            log.warning("Could not load module configuration!");
+        }
+
     }
 
     /** private void assignToWikidataWorkspace(Topic topic) {
