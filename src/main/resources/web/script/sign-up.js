@@ -41,10 +41,11 @@
     // form.onsubmit()-Implementation
     function createAccount() {
 
-        checkUserName()
+        // prevent submission of form
+        if (!isValidUsername()) return
         if (checkPassword() !== OK_STRING) return
         if (comparePasswords() !== OK_STRING) return
-        if (checkMailbox() == null) return
+        if (checkMailbox() === null) return
         if (checkAgreements() !== OK_STRING) return
 
         var username = encodeURIComponent(document.getElementById("username").value)
@@ -71,15 +72,23 @@
 
     }
 
-    function checkUserName() {
-
-        this.usernameInput = document.getElementById("username") // fixme: maybe its better to acces the form element
-
-        var userInput = this.usernameInput.value
-        if (!isValidUsername(userInput)) {
+    function isValidUsername () {
+        var usernameInput = document.getElementById("username") // fixme: maybe its better to acces the form element
+        var userInput = usernameInput.value
+        if (userInput.length <= 1) {
             renderWarning("This username would be invalid.")
-            return null
+            disableSignupForm()
+            return false
         }
+        enableSignupForm()
+        return true
+    }
+
+    function checkUserNameAvailability() {
+
+        var usernameInput = document.getElementById("username") // fixme: maybe its better to acces the form element
+        var userInput = usernameInput.value
+        
         xhr = new XMLHttpRequest()
         xhr.onload = function(e) {
             var response = JSON.parse(xhr.response)
@@ -94,17 +103,29 @@
             }
         }
         xhr.open("GET", "/sign-up/check/" + userInput, false)
-        xhr.send()
+        xhr.send()   
 
-        function isValidUsername(name) {
-            if (name.length <= 1) {
+    }
+    
+    function checkMailboxAvailability() {
+        var mailboxField = document.getElementById("mailbox") // fixme: maybe its better to acces the form element
+        var mailBox = mailboxField.value
+        xhr = new XMLHttpRequest()
+        xhr.onload = function(e) {
+            var response = JSON.parse(xhr.response)
+            if (!response.isAvailable) {
+                console.log("This mailbox is already registered")
+                renderWarning("This E-Mail address is already registered.")
                 disableSignupForm()
-                return false
+                return null
             } else {
                 enableSignupForm()
-                return true
+                renderWarning(EMPTY_STRING)
+                return OK_STRING
             }
         }
+        xhr.open("GET", "/sign-up/check/mailbox/" + mailBox, false)
+        xhr.send()
 
     }
 
@@ -114,23 +135,21 @@
             renderWarning("Your password must be at least 8 characters long.")
             disableSignupForm()
             return null
-        } else {
-            enableSignupForm()
-            return OK_STRING
         }
+        enableSignupForm()
+        return OK_STRING
     }
 
-    function checkMailbox () { // fixme:
+    function checkMailbox () {
         var mailboxField = document.getElementById("mailbox") // fixme: maybe its better to acces the form element
-        if (mailboxField.value.indexOf("@") == -1 || mailboxField.value.indexOf(".") == -1) {
+        if (mailboxField.value.indexOf("@") === -1 || mailboxField.value.indexOf(".") === -1) {
             renderWarning("This E-Mail Address would be invalid.")
             disableSignupForm()
             return null
-        } else {
-            enableSignupForm()
-            renderWarning(EMPTY_STRING)
-            return OK_STRING
         }
+        enableSignupForm()
+        renderWarning(EMPTY_STRING)
+        return OK_STRING
     }
 
     function comparePasswords () {
@@ -140,28 +159,25 @@
             renderWarning("Your passwords do not match.")
             disableSignupForm()
             return null
-        } else if (passwordFieldOne.value === passwordFieldTwo.value) {
-            renderWarning(EMPTY_STRING)
-            enableSignupForm()
-            checkPassword()
-            return OK_STRING
         }
+        renderWarning(EMPTY_STRING)
+        enableSignupForm()
+        checkPassword()
+        return OK_STRING
     }
 
     function checkAgreements() {
         var tosCheck = document.getElementById("toscheck").checked
         var privateOk = document.getElementById("privateinfo").checked
         //
-        console.log("Checked....." + tosCheck + " and " + privateOk)
         if (tosCheck && privateOk) {
             renderWarning(EMPTY_STRING)
             enableSignupForm()
             return OK_STRING
-        } else {
-            renderWarning("First, please check our terms and conditions.")
-            disableSignupForm()
-            return null
         }
+        renderWarning("First, please check our terms and conditions.")
+        disableSignupForm()
+        return null
     }
 
     function showLabsPrivateText() {

@@ -3,9 +3,11 @@ package org.deepamehta.plugins.signup;
 import com.sun.jersey.api.view.Viewable;
 import de.deepamehta.core.Association;
 import de.deepamehta.core.ChildTopics;
+import de.deepamehta.core.RelatedTopic;
 import de.deepamehta.core.Topic;
 import de.deepamehta.core.model.*;
 import de.deepamehta.core.service.Inject;
+import de.deepamehta.core.service.ResultList;
 import de.deepamehta.core.service.Transactional;
 import de.deepamehta.core.storage.spi.DeepaMehtaTransaction;
 import de.deepamehta.plugins.accesscontrol.model.ACLEntry;
@@ -104,34 +106,45 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             throw new RuntimeException(e);
         }
     }
+    
+    @GET
+    @Path("/sign-up/check/mailbox/{email}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getMailboxAvailability(@PathParam("email") String email) {
+        JSONObject response = new JSONObject();
+        try {
+            response.put("isAvailable", true);
+            if (isMailboxRegistered(email)) response.put("isAvailable", false);
+            return response.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @GET
     @Path("/sign-up/create/{username}/{pass-one}/{mailbox}")
     @Transactional
     public String createSimpleUserAccount(@PathParam("username") String username, @PathParam("mailbox") String mailbox,
             @PathParam("pass-one") String password) {
-        try {
-            if (!isUsernameAvailable(username)) throw new WebApplicationException(412);
-            if (!isPasswordGood(password)) throw new WebApplicationException(412);
-            log.fine("Setting up new \"User Account\" composite value model");
-            ChildTopicsModel userAccount = new ChildTopicsModel()
-                .put(USERNAME_TYPE_URI, username)
-                .put(USER_PASSWORD_TYPE_URI, password)
-                .put(MAILBOX_TYPE_URI, mailbox);
-            // ### set user account to "Blocked" until verified (introduce this in a new migration)
-            TopicModel userModel = new TopicModel(USER_ACCOUNT_TYPE_URI, userAccount);
-            Topic user = dms.createTopic(userModel);
-            log.info("Created new \"User Account\" for " + username);
-            acService.setACL(user, new AccessControlList( //
-                            new ACLEntry(Operation.WRITE, UserRole.OWNER)));
-            acService.setCreator(user, username);
-            acService.setOwner(user, username);
-            // ### assign to custom workspace - make configurable, e.g. Membership "Wikidata"
-            assignToConfiguredWorkspace(user.getChildTopics().getTopic(USERNAME_TYPE_URI)); 
-            return username;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        if (!isUsernameAvailable(username)) throw new WebApplicationException(412);
+        if (!isPasswordGood(password)) throw new WebApplicationException(412);
+        if (isMailboxRegistered(mailbox)) throw new WebApplicationException(412);
+        log.fine("Setting up new \"User Account\" composite value model");
+        ChildTopicsModel userAccount = new ChildTopicsModel()
+            .put(USERNAME_TYPE_URI, username.trim())
+            .put(USER_PASSWORD_TYPE_URI, password)
+            .put(MAILBOX_TYPE_URI, mailbox.trim());
+        // ### set user account to "Blocked" until verified (introduce this in a new migration)
+        TopicModel userModel = new TopicModel(USER_ACCOUNT_TYPE_URI, userAccount);
+        Topic user = dms.createTopic(userModel);
+        log.info("Created new \"User Account\" for " + username);
+        acService.setACL(user, new AccessControlList( //
+                        new ACLEntry(Operation.WRITE, UserRole.OWNER)));
+        acService.setCreator(user, username);
+        acService.setOwner(user, username);
+        // ### assign to custom workspace - make configurable, e.g. Membership "Wikidata"
+        assignConfiguredMembership(user.getChildTopics().getTopic(USERNAME_TYPE_URI)); 
+        return username;
     }
     
     /**
@@ -152,9 +165,18 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     /** --- Private Helpers --- */
 
     private boolean isUsernameAvailable(String username) {
-        // fixme: framework should also allow us to query case insensitve for a username
-        Topic userName = dms.getTopic(USERNAME_TYPE_URI, new SimpleValue(username));
-        return (userName == null);
+        Topic userName = dms.getTopic(USERNAME_TYPE_URI, new SimpleValue(username.trim()));
+        return (userName == null) ? true : false;
+    }
+    
+    private boolean isMailboxRegistered(String email) {
+        String value = email.trim();
+        Topic eMail = dms.getTopic(MAILBOX_TYPE_URI, new SimpleValue(value));
+        ResultList<RelatedTopic> topics = dms.getTopics(MAILBOX_TYPE_URI, 0);
+        for (RelatedTopic topic : topics) {
+            if (topic.getSimpleValue().toString().contains(email)) return true;
+        }
+        return (eMail == null) ? false : true;
     }
     
     private Topic getCurrentSignupConfiguration() {
@@ -231,7 +253,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         return (results.size() > 0);
     }
 
-    private void assignToDefaultWorkspace(Topic topic) {
+    private void assignDefaultMembership(Topic topic) {
         Topic defaultWorkspace = dms.getTopic("uri", new SimpleValue(WS_DM_DEFAULT_URI));
         if (!associationExists("dm4.core.aggregation", defaultWorkspace, topic)) {
             dms.createAssociation(new AssociationModel("dm4.core.aggregation",
@@ -264,7 +286,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     }
 
-    private void assignToConfiguredWorkspace(Topic topic) {
+    private void assignConfiguredMembership(Topic topic) {
         Topic configuredWorkspace = getCurrentSignupWorkspace();
         if (configuredWorkspace != null) {
             log.info("Sign-up: No workspace associated with \"Sign-up configuration\" topic. Assigning new "
@@ -276,7 +298,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
                 ));
             }
         } else {
-            assignToDefaultWorkspace(topic);
+            assignDefaultMembership(topic);
         }
     }
 
