@@ -232,7 +232,7 @@
     "topics": [
         {
             "type_uri": "org.deepamehta.signup.configuration",
-            "uri": "org.deepamehta.signup.wikidata_topicmaps_configuration",
+            "uri": "org.deepamehta.signup.default_configuration",
             "childs": {
                 "org.deepamehta.signup.config_project_title"    : "Wikidata Topicmaps",
                 "org.deepamehta.signup.config_webapp_title"     : "Wikidata Topicmaps UI",

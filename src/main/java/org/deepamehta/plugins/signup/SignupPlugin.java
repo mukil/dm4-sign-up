@@ -6,6 +6,7 @@ import de.deepamehta.core.ChildTopics;
 import de.deepamehta.core.RelatedTopic;
 import de.deepamehta.core.Topic;
 import de.deepamehta.core.model.*;
+import de.deepamehta.core.service.DeepaMehtaService;
 import de.deepamehta.core.service.Inject;
 import de.deepamehta.core.service.ResultList;
 import de.deepamehta.core.service.Transactional;
@@ -13,11 +14,17 @@ import de.deepamehta.core.service.accesscontrol.Credentials;
 import de.deepamehta.plugins.accesscontrol.service.AccessControlService;
 import de.deepamehta.plugins.webactivator.WebActivatorPlugin;
 import de.deepamehta.plugins.workspaces.service.WorkspacesService;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import org.apache.commons.mail.EmailException;
+import org.apache.commons.mail.HtmlEmail;
 import org.codehaus.jettison.json.JSONObject;
 import org.deepamehta.plugins.signup.service.SignupPluginService;
 
@@ -126,8 +133,10 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         try {
             // 1) Create new user
             Topic user = acService.createUserAccount(new Credentials(username.trim(), password));
+            // 2) Inform administrations
+            sendNotificationMail(username);
             /** Topic account = user.getRelatedTopic(null, null, null, "dm4.accesscontrol.user_account");
-            // 2) Attach E-Mail to new user
+            // ..) Attach E-Mail to new user
             log.info("Trying to asttach E-Mail Address to new \"User Account\"");
             ChildTopicsModel userAccountMailbox = new ChildTopicsModel()
                 .put(MAILBOX_TYPE_URI, mailbox.trim());
@@ -156,6 +165,68 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     /** --- Private Helpers --- */
 
+    private void sendNotificationMail(String username) {
+        // Fix: Classloader issue we have in OSGi since using Pax web
+        Thread.currentThread().setContextClassLoader(SignupPlugin.class.getClassLoader());
+        log.info("BeforeSend: Set classloader to " + Thread.currentThread().getContextClassLoader().toString());
+
+        HtmlEmail email = new HtmlEmail();
+        email.setDebug(true); // => System.out.println(SMTP communication);
+        email.setHostName("localhost");
+        try {
+            // ..) Set Senders of Mail
+            email.setFrom("no-reply@my.deepamehta.de", "My DeepaMehta 4");
+        } catch (EmailException ex) {
+            log.log(Level.SEVERE, null, ex);
+        }
+
+        try {
+            // ..) Set Subject of Mail
+            email.setSubject( "Account registration on my.deepamehta.de");
+        } catch (Exception e) {
+            log.log(Level.INFO, "Exception during setting subject of mail", e);
+        }
+
+        try {
+            String text = "Hi there, " + username + " created an account at your service.";
+            // ..) Set Message Body
+            email.setTextMsg(text);
+        } catch (Exception e) {
+            log.log(Level.INFO, "Exception during setting mail body", e);
+        }
+
+        // ..) Set recipient of notification mail
+        // Topic config = getCurrentSignupConfiguration().loadChildTopics();
+        /** ### see #813 and #764
+         * Topic config = dms.getTopic("uri", new SimpleValue("org.deepamehta.signup.default_configuration"));
+        config.loadChildTopics();
+        String recipient = config.getChildTopics().getString("org.deepamehta.signup.config_admin_mailbox"); **/
+         // ### instead of using our new configuration topic we use this hardcoded address
+        String recipient = "team@lists.deepamehta.de";
+        log.info("Loaded current configuration topic, sending notification mail to " + recipient);
+        try {
+            Collection<InternetAddress> recipients = new ArrayList<InternetAddress>();
+            recipients.add(new InternetAddress(recipient));
+            email.setTo(recipients);
+        } catch (AddressException ex) {
+            Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (EmailException ex) {
+            Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        try {
+            email.send();
+            log.info("Mail was SUCCESSFULLY sent to " + email.getToAddresses() + " mail addresses");
+        } catch (EmailException e) {
+            log.log(Level.SEVERE, "Mail was NOT sent to " + email.getToAddresses() + " mail addresses", e);
+        } catch (Exception e) { // error after send
+            log.log(Level.SEVERE,"Mail was NOT sent to " + email.getToAddresses() + " mail addresses", e);
+        }
+        // Fix: Classloader issue we have in OSGi since using Pax web
+        Thread.currentThread().setContextClassLoader(DeepaMehtaService.class.getClassLoader());
+        log.info("AfterSend: Set Classloader back to " + Thread.currentThread().getContextClassLoader().toString());
+    }
+
     private boolean isUsernameAvailable(String username) {
         Topic userName = acService.getUsernameTopic(username);
         return (userName == null);
@@ -179,12 +250,6 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         Topic pluginTopic = dms.getTopic("uri", new SimpleValue("org.deepamehta.sign-up"));
         return pluginTopic.getRelatedTopic("dm4.core.association", "dm4.core.default", "dm4.core.default", 
                 "org.deepamehta.signup.configuration");
-    }
-
-    private Topic getCurrentSignupWorkspace() {
-        Topic pluginConfiguration = getCurrentSignupConfiguration();
-        return pluginConfiguration.getRelatedTopic("dm4.core.association", "dm4.core.default", "dm4.core.default", 
-                "dm4.workspaces.workspace");
     }
 
     private boolean isPasswordGood(String password) {
@@ -221,25 +286,6 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         return view("ok");
     }
 
-
-    private boolean associationExists(String edge_type, Topic item, Topic user) {
-        List<Association> results = dms.getAssociations(item.getId(), user.getId(), edge_type);
-        return (results.size() > 0);
-    }
-
-    private void assignDefaultMembership(Topic topic) {
-        Topic defaultWorkspace = dms.getTopic("uri", new SimpleValue(WS_DM_DEFAULT_URI));
-        if (!associationExists("dm4.core.aggregation", defaultWorkspace, topic)) {
-            dms.createAssociation(new AssociationModel("dm4.core.aggregation",
-                new TopicRoleModel(topic.getId(), "dm4.core.parent"),
-                new TopicRoleModel(defaultWorkspace.getId(), "dm4.core.child")
-            ));
-        } else {
-            log.warning("New User Account was already to default (\"DeepaMehta\") workspace "
-                + "(probably through already having a workspace cookie set?).");
-        }
-    }
-    
     private void prepareSignupPage() {
         if (currentModuleConfiguration != null) {
             log.info("Preparing views according to current module configuration.");
@@ -258,22 +304,6 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             log.warning("Could not load module configuration!");
         }
 
-    }
-
-    private void assignConfiguredMembership(Topic topic) {
-        Topic configuredWorkspace = getCurrentSignupWorkspace();
-        if (configuredWorkspace != null) {
-            log.info("Sign-up: No workspace associated with \"Sign-up configuration\" topic. Assigning new "
-                    + "usernames to default workspace \"DeepaMehta\".");
-            if (!associationExists("dm4.core.aggregation", configuredWorkspace, topic)) {
-                dms.createAssociation(new AssociationModel("dm4.core.aggregation",
-                    new TopicRoleModel(topic.getId(), "dm4.core.parent"),
-                    new TopicRoleModel(configuredWorkspace.getId(), "dm4.core.child")
-                ));
-            }
-        } else {
-            assignDefaultMembership(topic);
-        }
     }
 
 }
