@@ -9,8 +9,7 @@
                     "type_uri": "dm4.webclient.view_config",
                     "childs": {
                         "dm4.webclient.show_in_create_menu": false,
-                        "dm4.webclient.searchable_as_unit": false,
-                        "dm4.webclient.rows": 1
+                        "dm4.webclient.searchable_as_unit": false
                     }
                 }
             ]
@@ -24,8 +23,7 @@
                     "type_uri": "dm4.webclient.view_config",
                     "childs": {
                         "dm4.webclient.show_in_create_menu": false,
-                        "dm4.webclient.searchable_as_unit": false,
-                        "dm4.webclient.rows": 1
+                        "dm4.webclient.searchable_as_unit": false
                     }
                 }
             ]
@@ -39,8 +37,7 @@
                     "type_uri": "dm4.webclient.view_config",
                     "childs": {
                         "dm4.webclient.show_in_create_menu": false,
-                        "dm4.webclient.searchable_as_unit": false,
-                        "dm4.webclient.rows": 1
+                        "dm4.webclient.searchable_as_unit": false
                     }
                 }
             ]
@@ -54,8 +51,7 @@
                     "type_uri": "dm4.webclient.view_config",
                     "childs": {
                         "dm4.webclient.show_in_create_menu": false,
-                        "dm4.webclient.searchable_as_unit": false,
-                        "dm4.webclient.rows": 1
+                        "dm4.webclient.searchable_as_unit": false
                     }
                 }
             ]
@@ -69,8 +65,7 @@
                     "type_uri": "dm4.webclient.view_config",
                     "childs": {
                         "dm4.webclient.show_in_create_menu": false,
-                        "dm4.webclient.searchable_as_unit": false,
-                        "dm4.webclient.rows": 1
+                        "dm4.webclient.searchable_as_unit": false
                     }
                 }
             ]
@@ -85,7 +80,7 @@
                     "childs": {
                         "dm4.webclient.show_in_create_menu": false,
                         "dm4.webclient.searchable_as_unit": false,
-                        "dm4.webclient.rows": 1
+                        "dm4.webclient.input_field_rows": 5
                     }
                 }
             ]
@@ -99,8 +94,7 @@
                     "type_uri": "dm4.webclient.view_config",
                     "childs": {
                         "dm4.webclient.show_in_create_menu": false,
-                        "dm4.webclient.searchable_as_unit": false,
-                        "dm4.webclient.rows": 1
+                        "dm4.webclient.searchable_as_unit": false
                     }
                 }
             ]
@@ -115,7 +109,7 @@
                     "childs": {
                         "dm4.webclient.show_in_create_menu": false,
                         "dm4.webclient.searchable_as_unit": false,
-                        "dm4.webclient.rows": 1
+                        "dm4.webclient.input_field_rows": 5
                     }
                 }
             ]
@@ -130,8 +124,7 @@
                     "type_uri": "dm4.webclient.view_config",
                     "childs": {
                         "dm4.webclient.show_in_create_menu": false,
-                        "dm4.webclient.searchable_as_unit": false,
-                        "dm4.webclient.input_field_rows": 3
+                        "dm4.webclient.searchable_as_unit": false
                     }
                 }
             ]
@@ -147,6 +140,20 @@
                         "dm4.webclient.show_in_create_menu": false,
                         "dm4.webclient.searchable_as_unit": false,
                         "dm4.webclient.input_field_rows": 3
+                    }
+                }
+            ]
+        },
+        {
+            "value": "Sign-up Configuration: Administrators Mailbox",
+            "uri": "org.deepamehta.signup.config_admin_mailbox",
+            "data_type_uri": "dm4.core.text",
+            "view_config_topics": [
+                {
+                    "type_uri": "dm4.webclient.view_config",
+                    "childs": {
+                        "dm4.webclient.show_in_create_menu": false,
+                        "dm4.webclient.searchable_as_unit": false
                     }
                 }
             ]
@@ -205,6 +212,11 @@
                     "child_type_uri":           "org.deepamehta.signup.config_pages_footer",
                     "child_cardinality_uri":    "dm4.core.one",
                     "assoc_type_uri":           "dm4.core.composition_def"
+                },
+                {
+                    "child_type_uri":           "org.deepamehta.signup.config_admin_mailbox",
+                    "child_cardinality_uri":    "dm4.core.one",
+                    "assoc_type_uri":           "dm4.core.composition_def"
                 }
             ], "view_config_topics": [
                 {
@@ -231,7 +243,8 @@
                 "org.deepamehta.signup.config_tos_label"        : "I agree with the Wikidata Topicmaps Labs Project Terms of use.",
                 "org.deepamehta.signup.config_tos_detail"       : "Do not use the Wikidata Topicmaps Labs Project if you do not agree to the following: information shared with this site, including usernames and passwords, will be made available to volunteer administrators and may not be treated confidentially. Volunteers may have full access to the systems hosting the projects, allowing them access to any data or other information you submit.<br/><br/> As a result, use of your real Wikimedia credentials is highly discouraged in wmflabs.org projects. You should use a different password for your account than you would on projects like Wikipedia, Commons, etc. By creating an account in this project and/or using other Wikimedia Labs Services, you agree that the volunteer administrators of this project will have access to any data you submit. Since access to this information by volunteers is fundamental to the operation of Labs, these terms regarding use of your data <i>expressly override</i> the Wikimedia Foundation's Privacy Policy as it relates to the use and access of your personal information.",
                 "org.deepamehta.signup.config_pd_label"         : "I understand that any private information I give to this site may be made publicly available.",
-                "org.deepamehta.signup.config_pd_detail"        : "By using this project, you agree that any private information you give to this project may be made publicly available and not be treated as confidential. Additionally you agree that the volunteer administrators of this project will have access to any data you submit. This can include your IP address, your username/password combination for accounts created in Labs services, and any other information that you send.<br/><br/>The volunteer administrators of this project are bound by the Wikimedia Labs Terms of Use, and are not allowed to share this information or use it in any non-approved way. Since access to this information is fundamental to the operation of Wikimedia Labs, these terms regarding use of your data <i>expressly override</i> the Wikimedia Foundation's Privacy Policy as it relates to the use and access of your personal information."
+                "org.deepamehta.signup.config_pd_detail"        : "By using this project, you agree that any private information you give to this project may be made publicly available and not be treated as confidential. Additionally you agree that the volunteer administrators of this project will have access to any data you submit. This can include your IP address, your username/password combination for accounts created in Labs services, and any other information that you send.<br/><br/>The volunteer administrators of this project are bound by the Wikimedia Labs Terms of Use, and are not allowed to share this information or use it in any non-approved way. Since access to this information is fundamental to the operation of Wikimedia Labs, these terms regarding use of your data <i>expressly override</i> the Wikimedia Foundation's Privacy Policy as it relates to the use and access of your personal information.",
+                "org.deepamehta.signup.config_admin_mailbox"    : "team@lists.deepamehta.de"
             }
         }
     ]

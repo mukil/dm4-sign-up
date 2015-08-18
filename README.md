@@ -45,7 +45,7 @@ The central topic for configuring the sign-up dialog for your DeepaMehta 4 insta
 *    all text-messages, hyperlinks, titles, logo, css, read more url of the login page
 *    and additionally the terms of service and checkbox labels on the registration page
 *    the page footer (HTML) of the login and registration page
-*    the default workspace-membership assignment for new registrants 
+*    the default workspace-membership assignment for new registrants
      (simply `associate` your `Sign-up configuration` topic to one topic of type `Workspace` of your choice)
 *    the path to a custom image file as logo
 *    the path to a custom CSS file replacing the default style
@@ -56,6 +56,15 @@ The central topic for configuring the sign-up dialog for your DeepaMehta 4 insta
 GPL v3 - https://www.gnu.org/licenses/gpl.html
 
 # Version History
+
+1.1, UPCOMING
+- Adapted createUserAccounts to new ACL-Service (remove join Workspace) - no Workspace cookie
+- Maintain configuration topic editble (migrate from postInstall to Migration)
+- Add: Internal E-Mail Reporting (Erweiterte Configuration, "Administrator"-Mailbox nach erfolgreicher Registrierung)
+- Adapted to: 4.6
+- Incorporate (not dm4-mail dependency but) some low-level mail functionality
+- Skipped adding an E-Mail Address as part of the registration process
+- Updated dependency to bundle dm46-webactivator-0.4.5
 
 1.0.0, Dec 25, 2014
 

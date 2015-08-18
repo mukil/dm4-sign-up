@@ -7,7 +7,7 @@ import de.deepamehta.core.service.PluginService;
  *
  * @name dm4-sign-up
  * @website https://github.com/mukil/dm4-sign-up
- * @version 1.0.0-SNAPSHOT
+ * @version 1.1-SNAPSHOT
  * @author <a href="mailto:malte@mikromedia.de">Malte Reissig</a>;
  */
 
@@ -24,10 +24,10 @@ public interface SignupPluginService extends PluginService {
      * Checks for username availability, password strength (>=8 chars) and assignes 
      * an "E Mail Address" to the new "User Account"-Topic.
      * 
-     * @param   password    String which must have the prefix "-SHA-256-" and which must be encoded already.
+     * @param   password    String Password in cleartext.
      * 
      * @return  String  username
      */
-    String createSimpleUserAccount(String username, String mailbox, String password);
+    String createSimpleUserAccount(String username, String password);
 
 }

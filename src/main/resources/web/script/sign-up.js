@@ -45,12 +45,13 @@
         if (!isValidUsername()) return
         if (checkPassword() !== OK_STRING) return
         if (comparePasswords() !== OK_STRING) return
-        if (checkMailbox() === null) return
+        // if (checkMailbox() === null) return
         if (checkAgreements() !== OK_STRING) return
 
         var username = encodeURIComponent(document.getElementById("username").value)
-        var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
-        var password = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
+        // var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
+        // var password = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
+        var password = encodeURIComponent(document.getElementById("pass-one").value)
 
         // ### set default ws-topicid in cookie in dm4_workspace_id=
         xhr = new XMLHttpRequest()
@@ -66,7 +67,7 @@
         /** xhr.onerror = function (e) {
             renderWarning("Account creation failed." + e)
         } **/
-        xhr.open("GET", "/sign-up/create/" + username + "/" + password + "/" + mailbox)
+        xhr.open("GET", "/sign-up/create/" + username + "/" + password + "?no_workspace_assignment=true")
         xhr.setRequestHeader("Content-Type", "text/plain")
         xhr.send()
 

@@ -9,14 +9,12 @@ import de.deepamehta.core.model.*;
 import de.deepamehta.core.service.Inject;
 import de.deepamehta.core.service.ResultList;
 import de.deepamehta.core.service.Transactional;
-import de.deepamehta.core.storage.spi.DeepaMehtaTransaction;
-import de.deepamehta.plugins.accesscontrol.model.ACLEntry;
-import de.deepamehta.plugins.accesscontrol.model.AccessControlList;
-import de.deepamehta.plugins.accesscontrol.model.Operation;
-import de.deepamehta.plugins.accesscontrol.model.UserRole;
+import de.deepamehta.core.service.accesscontrol.Credentials;
 import de.deepamehta.plugins.accesscontrol.service.AccessControlService;
 import de.deepamehta.plugins.webactivator.WebActivatorPlugin;
+import de.deepamehta.plugins.workspaces.service.WorkspacesService;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -33,7 +31,7 @@ import org.deepamehta.plugins.signup.service.SignupPluginService;
  *
  * @name dm4-sign-up
  * @website https://github.com/mukil/dm4-sign-up
- * @version 1.0.0-SNAPSHOT
+ * @version 1.1-SNAPSHOT
  * @author <a href="mailto:malte@mikromedia.de">Malte Reissig</a>;
  */
 
@@ -51,12 +49,11 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     public static final String MAILBOX_TYPE_URI = "dm4.contacts.email_address";
 
     private static final String USERNAME_TYPE_URI = "dm4.accesscontrol.username";
-    private static final String USER_PASSWORD_TYPE_URI = "dm4.accesscontrol.password";
+    // private static final String USER_PASSWORD_TYPE_URI = "dm4.accesscontrol.password";
     // private static final String WS_WIKIDATA_URI = "org.deepamehta.workspaces.wikidata";
     // private static final String WS_DEFAULT_URI = "de.workspaces.deepamehta";
 
     public final static String WS_DM_DEFAULT_URI = "de.workspaces.deepamehta";
-    private final String ADMINISTRATOR_USERNAME = "admin";
     
     // --- Sign-up related type URIs (Configuration, Template Data)
     
@@ -73,8 +70,11 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     
     private Topic currentModuleConfiguration = null;
 
-    @Inject
+    @Inject /*** Used in migration */
     private AccessControlService acService;
+
+    @Inject /*** Used in migration */
+    private WorkspacesService wsService;
 
     @Override
     public void init() {
@@ -84,14 +84,8 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         log.info("Sign-up: Set module configuration to (uri=" + currentModuleConfiguration.getUri() 
                 + ") " + currentModuleConfiguration.getSimpleValue());
     }
-    
-    @Override
-    public void postInstall() {
-        checkACLsOfMigration();
-    }
 
     /** Plugin Service Implementation */
-
     @GET
     @Path("/sign-up/check/{username}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -106,7 +100,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             throw new RuntimeException(e);
         }
     }
-    
+
     @GET
     @Path("/sign-up/check/mailbox/{email}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -122,31 +116,30 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     }
 
     @GET
-    @Path("/sign-up/create/{username}/{pass-one}/{mailbox}")
+    @Path("/sign-up/create/{username}/{pass-one}")
     @Transactional
-    public String createSimpleUserAccount(@PathParam("username") String username, @PathParam("mailbox") String mailbox,
-            @PathParam("pass-one") String password) {
+    public String createSimpleUserAccount(@PathParam("username") String username, @PathParam("pass-one") String password) {
         if (!isUsernameAvailable(username)) throw new WebApplicationException(412);
         if (!isPasswordGood(password)) throw new WebApplicationException(412);
-        if (isMailboxRegistered(mailbox)) throw new WebApplicationException(412);
-        log.fine("Setting up new \"User Account\" composite value model");
-        ChildTopicsModel userAccount = new ChildTopicsModel()
-            .put(USERNAME_TYPE_URI, username.trim())
-            .put(USER_PASSWORD_TYPE_URI, password)
-            .put(MAILBOX_TYPE_URI, mailbox.trim());
-        // ### set user account to "Blocked" until verified (introduce this in a new migration)
-        TopicModel userModel = new TopicModel(USER_ACCOUNT_TYPE_URI, userAccount);
-        Topic user = dms.createTopic(userModel);
-        log.info("Created new \"User Account\" for " + username);
-        acService.setACL(user, new AccessControlList( //
-                        new ACLEntry(Operation.WRITE, UserRole.OWNER)));
-        acService.setCreator(user, username);
-        acService.setOwner(user, username);
-        // ### assign to custom workspace - make configurable, e.g. Membership "Wikidata"
-        assignConfiguredMembership(user.getChildTopics().getTopic(USERNAME_TYPE_URI)); 
+        // if (isMailboxRegistered(mailbox)) throw new WebApplicationException(412);
+        log.info("Trying to set up new \"User Account\" for username " + username);
+        try {
+            // 1) Create new user
+            Topic user = acService.createUserAccount(new Credentials(username.trim(), password));
+            /** Topic account = user.getRelatedTopic(null, null, null, "dm4.accesscontrol.user_account");
+            // 2) Attach E-Mail to new user
+            log.info("Trying to asttach E-Mail Address to new \"User Account\"");
+            ChildTopicsModel userAccountMailbox = new ChildTopicsModel()
+                .put(MAILBOX_TYPE_URI, mailbox.trim());
+            account.getChildTopics().set(MAILBOX_TYPE_URI, userAccountMailbox);
+            log.info("Successfully attached E-Mail Address value to \"User Account\""); **/
+        } catch (Exception e) {
+            log.log(Level.SEVERE, "Creating simple user account failed.", e);
+            return "FAILED";
+        }
         return username;
     }
-    
+
     /**
      * Re-load the sign-up configuration topic.
      
@@ -160,31 +153,34 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     }
 
 
-    
 
     /** --- Private Helpers --- */
 
     private boolean isUsernameAvailable(String username) {
-        Topic userName = dms.getTopic(USERNAME_TYPE_URI, new SimpleValue(username.trim()));
-        return (userName == null) ? true : false;
+        Topic userName = acService.getUsernameTopic(username);
+        return (userName == null);
     }
-    
+
     private boolean isMailboxRegistered(String email) {
         String value = email.trim();
         Topic eMail = dms.getTopic(MAILBOX_TYPE_URI, new SimpleValue(value));
         ResultList<RelatedTopic> topics = dms.getTopics(MAILBOX_TYPE_URI, 0);
         for (RelatedTopic topic : topics) {
-            if (topic.getSimpleValue().toString().contains(email)) return true;
+            if (topic.getSimpleValue().toString().contains(value)) {
+                log.info("Sign-up check for E-Mail Address: " + email + " is already registered.");
+                return true;
+            }
         }
-        return (eMail == null) ? false : true;
+        log.info("Sign-up check for E-Mail Address: " + email + " seems NOT to be registered yet, or? " + (eMail != null));
+        return (eMail != null);
     }
-    
+
     private Topic getCurrentSignupConfiguration() {
         Topic pluginTopic = dms.getTopic("uri", new SimpleValue("org.deepamehta.sign-up"));
         return pluginTopic.getRelatedTopic("dm4.core.association", "dm4.core.default", "dm4.core.default", 
                 "org.deepamehta.signup.configuration");
     }
-    
+
     private Topic getCurrentSignupWorkspace() {
         Topic pluginConfiguration = getCurrentSignupConfiguration();
         return pluginConfiguration.getRelatedTopic("dm4.core.association", "dm4.core.default", "dm4.core.default", 
@@ -196,28 +192,6 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         return (password.length() >= 8);
     }
     
-    private void checkACLsOfMigration() {
-        Topic config = dms.getTopic("uri", new SimpleValue("org.deepamehta.signup.wikidata_topicmaps_configuration"));
-        if (acService.getCreator(config) == null) {
-            DeepaMehtaTransaction tx = dms.beginTx();
-            log.info("Sign-up: initial ACL update of configuration");
-            try {
-                Topic admin = acService.getUsername(ADMINISTRATOR_USERNAME);
-                String adminName = admin.getSimpleValue().toString();
-                acService.setCreator(config, adminName);
-                acService.setOwner(config, adminName);
-                acService.setACL(config, new AccessControlList(new ACLEntry(Operation.WRITE, UserRole.OWNER)));
-                tx.success();
-            } catch (Exception e) {
-                log.warning("Sign-up: could not update ACLs of migration due to a " 
-                    +  e.getClass().toString());
-            } finally {
-                tx.finish();
-            }
-            
-        }
-    }
-
     
     
     /** --- Sign-up Routes --- */
