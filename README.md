@@ -61,7 +61,7 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 - Adapted createUserAccounts to new ACL-Service (remove join Workspace) - no Workspace cookie
 - Maintain configuration topic editble (migrate from postInstall to Migration)
 - Add: Internal E-Mail Reporting (Erweiterte Configuration, "Administrator"-Mailbox nach erfolgreicher Registrierung)
-- Adapted to: 4.6
+- Updated to be compatible with 4.6.2-SNAPSHOT (as of 16th August 2015 or later)
 - Incorporate (not dm4-mail dependency but) some low-level mail functionality
 - Skipped adding an E-Mail Address as part of the registration process
 - Updated dependency to bundle dm46-webactivator-0.4.5
