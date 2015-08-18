@@ -28,13 +28,13 @@ https://github.com/jri/deepamehta
 
 To be able to install this module you first and additionally have to install the following DeepaMehta 4 Plugins.
 
-*    `dm44-webactivator-0.4.4`-Bundle - [Source Code](https://github.com/jri/dm4-webactivator), [Nightly Build](http://download.deepamehta.de/nightly/)
+*    `dm46-webactivator-0.4.5`-Bundle - Build from [sources](https://github.com/mukil/dm4-webactivator)
 
 ## Download & Installation
 
-You can find the latest stable version of this plugin bundled for download as `dm44-sign-up-X.Y.Z.jar-` at [http://download.deepamehta.de/nightly/](http://download.deepamehta.de/nightly/).
+You can find the latest stable version of this plugin bundled for download as `dm46-sign-up-X.Y.Z.jar-` at [http://download.deepamehta.de/nightly/](http://download.deepamehta.de/nightly/).
 
-Additionally you need to download the required `dm44-webactivator-0.4.4`-Bundle - [Source Code](https://github.com/jri/dm4-webactivator), [Nightly Build](http://download.deepamehta.de/nightly/).
+As mentioned above, you currently need to build the required `dm46-webactivator-0.4.5`-Bundle from [source](https://github.com/mukil/dm4-webactivator),
 
 After downloading the bundle-files, place them in the `bundles` folder of your DeepaMehta installation and restart DeepaMehta.
 
