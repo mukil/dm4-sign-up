@@ -25,6 +25,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.deepamehta.plugins.signup.service.SignupPluginService;
 
@@ -126,27 +127,26 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     @Path("/sign-up/create/{username}/{pass-one}")
     @Transactional
     public String createSimpleUserAccount(@PathParam("username") String username, @PathParam("pass-one") String password) {
-        if (!isUsernameAvailable(username)) throw new WebApplicationException(412);
-        if (!isPasswordGood(password)) throw new WebApplicationException(412);
-        // if (isMailboxRegistered(mailbox)) throw new WebApplicationException(412);
-        log.info("Trying to set up new \"User Account\" for username " + username);
         try {
-            // 1) Create new user
-            Topic user = acService.createUserAccount(new Credentials(username.trim(), password));
-            // 2) Inform administrations
-            sendNotificationMail(username);
-            /** Topic account = user.getRelatedTopic(null, null, null, "dm4.accesscontrol.user_account");
-            // ..) Attach E-Mail to new user
-            log.info("Trying to asttach E-Mail Address to new \"User Account\"");
-            ChildTopicsModel userAccountMailbox = new ChildTopicsModel()
-                .put(MAILBOX_TYPE_URI, mailbox.trim());
-            account.getChildTopics().set(MAILBOX_TYPE_URI, userAccountMailbox);
-            log.info("Successfully attached E-Mail Address value to \"User Account\""); **/
-        } catch (Exception e) {
-            log.log(Level.SEVERE, "Creating simple user account failed.", e);
+            if (!isUsernameAvailable(username)) throw new WebApplicationException(412);
+            Credentials creds = new Credentials(new JSONObject()
+                    .put("username", username)
+                    .put("password", password));
+            log.info("Trying to set up new \"User Account\" for username " + username);
+            try {
+                // 1) Create new user
+                Topic user = acService.createUserAccount(creds);
+                // 2) Inform administrations
+                sendNotificationMail(username);
+                return username;
+            } catch (Exception e) {
+                log.log(Level.SEVERE, "Creating simple user account failed.", e);
+                return "FAILED";
+            }
+        } catch (JSONException ex) {
+            log.log(Level.SEVERE, null, ex);
             return "FAILED";
         }
-        return username;
     }
 
     /**
