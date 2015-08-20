@@ -175,7 +175,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         email.setHostName("localhost");
         try {
             // ..) Set Senders of Mail
-            email.setFrom("no-reply@my.deepamehta.de", "My DeepaMehta 4");
+            email.setFrom("mre@deepamehta.de", "My DeepaMehta 4");
         } catch (EmailException ex) {
             log.log(Level.SEVERE, null, ex);
         }
