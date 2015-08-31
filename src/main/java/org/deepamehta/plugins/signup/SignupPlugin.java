@@ -1,7 +1,6 @@
 package org.deepamehta.plugins.signup;
 
 import com.sun.jersey.api.view.Viewable;
-import de.deepamehta.core.Association;
 import de.deepamehta.core.ChildTopics;
 import de.deepamehta.core.RelatedTopic;
 import de.deepamehta.core.Topic;
@@ -16,7 +15,6 @@ import de.deepamehta.plugins.webactivator.WebActivatorPlugin;
 import de.deepamehta.plugins.workspaces.service.WorkspacesService;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.internet.AddressException;
@@ -78,7 +76,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     
     private Topic currentModuleConfiguration = null;
 
-    @Inject /*** Used in migration */
+    @Inject
     private AccessControlService acService;
 
     @Inject /*** Used in migration */
@@ -89,7 +87,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         initTemplateEngine();
         currentModuleConfiguration = getCurrentSignupConfiguration();
         currentModuleConfiguration.loadChildTopics();
-        log.info("Sign-up: Set module configuration to (uri=" + currentModuleConfiguration.getUri() 
+        log.info("Sign-up: Loaded module configuration (uri=" + currentModuleConfiguration.getUri()
                 + ") " + currentModuleConfiguration.getSimpleValue());
     }
 
@@ -149,18 +147,6 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         }
     }
 
-    /**
-     * Re-load the sign-up configuration topic.
-     
-     */
-    @GET
-    @Path("/sign-up/config/reload")
-    public Topic reloadConfiguration() {
-        log.info("Sign-up: Reloading sign-up plugin configuration.");
-        currentModuleConfiguration = getCurrentSignupConfiguration();
-        return currentModuleConfiguration;
-    }
-
 
 
     /** --- Private Helpers --- */
@@ -196,13 +182,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         }
 
         // ..) Set recipient of notification mail
-        // Topic config = getCurrentSignupConfiguration().loadChildTopics();
-        /** ### see #813 and #764
-         * Topic config = dms.getTopic("uri", new SimpleValue("org.deepamehta.signup.default_configuration"));
-        config.loadChildTopics();
-        String recipient = config.getChildTopics().getString("org.deepamehta.signup.config_admin_mailbox"); **/
-         // ### instead of using our new configuration topic we use this hardcoded address
-        String recipient = "team@lists.deepamehta.de";
+        String recipient = currentModuleConfiguration.getChildTopics().getString("org.deepamehta.signup.config_admin_mailbox");
         log.info("Loaded current configuration topic, sending notification mail to " + recipient);
         try {
             Collection<InternetAddress> recipients = new ArrayList<InternetAddress>();
@@ -246,19 +226,20 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         return (eMail != null);
     }
 
+    /**
+     * The sign-up configuration object is loaded once the bundle/plugin is
+     * initialized by the framework.
+     *
+     * @see init()
+     */
     private Topic getCurrentSignupConfiguration() {
         Topic pluginTopic = dms.getTopic("uri", new SimpleValue("org.deepamehta.sign-up"));
-        return pluginTopic.getRelatedTopic("dm4.core.association", "dm4.core.default", "dm4.core.default", 
+        return pluginTopic.getRelatedTopic("dm4.core.association", "dm4.core.default", "dm4.core.default",
                 "org.deepamehta.signup.configuration");
     }
 
-    private boolean isPasswordGood(String password) {
-        // fixem: should be at least 13 chars long but actually we should work on implementing two-factor auth
-        return (password.length() >= 8);
-    }
-    
-    
-    
+
+
     /** --- Sign-up Routes --- */
 
     @GET

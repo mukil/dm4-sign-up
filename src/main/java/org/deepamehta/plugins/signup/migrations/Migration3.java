@@ -27,31 +27,29 @@ public class Migration3 extends Migration {
 
         Topic pluginTopic = dms.getTopic("uri", new SimpleValue("org.deepamehta.sign-up"));
 
-        // If not already done, enrich the "User Account"-Type about a "E-Mail Address"-Type
+        // 1) Assign the (default) "Sign-up Configuration" to the Plugin topic
         List<Association> configs = pluginTopic.getAssociations();
         boolean hasConfiguration = false;
         for (Association assoc : configs) {
             if (assoc.getPlayer1().getTypeUri().equals("org.deepamehta.signup.configuration")) hasConfiguration = true;
         }
+        // ..
         if (!hasConfiguration) {
             logger.info("Sign-up => Assigning default \"Sign-up Configuration\" to \"DeepaMehta 4 Sign up\" Topic");
             dms.createAssociation(new AssociationModel("dm4.core.association", 
                     new TopicRoleModel(pluginTopic.getId(), "dm4.core.default"),
-                    new TopicRoleModel("org.deepamehta.signup.wikidata_topicmaps_configuration", "dm4.core.default")
+                    new TopicRoleModel("org.deepamehta.signup.default_configuration", "dm4.core.default")
             ));
         } else {
             logger.info("Sign-up => NOT assigning \"Sign-up Configuration\" to \"DeepaMehta 4 Sign up\" Topic"
                     + "- Already done!");
         }
 
-        // Set Configuration Topic Workspace Assignment
-        Topic config_topic = dms.getTopic("uri", new SimpleValue("org.deepamehta.signup.wikidata_topicmaps_configuration"));
+        // 2) Set Configuration Topic Workspace Assignment to ("System") (editable for admin)
+        Topic config_topic = dms.getTopic("uri",
+                new SimpleValue("org.deepamehta.signup.wikidata_topicmaps_configuration"));
         Topic systemWorkspace = wsService.getWorkspace(AccessControlService.SYSTEM_WORKSPACE_URI);
         wsService.assignToWorkspace(config_topic, systemWorkspace.getId());
-        // ### no creator set? OK
-        if (acService.getCreator(config_topic.getId()) == null) {
-            logger.warning("Sign-up: did not and cannot set owner & creator of configuration topic - Assigned to System WS");
-        }
 
     }
 
