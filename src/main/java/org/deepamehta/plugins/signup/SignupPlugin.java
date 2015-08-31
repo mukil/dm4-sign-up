@@ -5,7 +5,9 @@ import de.deepamehta.core.ChildTopics;
 import de.deepamehta.core.RelatedTopic;
 import de.deepamehta.core.Topic;
 import de.deepamehta.core.model.*;
+import de.deepamehta.core.service.DeepaMehtaEvent;
 import de.deepamehta.core.service.DeepaMehtaService;
+import de.deepamehta.core.service.EventListener;
 import de.deepamehta.core.service.Inject;
 import de.deepamehta.core.service.ResultList;
 import de.deepamehta.core.service.Transactional;
@@ -26,6 +28,7 @@ import org.apache.commons.mail.HtmlEmail;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.deepamehta.plugins.signup.service.SignupPluginService;
+import org.deepamehta.plugins.signup.service.UserAccountCreateListener;
 
 
 /**
@@ -82,6 +85,8 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     @Inject /*** Used in migration */
     private WorkspacesService wsService;
 
+
+
     @Override
     public void init() {
         initTemplateEngine();
@@ -90,6 +95,13 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         log.info("Sign-up: Loaded module configuration (uri=" + currentModuleConfiguration.getUri()
                 + ") " + currentModuleConfiguration.getSimpleValue());
     }
+
+    static DeepaMehtaEvent USER_ACCOUNT_CREATE_LISTENER = new DeepaMehtaEvent(UserAccountCreateListener.class) {
+        @Override
+        public void deliver(EventListener listener, Object... params) {
+            ((UserAccountCreateListener) listener).userAccountCreated((Topic) params[0]);
+        }
+    };
 
     /** Plugin Service Implementation */
     @GET
@@ -134,7 +146,9 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             try {
                 // 1) Create new user
                 Topic user = acService.createUserAccount(creds);
-                // 2) Inform administrations
+                // 2) fire custom event
+                dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, user);
+                // 3) Inform administrations
                 sendNotificationMail(username);
                 return username;
             } catch (Exception e) {
