@@ -14,6 +14,7 @@ import de.deepamehta.core.service.ResultList;
 import de.deepamehta.core.service.Transactional;
 import de.deepamehta.core.service.accesscontrol.AccessControl;
 import de.deepamehta.core.service.accesscontrol.Credentials;
+import de.deepamehta.core.service.event.PostUpdateTopicListener;
 import de.deepamehta.plugins.accesscontrol.service.AccessControlService;
 import de.deepamehta.plugins.webactivator.WebActivatorPlugin;
 import de.deepamehta.plugins.workspaces.service.WorkspacesService;
@@ -47,27 +48,20 @@ import org.deepamehta.plugins.signup.service.SignupPluginService;
  */
 
 @Path("/")
-public class SignupPlugin extends WebActivatorPlugin implements SignupPluginService {
+public class SignupPlugin extends WebActivatorPlugin implements SignupPluginService,
+                                                                PostUpdateTopicListener {
 
     private static Logger log = Logger.getLogger(SignupPlugin.class.getName());
 
     // --- DeepaMehta 4 related type URIs
-    
-    /** @see also @de.deepamehta.plugins.accesscontrol.model.Credentials */
-    private static final String ENCRYPTED_PASSWORD_PREFIX = "-SHA256-";
 
-    public static final String USER_ACCOUNT_TYPE_URI = "dm4.accesscontrol.user_account";
     public static final String MAILBOX_TYPE_URI = "dm4.contacts.email_address";
-
-    private static final String USERNAME_TYPE_URI = "dm4.accesscontrol.username";
-    // private static final String USER_PASSWORD_TYPE_URI = "dm4.accesscontrol.password";
-    // private static final String WS_WIKIDATA_URI = "org.deepamehta.workspaces.wikidata";
-    // private static final String WS_DEFAULT_URI = "de.workspaces.deepamehta";
-
     public final static String WS_DM_DEFAULT_URI = "de.workspaces.deepamehta";
     
     // --- Sign-up related type URIs (Configuration, Template Data)
     
+    private final String SIGN_UP_PLUGIN_TOPIC_URI = "org.deepamehta.sign-up";
+    private final String SIGN_UP_CONFIG_TYPE_URI = "org.deepamehta.signup.configuration";
     private final String CONFIG_PROJECT_TITLE = "org.deepamehta.signup.config_project_title";
     private final String CONFIG_WEBAPP_TITLE = "org.deepamehta.signup.config_webapp_title";
     private final String CONFIG_LOGO_PATH = "org.deepamehta.signup.config_webapp_logo_path";
@@ -92,10 +86,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     @Override
     public void init() {
         initTemplateEngine();
-        currentModuleConfiguration = getCurrentSignupConfiguration();
-        currentModuleConfiguration.loadChildTopics();
-        log.info("Sign-up: Loaded module configuration (uri=" + currentModuleConfiguration.getUri()
-                + ") " + currentModuleConfiguration.getSimpleValue());
+        reloadConfiguration();
     }
 
     static DeepaMehtaEvent USER_ACCOUNT_CREATE_LISTENER = new DeepaMehtaEvent(UserAccountCreateListener.class) {
@@ -135,19 +126,6 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         }
     }
 
-    /**
-     * Re-load the sign-up configuration topic.
-     */
-    @GET
-    @Path("/sign-up/config/reload")
-    public Topic reloadConfiguration() {
-        log.info("Sign-up: Reloading sign-up plugin configuration.");
-        currentModuleConfiguration = getCurrentSignupConfiguration();
-        log.info("Sign-up: Loaded sign-up configuration => \"" + currentModuleConfiguration.getUri()
-                + "\", \"" + currentModuleConfiguration.getSimpleValue() + "\"");
-        return currentModuleConfiguration;
-    }
-
     @GET
     @Path("/sign-up/create/{username}/{pass-one}/{mailbox}")
     @Transactional
@@ -165,7 +143,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
                 // 2) fire custom event ### useless since fired by "anonymous" (this request scope)
                 // dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, user);
                 // 3) attach e-mail address topic
-                Topic eMailAddress = dms.createTopic(new TopicModel("dm4.contacts.email_address", new SimpleValue(mailbox.trim())));
+                Topic eMailAddress = dms.createTopic(new TopicModel(MAILBOX_TYPE_URI, new SimpleValue(mailbox.trim())));
                 // 4) associate e-mail address topic to "username" topic and to "System" workspace
                 AccessControl acCore = dms.getAccessControl();
                 acCore.assignToWorkspace(eMailAddress, acCore.getSystemWorkspaceId());
@@ -192,6 +170,21 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
 
     /** --- Private Helpers --- */
+
+    /**
+     * Loads the next sign-up configuration topic for this plugin.
+     *
+     * @see init()
+     * @see postUpdateTopic()
+     */
+    private Topic reloadConfiguration() {
+        log.info("Sign-up: Reloading sign-up plugin configuration.");
+        currentModuleConfiguration = getCurrentSignupConfiguration();
+        currentModuleConfiguration.loadChildTopics();
+        log.info("Sign-up: Loaded sign-up configuration => \"" + currentModuleConfiguration.getUri()
+                + "\", \"" + currentModuleConfiguration.getSimpleValue() + "\"");
+        return currentModuleConfiguration;
+    }
 
     private void sendNotificationMail(String username, String mailbox) {
         // Fix: Classloader issue we have in OSGi since using Pax web
@@ -270,14 +263,14 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     /**
      * The sign-up configuration object is loaded once when this bundle/plugin is
-     * initialized by the framework and when "admin" reloads it.
+     * initialized by the framework and as soon as one configuration was edited.
      *
-     * @see init()
+     * @see reloadConfiguration()
      */
     private Topic getCurrentSignupConfiguration() {
-        Topic pluginTopic = dms.getTopic("uri", new SimpleValue("org.deepamehta.sign-up"));
+        Topic pluginTopic = dms.getTopic("uri", new SimpleValue(SIGN_UP_PLUGIN_TOPIC_URI));
         return pluginTopic.getRelatedTopic("dm4.core.association", "dm4.core.default", "dm4.core.default",
-                "org.deepamehta.signup.configuration");
+                SIGN_UP_CONFIG_TYPE_URI);
     }
 
 
@@ -327,6 +320,12 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             log.warning("Could not load module configuration!");
         }
 
+    }
+
+    public void postUpdateTopic(Topic topic, TopicModel tm, TopicModel tm1) {
+        if (topic.getTypeUri().equals(SIGN_UP_CONFIG_TYPE_URI)) {
+            reloadConfiguration();
+        }
     }
 
 }
