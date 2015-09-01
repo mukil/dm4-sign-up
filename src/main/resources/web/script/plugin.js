@@ -53,7 +53,7 @@
         // === Access Control Listeners ===
 
         dm4c.add_listener("logged_in", function(username) {
-            console.log("Sign-up plugin recevied LOGIN - removing sign-up-button")
+            // console.log("Sign-up plugin recevied LOGIN - removing sign-up-button")
             jQuery('#sign-up-button').remove()
         })
 

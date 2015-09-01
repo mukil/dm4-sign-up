@@ -12,12 +12,9 @@ import de.deepamehta.plugins.workspaces.service.WorkspacesService;
 import java.util.List;
 import java.util.logging.Logger;
 
-public class Migration3 extends Migration {
+public class Migration2 extends Migration {
 
     private Logger logger = Logger.getLogger(getClass().getName());
-
-    @Inject
-    private AccessControlService acService;
 
     @Inject
     private WorkspacesService wsService;
@@ -36,7 +33,7 @@ public class Migration3 extends Migration {
         // ..
         if (!hasConfiguration) {
             logger.info("Sign-up => Assigning default \"Sign-up Configuration\" to \"DeepaMehta 4 Sign up\" Topic");
-            dms.createAssociation(new AssociationModel("dm4.core.association", 
+            dms.createAssociation(new AssociationModel("dm4.core.association",
                     new TopicRoleModel(pluginTopic.getId(), "dm4.core.default"),
                     new TopicRoleModel("org.deepamehta.signup.default_configuration", "dm4.core.default")
             ));

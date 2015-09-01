@@ -1,6 +1,7 @@
 package org.deepamehta.plugins.signup;
 
 import com.sun.jersey.api.view.Viewable;
+import de.deepamehta.core.Association;
 import de.deepamehta.core.ChildTopics;
 import de.deepamehta.core.RelatedTopic;
 import de.deepamehta.core.Topic;
@@ -11,6 +12,7 @@ import de.deepamehta.core.service.EventListener;
 import de.deepamehta.core.service.Inject;
 import de.deepamehta.core.service.ResultList;
 import de.deepamehta.core.service.Transactional;
+import de.deepamehta.core.service.accesscontrol.AccessControl;
 import de.deepamehta.core.service.accesscontrol.Credentials;
 import de.deepamehta.plugins.accesscontrol.service.AccessControlService;
 import de.deepamehta.plugins.webactivator.WebActivatorPlugin;
@@ -23,6 +25,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response.Status;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.codehaus.jettison.json.JSONException;
@@ -132,10 +135,24 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         }
     }
 
+    /**
+     * Re-load the sign-up configuration topic.
+     */
     @GET
-    @Path("/sign-up/create/{username}/{pass-one}")
+    @Path("/sign-up/config/reload")
+    public Topic reloadConfiguration() {
+        log.info("Sign-up: Reloading sign-up plugin configuration.");
+        currentModuleConfiguration = getCurrentSignupConfiguration();
+        log.info("Sign-up: Loaded sign-up configuration => \"" + currentModuleConfiguration.getUri()
+                + "\", \"" + currentModuleConfiguration.getSimpleValue() + "\"");
+        return currentModuleConfiguration;
+    }
+
+    @GET
+    @Path("/sign-up/create/{username}/{pass-one}/{mailbox}")
     @Transactional
-    public String createSimpleUserAccount(@PathParam("username") String username, @PathParam("pass-one") String password) {
+    public String createSimpleUserAccount(@PathParam("username") String username, @PathParam("pass-one") String password,
+            @PathParam("mailbox") String mailbox) {
         try {
             if (!isUsernameAvailable(username)) throw new WebApplicationException(412);
             Credentials creds = new Credentials(new JSONObject()
@@ -144,19 +161,31 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             log.info("Trying to set up new \"User Account\" for username " + username);
             try {
                 // 1) Create new user
-                Topic user = acService.createUserAccount(creds);
-                // 2) fire custom event
-                dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, user);
-                // 3) Inform administrations
-                sendNotificationMail(username);
+                Topic usernameTopic = acService.createUserAccount(creds);
+                // 2) fire custom event ### useless since fired by "anonymous" (this request scope)
+                // dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, user);
+                // 3) attach e-mail address topic
+                Topic eMailAddress = dms.createTopic(new TopicModel("dm4.contacts.email_address", new SimpleValue(mailbox.trim())));
+                // 4) associate e-mail address topic to "username" topic and to "System" workspace
+                AccessControl acCore = dms.getAccessControl();
+                acCore.assignToWorkspace(eMailAddress, acCore.getSystemWorkspaceId());
+                log.info("Assigned eMail-Address topic to system workspace");
+                Association assoc = dms.createAssociation(new AssociationModel("dm4.core.association",
+                        new TopicRoleModel(usernameTopic.getId(), "dm4.core.parent"),
+                        new TopicRoleModel(eMailAddress.getId(), "dm4.core.child")));
+                log.info("FINISHED: Related E-Mail Address: " + mailbox + " to new username");
+                // 5) ### associate association to "system" workspace too
+                // acCore.assignToWorkspace(assoc, acCore.getSystemWorkspaceId());
+                // 6) Inform administrations
+                sendNotificationMail(username, mailbox.trim());
                 return username;
             } catch (Exception e) {
                 log.log(Level.SEVERE, "Creating simple user account failed.", e);
-                return "FAILED";
+                throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
             }
         } catch (JSONException ex) {
             log.log(Level.SEVERE, null, ex);
-            return "FAILED";
+            throw new WebApplicationException(ex, Status.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -164,7 +193,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     /** --- Private Helpers --- */
 
-    private void sendNotificationMail(String username) {
+    private void sendNotificationMail(String username, String mailbox) {
         // Fix: Classloader issue we have in OSGi since using Pax web
         Thread.currentThread().setContextClassLoader(SignupPlugin.class.getClassLoader());
         log.info("BeforeSend: Set classloader to " + Thread.currentThread().getContextClassLoader().toString());
@@ -187,7 +216,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         }
 
         try {
-            String text = "Hi there, " + username + " created an account at your service.";
+            String text = "Hi there, " + username + " ("+mailbox+") created an account at your service.";
             // ..) Set Message Body
             email.setTextMsg(text);
         } catch (Exception e) {
@@ -240,8 +269,8 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     }
 
     /**
-     * The sign-up configuration object is loaded once the bundle/plugin is
-     * initialized by the framework.
+     * The sign-up configuration object is loaded once when this bundle/plugin is
+     * initialized by the framework and when "admin" reloads it.
      *
      * @see init()
      */

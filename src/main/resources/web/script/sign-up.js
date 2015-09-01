@@ -45,11 +45,11 @@
         if (!isValidUsername()) return
         if (checkPassword() !== OK_STRING) return
         if (comparePasswords() !== OK_STRING) return
-        // if (checkMailbox() === null) return
+        if (checkMailbox() === null) return
         if (checkAgreements() !== OK_STRING) return
 
         var usernameVal = encodeURIComponent(document.getElementById("username").value)
-        // var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
+        var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
         var passwordVal = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
         // var password = encodeURIComponent(document.getElementById("pass-one").value)
 
@@ -57,17 +57,13 @@
         xhr = new XMLHttpRequest()
         xhr.onload = function(e) {
             var username = xhr.response
-            if (username.indexOf("<html>") != 0) {
-                renderFriendlyMessage('Submitting ..')
-                redirectToOK()
-            } else {
-                renderWarning("Account creation failed.")
-            }
+            renderFriendlyMessage('Submitting ..')
+            redirectToOK()
         }
-        /** xhr.onerror = function (e) {
+        xhr.onerror = function (e) {
             renderWarning("Account creation failed." + e)
-        } **/
-        xhr.open("GET", "/sign-up/create/" + usernameVal + "/" + passwordVal + "?no_workspace_assignment=true")
+        }
+        xhr.open("GET", "/sign-up/create/" + usernameVal + "/" + passwordVal + "/" + mailbox + "?no_workspace_assignment=true")
         xhr.setRequestHeader("Content-Type", "text/plain")
         xhr.send()
 
@@ -108,6 +104,7 @@
 
     }
     
+    /** ### anonymous can not read all mailbox (and thus cannot check for duplicates)
     function checkMailboxAvailability() {
         var mailboxField = document.getElementById("mailbox") // fixme: maybe its better to acces the form element
         var mailBox = mailboxField.value
@@ -128,7 +125,7 @@
         xhr.open("GET", "/sign-up/check/mailbox/" + mailBox, false)
         xhr.send()
 
-    }
+    } **/
 
     function checkPassword () {
         var passwordField = document.getElementById("pass-one") // fixme: maybe its better to acces the form element

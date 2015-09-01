@@ -28,6 +28,6 @@ public interface SignupPluginService extends PluginService {
      * 
      * @return  String  username
      */
-    String createSimpleUserAccount(String username, String password);
+    String createSimpleUserAccount(String username, String password, String mailbox);
 
 }
