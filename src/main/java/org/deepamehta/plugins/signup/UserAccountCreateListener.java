@@ -1,4 +1,4 @@
-package org.deepamehta.plugins.signup.service;
+package org.deepamehta.plugins.signup;
 
 import de.deepamehta.core.Topic;
 import de.deepamehta.core.service.EventListener;

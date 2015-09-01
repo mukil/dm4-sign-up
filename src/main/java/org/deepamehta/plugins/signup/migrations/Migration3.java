@@ -47,7 +47,7 @@ public class Migration3 extends Migration {
 
         // 2) Set Configuration Topic Workspace Assignment to ("System") (editable for admin)
         Topic config_topic = dms.getTopic("uri",
-                new SimpleValue("org.deepamehta.signup.wikidata_topicmaps_configuration"));
+                new SimpleValue("org.deepamehta.signup.default_configuration"));
         Topic systemWorkspace = wsService.getWorkspace(AccessControlService.SYSTEM_WORKSPACE_URI);
         wsService.assignToWorkspace(config_topic, systemWorkspace.getId());
 

@@ -28,7 +28,6 @@ import org.apache.commons.mail.HtmlEmail;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.deepamehta.plugins.signup.service.SignupPluginService;
-import org.deepamehta.plugins.signup.service.UserAccountCreateListener;
 
 
 /**
