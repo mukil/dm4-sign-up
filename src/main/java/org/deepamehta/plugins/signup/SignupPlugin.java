@@ -209,7 +209,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         }
 
         try {
-            String text = "Hi there, " + username + " ("+mailbox+") created an account at your service.";
+            String text = "\nA new user has registered.\n\nUsername: " + username + "\nE-Mail: "+mailbox+"";
             // ..) Set Message Body
             email.setTextMsg(text);
         } catch (Exception e) {
