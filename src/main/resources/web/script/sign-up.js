@@ -63,7 +63,7 @@
         xhr.onerror = function (e) {
             renderWarning("Account creation failed." + e)
         }
-        xhr.open("GET", "/sign-up/create/" + usernameVal + "/" + passwordVal + "/" + mailbox + "?no_workspace_assignment=true")
+        xhr.open("GET", "/sign-up/send/" + usernameVal + "/" + passwordVal + "/" + mailbox + "?no_workspace_assignment=true")
         xhr.setRequestHeader("Content-Type", "text/plain")
         xhr.send()
 
@@ -226,6 +226,6 @@
 
     function redirectToOK () {
         setTimeout(function (e) {
-            window.location.href = '/ok'
+            window.location.href = '/token-info'
         }, 1500)
     }

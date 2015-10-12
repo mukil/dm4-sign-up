@@ -11,22 +11,29 @@ import de.deepamehta.core.service.DeepaMehtaService;
 import de.deepamehta.core.service.EventListener;
 import de.deepamehta.core.service.Inject;
 import de.deepamehta.core.service.ResultList;
-import de.deepamehta.core.service.Transactional;
 import de.deepamehta.core.service.accesscontrol.AccessControl;
 import de.deepamehta.core.service.accesscontrol.Credentials;
 import de.deepamehta.core.service.event.PostUpdateTopicListener;
+import de.deepamehta.core.storage.spi.DeepaMehtaTransaction;
 import de.deepamehta.plugins.accesscontrol.service.AccessControlService;
 import de.deepamehta.plugins.webactivator.WebActivatorPlugin;
 import de.deepamehta.plugins.workspaces.service.WorkspacesService;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.UriInfo;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.codehaus.jettison.json.JSONException;
@@ -57,9 +64,9 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     public static final String MAILBOX_TYPE_URI = "dm4.contacts.email_address";
     public final static String WS_DM_DEFAULT_URI = "de.workspaces.deepamehta";
-    
+
     // --- Sign-up related type URIs (Configuration, Template Data)
-    
+
     private final String SIGN_UP_PLUGIN_TOPIC_URI = "org.deepamehta.sign-up";
     private final String SIGN_UP_CONFIG_TYPE_URI = "org.deepamehta.signup.configuration";
     private final String CONFIG_PROJECT_TITLE = "org.deepamehta.signup.config_project_title";
@@ -72,7 +79,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     private final String CONFIG_TOS_DETAILS = "org.deepamehta.signup.config_tos_detail";
     private final String CONFIG_PD_LABEL = "org.deepamehta.signup.config_pd_label";
     private final String CONFIG_PD_DETAILS = "org.deepamehta.signup.config_pd_detail";
-    
+
     private Topic currentModuleConfiguration = null;
 
     @Inject
@@ -80,7 +87,10 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     @Inject /*** Used in migration */
     private WorkspacesService wsService;
+	
+	@Context UriInfo uri;
 
+    HashMap<String, JSONObject> token = new HashMap<String, JSONObject>();
 
 
     @Override
@@ -126,11 +136,9 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         }
     }
 
-    @GET
-    @Path("/sign-up/create/{username}/{pass-one}/{mailbox}")
-    @Transactional
-    public String createSimpleUserAccount(@PathParam("username") String username, @PathParam("pass-one") String password,
+    private String createSimpleUserAccount(@PathParam("username") String username, @PathParam("pass-one") String password,
             @PathParam("mailbox") String mailbox) {
+		DeepaMehtaTransaction tx = dms.beginTx();
         try {
             if (!isUsernameAvailable(username)) throw new WebApplicationException(412);
             Credentials creds = new Credentials(new JSONObject()
@@ -156,21 +164,79 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
                 // acCore.assignToWorkspace(assoc, acCore.getSystemWorkspaceId());
                 // 6) Inform administrations
                 sendNotificationMail(username, mailbox.trim());
+				tx.success();
+				tx.finish();
                 return username;
             } catch (Exception e) {
                 log.log(Level.SEVERE, "Creating simple user account failed.", e);
+				tx.failure();
+				tx.finish();
                 throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
             }
         } catch (JSONException ex) {
             log.log(Level.SEVERE, null, ex);
+			tx.failure();
+			tx.finish();
             throw new WebApplicationException(ex, Status.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    @GET
+    @Path("/sign-up/send/{username}/{pass-one}/{mailbox}")
+    public String createUserValidationToken(@PathParam("username") String username,
+		@PathParam("pass-one") String password, @PathParam("mailbox") String mailbox) {
+		//
+		String response = null;
+		try {
+			String key = UUID.randomUUID().toString();
+			long valid = new Date().getTime() + 3600000; // Token is valid fo 60 min
+			JSONObject value = new JSONObject();
+			value.put("username", username);
+			value.put("mailbox", mailbox);
+			value.put("password", password);
+			value.put("expiration", valid);
+			token.put(key, value);
+			log.info("Set up key " +key+ " for "+mailbox+" sending confirmation mail valid till " + new Date(valid).toString());
+			sendConfirmationMail(key, mailbox.trim());
+		} catch (JSONException ex) {
+			Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		return response;
+    }
+	
+	@GET
+    @Path("/sign-up/confirm/{token}")
+    public Viewable handleTokenRequest(@PathParam("token") String key) {
+		String username;
+		try {
+			JSONObject input = token.get(key);
+			token.remove(key);
+			username = input.getString("username");
+			// log.info("Compare expiration date " + new Date(input.getLong("expiration")).getTime() + " with " + new Date().getTime());
+			if (input.getLong("expiration") > new Date().getTime()) {
+				log.info("Trying to create user account for " + input.getString("mailbox"));
+				createSimpleUserAccount(username, input.getString("password"), input.getString("mailbox"));
+			} else {
+				viewData("username", null);
+				viewData("message", "Timeout");
+				return view("failure");
+			}
+		} catch (JSONException ex) {
+			Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
+			viewData("message", "An error occured processing your request");
+			log.severe("Account creation failed due to " + ex.getMessage() + " caused by " + ex.getCause().toString());
+			return view("failure");
+		}
+		log.info("Account confirmed & succesfully created, username: " + username);
+		viewData("username", username);
+		viewData("message", "User account created successfully");
+		return getAccountCreationOKView();
     }
 
 
 
     /** --- Private Helpers --- */
-
+	
     /**
      * Loads the next sign-up configuration topic for this plugin.
      *
@@ -185,6 +251,16 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
                 + "\", \"" + currentModuleConfiguration.getSimpleValue() + "\"");
         return currentModuleConfiguration;
     }
+
+	private void sendConfirmationMail(String key, String mailbox) {
+		try {
+			URL url = uri.getBaseUri().toURL();
+			log.info("The confirmation mails token request URL should be:"
+				+ "\n" + url + "sign-up/confirm/"+key);
+		} catch (MalformedURLException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
 
     private void sendNotificationMail(String username, String mailbox) {
         // Fix: Classloader issue we have in OSGi since using Pax web
@@ -301,6 +377,24 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         prepareSignupPage();
         return view("ok");
     }
+	
+	@GET
+    @Path("/error")
+    @Produces(MediaType.TEXT_HTML)
+    public Viewable getFailureView() {
+        prepareSignupPage();
+        return view("failure");
+    }
+
+    @GET
+    @Path("/token-info")
+    @Produces(MediaType.TEXT_HTML)
+    public Viewable getConfirmationInfoView() {
+        prepareSignupPage();
+        return view("confirmation");
+    }
+	
+	
 
     private void prepareSignupPage() {
         if (currentModuleConfiguration != null) {

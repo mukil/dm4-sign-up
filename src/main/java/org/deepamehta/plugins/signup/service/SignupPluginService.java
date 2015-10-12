@@ -21,13 +21,13 @@ public interface SignupPluginService extends PluginService {
     String getUsernameAvailability(String username);
     
     /** 
-     * Checks for username availability, password strength (>=8 chars) and assignes 
-     * an "E Mail Address" to the new "User Account"-Topic.
+     * Creates a token for username and "E Mail Address" for the creation of a 
+	 * new "User Account" topic.
      * 
      * @param   password    String Password in cleartext.
      * 
      * @return  String  username
      */
-    String createSimpleUserAccount(String username, String password, String mailbox);
+    String createUserValidationToken(String username, String password, String mailbox);
 
 }
