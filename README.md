@@ -1,17 +1,16 @@
 
 # DeepaMehta 4 Sign-up
 
-This plugin provides service provides a simple, AJAX and HTML-Template based, user-configurable `login` and `registration` dialog.
+This plugin provides service provides a simple, AJAX and HTML-Template based, user-configurable `login` and `registration` dialog. For mailbox validation purposes it requires being installed on a web server with a `postfix` -> `Internet Site? like mail send functionality.
 
 This plugin adds:
-*    An `E-Mail Address` to each `User Account`
-     (Aggregation Definition, with a _one_ to _one_ relation, if not already present)
 *    A `Sign-up`-link next to the `Login`-button in the DeepaMehta 4 Webclient
 *    A `Sign-up Configuration` topic associated to the `DeepaMehta 4 Sign up` Plugin
      (part of the "System" workspace and thus editable by `admin`)
 
 The special features of the `registration` dialog is comprised of:
 *    Username existence check
+*    Email existence check (Pending)
 *    Sends a notification mail to the configured e-mail address 
      on each account-creation (new in 4.6)
 *    Defused as of 4.6: E-Mail Address existence and (simple) validation
@@ -60,13 +59,16 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 # Version History
 
 1.1, UPCOMING
+- Email confirmation is now mandatory, confirmation mails are send out
+  (this requires a 'postfix' -> 'Internet Site' like web server setup)
+- ...
 - Adapted createUserAccounts to new ACL-Service (remove join Workspace) - no Workspace cookie
 - Maintain configuration topic editble (migrate from postInstall to Migration)
-- Add: Internal E-Mail Reporting (Erweiterte Configuration, "Administrator"-Mailbox nach erfolgreicher Registrierung)
-- Updated to be compatible with 4.6.2-SNAPSHOT (as of 16th August 2015 or later)
-- Incorporate (not dm4-mail dependency but) some low-level mail functionality
-- Skipped adding an E-Mail Address as part of the registration process
+- Added Email notification to admin on account creation
+- Updated module to be compatible with 4.6.2-SNAPSHOT (as of 16th August 2015 or later)
+- Incorporate some dm4-mail low-level functionality
 - Updated dependency to bundle dm46-webactivator-0.4.5
+- This plugin is not compatible with previous installations of the dm4-sign-up module
 
 1.0.0, Dec 25, 2014
 

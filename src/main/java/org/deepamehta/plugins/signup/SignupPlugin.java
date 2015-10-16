@@ -139,46 +139,40 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     private String createSimpleUserAccount(@PathParam("username") String username, @PathParam("pass-one") String password,
             @PathParam("mailbox") String mailbox) {
 		DeepaMehtaTransaction tx = dms.beginTx();
-        try {
-            if (!isUsernameAvailable(username)) throw new WebApplicationException(412);
-            Credentials creds = new Credentials(new JSONObject()
-                    .put("username", username)
-                    .put("password", password));
-            log.info("Trying to set up new \"User Account\" for username " + username);
-            try {
-                // 1) Create new user
-                Topic usernameTopic = acService.createUserAccount(creds);
-                // 2) fire custom event ### useless since fired by "anonymous" (this request scope)
-                // dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, user);
-                // 3) attach e-mail address topic
-                Topic eMailAddress = dms.createTopic(new TopicModel(MAILBOX_TYPE_URI, new SimpleValue(mailbox.trim())));
-                // 4) associate e-mail address topic to "username" topic and to "System" workspace
-                AccessControl acCore = dms.getAccessControl();
-                acCore.assignToWorkspace(eMailAddress, acCore.getSystemWorkspaceId());
-                log.info("Assigned eMail-Address topic to system workspace");
-                Association assoc = dms.createAssociation(new AssociationModel("dm4.core.association",
-                        new TopicRoleModel(usernameTopic.getId(), "dm4.core.parent"),
-                        new TopicRoleModel(eMailAddress.getId(), "dm4.core.child")));
-                log.info("FINISHED: Related E-Mail Address: " + mailbox + " to new username");
-                // 5) ### associate association to "system" workspace too
-                // acCore.assignToWorkspace(assoc, acCore.getSystemWorkspaceId());
-                // 6) Inform administrations
-                sendNotificationMail(username, mailbox.trim());
-				tx.success();
-				tx.finish();
-                return username;
-            } catch (Exception e) {
-                log.log(Level.SEVERE, "Creating simple user account failed.", e);
-				tx.failure();
-				tx.finish();
-                throw new WebApplicationException(e, Status.INTERNAL_SERVER_ERROR);
-            }
-        } catch (JSONException ex) {
-            log.log(Level.SEVERE, null, ex);
-			tx.failure();
+		try {
+			if (!isUsernameAvailable(username)) throw new WebApplicationException(412);
+			Credentials creds = new Credentials(new JSONObject()
+					.put("username", username)
+					.put("password", password));
+			log.info("Trying to set up new \"User Account\" for username " + username);
+			// 1) Create new user
+			Topic usernameTopic = acService.createUserAccount(creds);
+			// 2) fire custom event ### useless since fired by "anonymous" (this request scope)
+			// dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, user);
+			// 3) attach e-mail address topic
+			Topic eMailAddress = dms.createTopic(new TopicModel(MAILBOX_TYPE_URI, new SimpleValue(mailbox.trim())));
+			// 4) associate e-mail address topic to "username" topic and to "System" workspace
+			AccessControl acCore = dms.getAccessControl();
+			acCore.assignToWorkspace(eMailAddress, acCore.getSystemWorkspaceId());
+			log.info("Assigned eMail-Address topic to system workspace");
+			Association assoc = dms.createAssociation(new AssociationModel("dm4.core.association",
+					new TopicRoleModel(usernameTopic.getId(), "dm4.core.parent"),
+					new TopicRoleModel(eMailAddress.getId(), "dm4.core.child")));
+			log.info("FINISHED: Related E-Mail Address: " + mailbox + " to new username");
+			// 5) ### associate association to "system" workspace too
+			// acCore.assignToWorkspace(assoc, acCore.getSystemWorkspaceId());
+			// 6) Inform administrations
+			sendNotificationMail(username, mailbox.trim());
+			tx.success();
 			tx.finish();
-            throw new WebApplicationException(ex, Status.INTERNAL_SERVER_ERROR);
-        }
+			return username;
+		} catch (WebApplicationException e) {
+			throw new WebApplicationException(e.getResponse());
+		} catch (JSONException e) {
+			throw new RuntimeException("Creating simple user account FAILED!", e);
+		} finally {
+			tx.finish();
+		}
     }
 
     @GET
@@ -196,10 +190,12 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 			value.put("password", password);
 			value.put("expiration", valid);
 			token.put(key, value);
-			log.info("Set up key " +key+ " for "+mailbox+" sending confirmation mail valid till " + new Date(valid).toString());
-			sendConfirmationMail(key, mailbox.trim());
+			log.info("Set up key " +key+ " for "+mailbox+" sending confirmation mail valid till "
+				+ new Date(valid).toString());
+			sendConfirmationMail(key, username, mailbox.trim());
 		} catch (JSONException ex) {
 			Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
+			throw new RuntimeException(ex);
 		}
 		return response;
     }
@@ -212,7 +208,6 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 			JSONObject input = token.get(key);
 			token.remove(key);
 			username = input.getString("username");
-			// log.info("Compare expiration date " + new Date(input.getLong("expiration")).getTime() + " with " + new Date().getTime());
 			if (input.getLong("expiration") > new Date().getTime()) {
 				log.info("Trying to create user account for " + input.getString("mailbox"));
 				createSimpleUserAccount(username, input.getString("password"), input.getString("mailbox"));
@@ -252,71 +247,66 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         return currentModuleConfiguration;
     }
 
-	private void sendConfirmationMail(String key, String mailbox) {
+	private void sendConfirmationMail(String key, String username, String mailbox) {
 		try {
+			String webAppTitle = currentModuleConfiguration.getChildTopics()
+				.getString("org.deepamehta.signup.config_webapp_title");
 			URL url = uri.getBaseUri().toURL();
 			log.info("The confirmation mails token request URL should be:"
 				+ "\n" + url + "sign-up/confirm/"+key);
+			sendSystemMail("Your account on " +webAppTitle,
+				"Hi "+username+",\n\nyou can complete the account registration process for " + webAppTitle
+					+ " through visiting the following webpage:\n" + url + "sign-up/confirm/" + key
+					+ "\n\nCheers!\n\n", mailbox);
 		} catch (MalformedURLException ex) {
 			throw new RuntimeException(ex);
 		}
 	}
 
     private void sendNotificationMail(String username, String mailbox) {
-        // Fix: Classloader issue we have in OSGi since using Pax web
+		String webAppTitle = currentModuleConfiguration.getChildTopics().getString("org.deepamehta.signup.config_webapp_title");
+        sendSystemMail("Account registration on " + webAppTitle,
+			"\nA user has registered.\n\nUsername: " + username + "\nEmail: "+mailbox+"\n\n", null);
+    }
+
+	private void sendSystemMail(String subject, String message, String recipient) {
+		// Fix: Classloader issue we have in OSGi since using Pax web
         Thread.currentThread().setContextClassLoader(SignupPlugin.class.getClassLoader());
         log.info("BeforeSend: Set classloader to " + Thread.currentThread().getContextClassLoader().toString());
-
         HtmlEmail email = new HtmlEmail();
         email.setDebug(true); // => System.out.println(SMTP communication);
-        email.setHostName("localhost");
+        email.setHostName("localhost"); // ### use getBaseUri() from HTTP Context?
         try {
             // ..) Set Senders of Mail
-            email.setFrom("mre@deepamehta.de", "My DeepaMehta 4");
-        } catch (EmailException ex) {
-            log.log(Level.SEVERE, null, ex);
-        }
-
-        try {
-            // ..) Set Subject of Mail
-            email.setSubject( "Account registration on my.deepamehta.de");
-        } catch (Exception e) {
-            log.log(Level.INFO, "Exception during setting subject of mail", e);
-        }
-
-        try {
-            String text = "\nA new user has registered.\n\nUsername: " + username + "\nE-Mail: "+mailbox+"";
+			String projectName = currentModuleConfiguration.getChildTopics().getString("org.deepamehta.signup.config_project_title");
+			String sender = currentModuleConfiguration.getChildTopics().getString("org.deepamehta.signup.config_from_mailbox");
+            email.setFrom(sender.trim(), projectName.trim());
+			// ..) Set Subject of Mail
+            email.setSubject(subject);
             // ..) Set Message Body
-            email.setTextMsg(text);
-        } catch (Exception e) {
-            log.log(Level.INFO, "Exception during setting mail body", e);
-        }
-
-        // ..) Set recipient of notification mail
-        String recipient = currentModuleConfiguration.getChildTopics().getString("org.deepamehta.signup.config_admin_mailbox");
-        log.info("Loaded current configuration topic, sending notification mail to " + recipient);
-        try {
-            Collection<InternetAddress> recipients = new ArrayList<InternetAddress>();
-            recipients.add(new InternetAddress(recipient));
+            email.setTextMsg(message);
+			// ..) Set recipient of notification mail
+			String recipientValue;
+			if (recipient != null) {
+				recipientValue = recipient.trim();
+			} else {
+				recipientValue = currentModuleConfiguration.getChildTopics()
+					.getString("org.deepamehta.signup.config_admin_mailbox").trim();
+			}
+			log.info("Loaded current configuration topic, sending notification mail to " + recipientValue);
+			Collection<InternetAddress> recipients = new ArrayList<InternetAddress>();
+            recipients.add(new InternetAddress(recipientValue));
             email.setTo(recipients);
-        } catch (AddressException ex) {
-            Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (EmailException ex) {
-            Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        try {
-            email.send();
+			email.send();
             log.info("Mail was SUCCESSFULLY sent to " + email.getToAddresses() + " mail addresses");
-        } catch (EmailException e) {
-            log.log(Level.SEVERE, "Mail was NOT sent to " + email.getToAddresses() + " mail addresses", e);
-        } catch (Exception e) { // error after send
-            log.log(Level.SEVERE,"Mail was NOT sent to " + email.getToAddresses() + " mail addresses", e);
-        }
-        // Fix: Classloader issue we have in OSGi since using Pax web
-        Thread.currentThread().setContextClassLoader(DeepaMehtaService.class.getClassLoader());
-        log.info("AfterSend: Set Classloader back to " + Thread.currentThread().getContextClassLoader().toString());
-    }
+        } catch (Exception ex) {
+            throw new RuntimeException("Sending notification mail FAILED", ex);
+        } finally {
+			// Fix: Classloader issue we have in OSGi since using Pax web
+			Thread.currentThread().setContextClassLoader(DeepaMehtaService.class.getClassLoader());
+			log.info("AfterSend: Set Classloader back " + Thread.currentThread().getContextClassLoader().toString());
+		}
+	}
 
     private boolean isUsernameAvailable(String username) {
         Topic userName = acService.getUsernameTopic(username);
