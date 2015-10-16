@@ -204,6 +204,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     @Path("/sign-up/confirm/{token}")
     public Viewable handleTokenRequest(@PathParam("token") String key) {
 		String username;
+		if (token.isEmpty()) throw new RuntimeException("Sorry, we lost all the tokens!");
 		try {
 			JSONObject input = token.get(key);
 			token.remove(key);
