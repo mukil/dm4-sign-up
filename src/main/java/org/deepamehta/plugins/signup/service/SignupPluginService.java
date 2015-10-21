@@ -1,6 +1,5 @@
 package org.deepamehta.plugins.signup.service;
 
-import de.deepamehta.core.service.PluginService;
 
 
 /**
@@ -11,7 +10,7 @@ import de.deepamehta.core.service.PluginService;
  * @author <a href="mailto:malte@mikromedia.de">Malte Reissig</a>;
  */
 
-public interface SignupPluginService extends PluginService {
+public interface SignupPluginService {
 
     /** 
      * Checks for a Topic with the exact "username" value. 

@@ -104,7 +104,6 @@
 
     }
     
-    /** ### anonymous can not read all mailbox (and thus cannot check for duplicates)
     function checkMailboxAvailability() {
         var mailboxField = document.getElementById("mailbox") // fixme: maybe its better to acces the form element
         var mailBox = mailboxField.value
@@ -125,7 +124,7 @@
         xhr.open("GET", "/sign-up/check/mailbox/" + mailBox, false)
         xhr.send()
 
-    } **/
+    }
 
     function checkPassword () {
         var passwordField = document.getElementById("pass-one") // fixme: maybe its better to acces the form element

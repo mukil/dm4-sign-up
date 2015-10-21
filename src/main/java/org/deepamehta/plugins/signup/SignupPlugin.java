@@ -15,26 +15,25 @@ import de.deepamehta.core.service.accesscontrol.AccessControl;
 import de.deepamehta.core.service.accesscontrol.Credentials;
 import de.deepamehta.core.service.event.PostUpdateTopicListener;
 import de.deepamehta.core.storage.spi.DeepaMehtaTransaction;
-import de.deepamehta.plugins.accesscontrol.service.AccessControlService;
+import de.deepamehta.plugins.accesscontrol.AccessControlService;
 import de.deepamehta.plugins.webactivator.WebActivatorPlugin;
-import de.deepamehta.plugins.workspaces.service.WorkspacesService;
+import de.deepamehta.plugins.workspaces.WorkspacesService;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
-import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -114,8 +113,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         JSONObject response = new JSONObject();
         try {
             response.put("isAvailable", true);
-            if (!isUsernameAvailable(username)) response.put("isAvailable", false);
-            //
+            if (isUsernameTaken(username)) response.put("isAvailable", false);
             return response.toString();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -129,7 +127,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         JSONObject response = new JSONObject();
         try {
             response.put("isAvailable", true);
-            if (isMailboxRegistered(email)) response.put("isAvailable", false);
+            if (isMailboxTaken(email)) response.put("isAvailable", false);
             return response.toString();
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -140,35 +138,44 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             @PathParam("mailbox") String mailbox) {
 		DeepaMehtaTransaction tx = dms.beginTx();
 		try {
-			if (!isUsernameAvailable(username)) throw new WebApplicationException(412);
+			if (isUsernameTaken(username)) throw new RuntimeException("Username is unavailable!");
 			Credentials creds = new Credentials(new JSONObject()
 					.put("username", username)
 					.put("password", password));
 			log.info("Trying to set up new \"User Account\" for username " + username);
-			// 1) Create new user
-			Topic usernameTopic = acService.createUserAccount(creds);
+			// 1) Create new user (in which workspace), just within the private one, no?
+			final Topic usernameTopic = acService.createUserAccount(creds);
+			final String eMailAddressValue = mailbox;
 			// 2) fire custom event ### useless since fired by "anonymous" (this request scope)
 			// dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, user);
 			// 3) attach e-mail address topic
-			Topic eMailAddress = dms.createTopic(new TopicModel(MAILBOX_TYPE_URI, new SimpleValue(mailbox.trim())));
-			// 4) associate e-mail address topic to "username" topic and to "System" workspace
-			AccessControl acCore = dms.getAccessControl();
-			acCore.assignToWorkspace(eMailAddress, acCore.getSystemWorkspaceId());
-			log.info("Assigned eMail-Address topic to system workspace");
-			Association assoc = dms.createAssociation(new AssociationModel("dm4.core.association",
-					new TopicRoleModel(usernameTopic.getId(), "dm4.core.parent"),
-					new TopicRoleModel(eMailAddress.getId(), "dm4.core.child")));
-			log.info("FINISHED: Related E-Mail Address: " + mailbox + " to new username");
+			Topic eMailAddress = dms.getAccessControl().runWithoutWorkspaceAssignment(new Callable<Topic>() {
+				@Override
+				public Topic call() {
+					Topic eMailAddress = dms.createTopic(new TopicModel(MAILBOX_TYPE_URI, new SimpleValue(eMailAddressValue)));
+					// 4) associate e-mail address topic to "username" topic and to "System" workspace
+					AccessControl acCore = dms.getAccessControl();
+					// acCore.assignToWorkspace(eMailAddress, acCore.getSystemWorkspaceId());
+					Topic adminWorkspace = dms.getAccessControl().getPrivateWorkspace("admin");
+					log.info("Assigning eMail-Address topic to our \"admin's\" workspace");
+					acCore.assignToWorkspace(eMailAddress, adminWorkspace.getId());
+					log.info("Associating eMail-Address topic to username " + usernameTopic.getSimpleValue());
+					// skip workspace assignemnt for association
+					Association assoc = dms.createAssociation(new AssociationModel("dm4.core.association",
+						new TopicRoleModel(eMailAddress.getId(), "dm4.core.child"),
+						new TopicRoleModel(usernameTopic.getId(), "dm4.core.parent")));
+					return eMailAddress;
+				}
+			});
+			// acCore.assignToWorkspace(assoc, adminWorkspace.getId());
+			log.info("FINISHED: Related E-Mail Address: " + eMailAddress.getId() + " just to admins private workspace");
 			// 5) ### associate association to "system" workspace too
 			// acCore.assignToWorkspace(assoc, acCore.getSystemWorkspaceId());
 			// 6) Inform administrations
 			sendNotificationMail(username, mailbox.trim());
 			tx.success();
-			tx.finish();
 			return username;
-		} catch (WebApplicationException e) {
-			throw new WebApplicationException(e.getResponse());
-		} catch (JSONException e) {
+		} catch (Exception e) {
 			throw new RuntimeException("Creating simple user account FAILED!", e);
 		} finally {
 			tx.finish();
@@ -185,8 +192,8 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 			String key = UUID.randomUUID().toString();
 			long valid = new Date().getTime() + 3600000; // Token is valid fo 60 min
 			JSONObject value = new JSONObject();
-			value.put("username", username);
-			value.put("mailbox", mailbox);
+			value.put("username", username.trim());
+			value.put("mailbox", mailbox.trim());
 			value.put("password", password);
 			value.put("expiration", valid);
 			token.put(key, value);
@@ -254,8 +261,8 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 				.getString("org.deepamehta.signup.config_webapp_title");
 			URL url = uri.getBaseUri().toURL();
 			log.info("The confirmation mails token request URL should be:"
-				+ "\n" + url + "sign-up/confirm/"+key);
-			sendSystemMail("Your account on " +webAppTitle,
+				+ "\n" + url + "sign-up/confirm/" + key);
+			sendSystemMail("Your account on " + webAppTitle,
 				"Hi "+username+",\n\nyou can complete the account registration process for " + webAppTitle
 					+ " through visiting the following webpage:\n" + url + "sign-up/confirm/" + key
 					+ "\n\nCheers!\n\n", mailbox);
@@ -309,23 +316,15 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 		}
 	}
 
-    private boolean isUsernameAvailable(String username) {
-        Topic userName = acService.getUsernameTopic(username);
-        return (userName == null);
+    private boolean isUsernameTaken(String username) {
+		String value = username.trim();
+        Topic userNameTopic = acService.getUsernameTopic(value);
+        return (userNameTopic != null);
     }
 
-    private boolean isMailboxRegistered(String email) {
-        String value = email.trim();
-        Topic eMail = dms.getTopic(MAILBOX_TYPE_URI, new SimpleValue(value));
-        ResultList<RelatedTopic> topics = dms.getTopics(MAILBOX_TYPE_URI, 0);
-        for (RelatedTopic topic : topics) {
-            if (topic.getSimpleValue().toString().contains(value)) {
-                log.info("Sign-up check for E-Mail Address: " + email + " is already registered.");
-                return true;
-            }
-        }
-        log.info("Sign-up check for E-Mail Address: " + email + " seems NOT to be registered yet, or? " + (eMail != null));
-        return (eMail != null);
+    private boolean isMailboxTaken(String email) {
+        String value = email.toLowerCase().trim();
+        return dms.getAccessControl().emailAddressExists(value);
     }
 
     /**
