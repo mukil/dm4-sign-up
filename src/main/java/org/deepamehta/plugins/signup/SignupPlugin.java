@@ -142,36 +142,31 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 			Credentials creds = new Credentials(new JSONObject()
 					.put("username", username)
 					.put("password", password));
-			log.info("Trying to set up new \"User Account\" for username " + username);
 			// 1) Create new user (in which workspace), just within the private one, no?
 			final Topic usernameTopic = acService.createUserAccount(creds);
 			final String eMailAddressValue = mailbox;
-			// 2) fire custom event ### useless since fired by "anonymous" (this request scope)
-			// dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, user);
-			// 3) attach e-mail address topic
-			Topic eMailAddress = dms.getAccessControl().runWithoutWorkspaceAssignment(new Callable<Topic>() {
+			// 2) create and associate e-mail address topic
+			dms.getAccessControl().runWithoutWorkspaceAssignment(new Callable<Topic>() {
 				@Override
 				public Topic call() {
 					Topic eMailAddress = dms.createTopic(new TopicModel(MAILBOX_TYPE_URI, new SimpleValue(eMailAddressValue)));
-					// 4) associate e-mail address topic to "username" topic and to "System" workspace
+					// 3) fire custom event ### this is useless since fired by "anonymous" (this request scope)
+					// dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, user);
 					AccessControl acCore = dms.getAccessControl();
-					// acCore.assignToWorkspace(eMailAddress, acCore.getSystemWorkspaceId());
+					// 4) assign new e-mail address topic to admins "Private workspace"
 					Topic adminWorkspace = dms.getAccessControl().getPrivateWorkspace("admin");
-					log.info("Assigning eMail-Address topic to our \"admin's\" workspace");
 					acCore.assignToWorkspace(eMailAddress, adminWorkspace.getId());
-					log.info("Associating eMail-Address topic to username " + usernameTopic.getSimpleValue());
-					// skip workspace assignemnt for association
+					// 5) associate email address to "username" topic too
 					Association assoc = dms.createAssociation(new AssociationModel("dm4.core.association",
 						new TopicRoleModel(eMailAddress.getId(), "dm4.core.child"),
 						new TopicRoleModel(usernameTopic.getId(), "dm4.core.parent")));
+					// 6) assign that association also to admins "Private Workspace"
+					acCore.assignToWorkspace(assoc, adminWorkspace.getId());
 					return eMailAddress;
 				}
 			});
-			// acCore.assignToWorkspace(assoc, adminWorkspace.getId());
-			log.info("FINISHED: Related E-Mail Address: " + eMailAddress.getId() + " just to admins private workspace");
-			// 5) ### associate association to "system" workspace too
-			// acCore.assignToWorkspace(assoc, acCore.getSystemWorkspaceId());
-			// 6) Inform administrations
+			log.info("Created new user account for user \"" + username + "\" and " + eMailAddressValue);
+			// 6) Inform administrations about successfull account creation
 			sendNotificationMail(username, mailbox.trim());
 			tx.success();
 			return username;
