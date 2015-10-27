@@ -157,3 +157,10 @@ input[disabled] {
     margin-bottom: 10px;
     color: rgba(39, 99, 140, 1.0);
 }
+
+
+/** Webclient specific styles */
+
+#sign-up-button {
+    margin-right: 1em;
+}

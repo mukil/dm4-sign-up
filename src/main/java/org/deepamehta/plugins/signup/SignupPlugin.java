@@ -3,14 +3,12 @@ package org.deepamehta.plugins.signup;
 import com.sun.jersey.api.view.Viewable;
 import de.deepamehta.core.Association;
 import de.deepamehta.core.ChildTopics;
-import de.deepamehta.core.RelatedTopic;
 import de.deepamehta.core.Topic;
 import de.deepamehta.core.model.*;
 import de.deepamehta.core.service.DeepaMehtaEvent;
 import de.deepamehta.core.service.DeepaMehtaService;
 import de.deepamehta.core.service.EventListener;
 import de.deepamehta.core.service.Inject;
-import de.deepamehta.core.service.ResultList;
 import de.deepamehta.core.service.accesscontrol.AccessControl;
 import de.deepamehta.core.service.accesscontrol.Credentials;
 import de.deepamehta.core.service.event.PostUpdateTopicListener;
@@ -24,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
@@ -62,7 +59,8 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     // --- DeepaMehta 4 related type URIs
 
     public static final String MAILBOX_TYPE_URI = "dm4.contacts.email_address";
-    public final static String WS_DM_DEFAULT_URI = "de.workspaces.deepamehta";
+    public static final String WS_DM_DEFAULT_URI = "de.workspaces.deepamehta";
+    public static final String DM4_HOST_URL = System.getProperty("dm4.host.url");
 
     // --- Sign-up related type URIs (Configuration, Template Data)
 
@@ -98,6 +96,10 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         reloadConfiguration();
     }
 
+	/**
+	 * Custom events fired by sign-up module.
+	 * @return Topic	The username topic (related to newly created user account topic).
+	 */
     static DeepaMehtaEvent USER_ACCOUNT_CREATE_LISTENER = new DeepaMehtaEvent(UserAccountCreateListener.class) {
         @Override
         public void deliver(EventListener listener, Object... params) {
@@ -151,7 +153,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 				public Topic call() {
 					Topic eMailAddress = dms.createTopic(new TopicModel(MAILBOX_TYPE_URI, new SimpleValue(eMailAddressValue)));
 					// 3) fire custom event ### this is useless since fired by "anonymous" (this request scope)
-					// dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, user);
+					dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, usernameTopic);
 					AccessControl acCore = dms.getAccessControl();
 					// 4) assign new e-mail address topic to admins "Private workspace"
 					Topic adminWorkspace = dms.getAccessControl().getPrivateWorkspace("admin");
@@ -254,7 +256,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 		try {
 			String webAppTitle = currentModuleConfiguration.getChildTopics()
 				.getString("org.deepamehta.signup.config_webapp_title");
-			URL url = uri.getBaseUri().toURL();
+			URL url = new URL(DM4_HOST_URL);
 			log.info("The confirmation mails token request URL should be:"
 				+ "\n" + url + "sign-up/confirm/" + key);
 			sendSystemMail("Your account on " + webAppTitle,
@@ -273,7 +275,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     }
 
 	private void sendSystemMail(String subject, String message, String recipient) {
-		// Fix: Classloader issue we have in OSGi since using Pax web
+		// Hot Fix: Classloader issue we have in OSGi since using Pax web
         Thread.currentThread().setContextClassLoader(SignupPlugin.class.getClassLoader());
         log.info("BeforeSend: Set classloader to " + Thread.currentThread().getContextClassLoader().toString());
         HtmlEmail email = new HtmlEmail();
