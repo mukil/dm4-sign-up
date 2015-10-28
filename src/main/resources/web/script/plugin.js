@@ -1,28 +1,39 @@
 
 dm4c.add_plugin('org.deepamehta.sign-up', function () {
 
-    var aclPlugin = dm4c.get_plugin("de.deepamehta.accesscontrol")
+    var aclPlugin
 
     dm4c.add_listener("init_3", function() {
-        if (!isLoggedIn()) {
-            render_sign_up_button()
-        }
+        aclPlugin = dm4c.get_plugin("de.deepamehta.accesscontrol")
+        if (!is_logged_in()) show_sign_up_button()
+    })
+
+    dm4c.add_listener("authority_increased", function() {
+        hide_sign_up_button()
     })
 
     dm4c.add_listener("authority_decreased", function() {
-        if (!isLoggedIn()) {
-            render_sign_up_button()
-        }
+        if (!is_logged_in()) show_sign_up_button()
     })
 
-    function isLoggedIn() {
+    function is_logged_in () {
+        // assert the precondition of our implementation is met
+        if (typeof aclPlugin === "undefined") {
+            throw new Error ("Assertion failed: The webclients AccessControlPlugin is "
+                + "unavailable for the sign-up plugin relying on init_3-hook.")
+        }
+        // do login check through the acl plugin
         var username = aclPlugin.get_username()
         return (typeof username !== "undefined")
     }
 
-    function render_sign_up_button () {
+    function show_sign_up_button () {
        var $sign_on = jQuery('<a href="/sign-up" id="sign-up-button">Sign up</a>')
         jQuery("#login-widget").prepend($sign_on)
+    }
+
+    function hide_sign_up_button () {
+        jQuery('#sign-up-button').remove()
     }
 
 })
