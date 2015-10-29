@@ -4,14 +4,14 @@
 
     <head>
         <meta charset="utf-8"></meta>
-        <title th:text="${title}">DeepaMehta 4 Account Created</title>
+        <title th:text="'Account created - ' + ${title}">Account Created</title>
         <link rel="stylesheet" th:href="${css_path}" type="text/css" />
     </head>
 
     <body class="ok-page">
         
         <div id="page-header">
-            <a href="/de.deepamehta.webclient" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
+            <a href="/de.deepamehta.webclient/" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
                 <img th:src="${logo_path}" src="/org.deepamehta.sign-up/images/deepamehta-logo.png" class="webapp-logo"
                     th:title="${title} + ' Logo'" th:alt="${title} + ' Logo'" width="160" /><br/>
                 <span class="project-title" th:title="'Click to Launch ' + ${title}" th:text="${title}">DeepaMehta Webclient</span>
@@ -22,7 +22,7 @@
             <h2>Account creation complete</h2>
             <p>
                 We completed your sign-up request and successfully created a new user account for you.<br/><br/>
-                Your username is <em th:text="${username}"></em> and you can now <a href="/">log in</a>.
+                Your username is <em th:text="${username}"></em> and you can now <a href="/sign-up/login">log in</a>.
             </p>
         </div>
 

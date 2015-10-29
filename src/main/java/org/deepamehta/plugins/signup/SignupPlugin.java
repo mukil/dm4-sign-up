@@ -42,18 +42,18 @@ import org.deepamehta.plugins.signup.service.SignupPluginService;
  * like "internet" setup on "localhost".
  *
  * Routes registerd by this plugin are:
- * "/"				login-form (frontpage, alternate logind dialog)
- * "/sign-up"		signup-form (registration dialog)
- * "/ok"			info-page after sucessfull account creation
- * "/error"			info-page after failure (no account creation)
- * "/token-info"	info-page notifying about confirmation mail
+ * "/sign-up"				signup-form (registration dialog)
+ * "/sign-up/login"			login-form (frontpage, alternate logind dialog)
+ * "/sign-up/ok"			info-page after sucessfull account creation
+ * "/sign-up/error"			info-page after failure (no account creation)
+ * "/sign-up/token-info"	info-page notifying about confirmation mail
  *
  * @name dm4-sign-up
  * @website https://github.com/mukil/dm4-sign-up
  * @version 1.1-SNAPSHOT
  * @author <a href="mailto:malte@mikromedia.de">Malte Reissig</a>;
  */
-@Path("/")
+@Path("/sign-up")
 public class SignupPlugin extends WebActivatorPlugin implements SignupPluginService, PostUpdateTopicListener {
 
 	private static Logger log = Logger.getLogger(SignupPlugin.class.getName());
@@ -116,7 +116,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 	// --- Plugin Service Implementation --- //
 
 	@GET
-	@Path("/sign-up/check/{username}")
+	@Path("/check/{username}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getUsernameAvailability(@PathParam("username") String username) {
 		JSONObject response = new JSONObject();
@@ -132,7 +132,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 	}
 
 	@GET
-	@Path("/sign-up/check/mailbox/{email}")
+	@Path("/check/mailbox/{email}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getMailboxAvailability(@PathParam("email") String email) {
 		JSONObject response = new JSONObject();
@@ -148,7 +148,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 	}
 
 	@GET
-	@Path("/sign-up/send/{username}/{pass-one}/{mailbox}")
+	@Path("/send/{username}/{pass-one}/{mailbox}")
 	public String createUserValidationToken(@PathParam("username") String username,
 		@PathParam("pass-one") String password, @PathParam("mailbox") String mailbox) {
 		//
@@ -175,7 +175,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 	}
 
 	@GET
-	@Path("/sign-up/confirm/{token}")
+	@Path("/confirm/{token}")
 	public Viewable handleTokenRequest(@PathParam("token") String key) {
 		// 1) Assert token exists: It may not exist due to e.g. bundle refresh, system restart, token invalid
 		if (!token.containsKey(key)) {
@@ -216,20 +216,21 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 	// --- Sign-up Plugin Routes --- //
 
 	@GET
-	@Produces(MediaType.TEXT_HTML)
-	public Viewable getLoginFormView() {
-		// ### use acl service to check if a session already exists and if so, redirect to dm-webclient directly
-		prepareSignupPage();
-		return view("login");
-	}
-
-	@GET
-	@Path("/sign-up")
+	@Path("/")
 	@Produces(MediaType.TEXT_HTML)
 	public Viewable getSignupFormView() {
 		// ### use acl service to check if a session already exists and if so, redirect to dm-webclient directly
 		prepareSignupPage();
 		return view("sign-up");
+	}
+
+	@GET
+	@Path("/login")
+	@Produces(MediaType.TEXT_HTML)
+	public Viewable getLoginFormView() {
+		// ### use acl service to check if a session already exists and if so, redirect to dm-webclient directly
+		prepareSignupPage();
+		return view("login");
 	}
 
 	@GET

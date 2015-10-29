@@ -4,7 +4,7 @@
 
     <head>
         <meta charset="utf-8"></meta>
-        <title th:text="${title}">DeepaMehta 4 Log in</title>
+        <title th:text="'Sign up - ' + ${title}">Sign up</title>
         <link rel="stylesheet"  th:href="${css_path}" type="text/css" />
         <script type="text/javascript" src="/de.deepamehta.accesscontrol/script/vendor/sha256.js"></script>
         <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
@@ -24,12 +24,12 @@
             <form name="aggreement" action="javascript:void();">
                 <input id="toscheck" type="checkbox" onclick="javascript:checkAgreements()" class="tos-check"></input>
                 <label for="toscheck" th:text="${tos_label}">I agree with the projects Terms of use.</label>
-                <a href="javascript:showLabsTermsText()" title="Read Details">.. read more</a><br/>
+                <a href="javascript:showLabsTermsText()" title="Read Details">Read more</a><br/>
                 <div id="account-info" th:utext="${tos_details}">
                 </div>
                 <input id="privateinfo" type="checkbox" onclick="javascript:checkAgreements()" class="private-info-check"></input>
                 <label for="privateinfo" th:text="${pd_label}">I understand that any private information I give to this site may be made publicly available.</label>
-                <a href="javascript:showLabsPrivateText()" title="Read Details">.. read more</a><br/>
+                <a href="javascript:showLabsPrivateText()" title="Read Details">Read more</a><br/>
                 <div id="private-info" th:utext="${pd_details}">
                 </div>
             </form>
@@ -51,7 +51,7 @@
                 <input type="text" id="mailbox" name="mailbox" placeholder="E-Mail Address"
                        onchange="checkMailboxAvailability()" class="sign-up mailbox" />
                 <div id="message-view"><span id="message"></span></div>
-                <input type="submit" id="create" value="Create account" class="sign-up ok" /> or <a href="/">log in</a>.
+                <input type="submit" id="create" value="Create account" class="sign-up ok" /> or <a href="/sign-up/login">log in</a>.
                 <!-- or sign up with <a href="/sign-on/openid/google">Google</a>. -->
             </form>
         </div>

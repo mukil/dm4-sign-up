@@ -27,7 +27,7 @@ dm4c.add_plugin('org.deepamehta.sign-up', function() {
     }
 
     function show_sign_up_button() {
-        var $sign_up = jQuery('<a href="/sign-up" id="sign-up-button">Sign up</a>')
+        var $sign_up = jQuery('<a href="/sign-up/" id="sign-up-button">Sign up</a>')
         jQuery('#login-widget').prepend($sign_up)
     }
 

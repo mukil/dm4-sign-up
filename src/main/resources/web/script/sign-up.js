@@ -2,14 +2,18 @@
     var EMPTY_STRING = ""
     var OK_STRING = "OK"
 
-    function doLogin () {
+
+
+    // --- Plain DeepaMehta 4 login method used by "/sign-up/login" page. --- //
+
+    function doLogin() {
 
         var id = document.getElementById("username").value
         var secret = document.getElementById("password").value
 
         checkAuthorization(id, secret)
 
-        function checkAuthorization (id, secret) {
+        function checkAuthorization(id, secret) {
 
             var authorization = authorization()
             if (authorization === undefined) return null
@@ -17,7 +21,6 @@
             xhr = new XMLHttpRequest()
             xhr.onload = function(e) {
                 if (xhr.response === "") {
-                    console.log("Login successfull")
                     renderFriendlyMessage('Opening Webclient ...')
                     redirectToWebclientUI()
                 } else {
@@ -36,12 +39,15 @@
 
     }
 
-    // ### empty passwords
-    // ###
-    // form.onsubmit()-Implementation
+
+
+    // --- Plain JavaScript form validation used by "/sign-up/" page. --- //
+
+    // ### empty passwords and crazy mailbox-domains.
+    // This is the form.onsubmit() implementation.
     function createAccount() {
 
-        // prevent submission of form
+        // any of these should prevent submission of form
         if (!isValidUsername()) return
         if (checkPassword() !== OK_STRING) return
         if (comparePasswords() !== OK_STRING) return
@@ -60,7 +66,7 @@
             renderFriendlyMessage('Submitting ..')
             redirectToOK()
         }
-        xhr.onerror = function (e) {
+        xhr.onerror = function(e) {
             renderWarning("Account creation failed." + e)
         }
         xhr.open("GET", "/sign-up/send/" + usernameVal + "/" + passwordVal + "/" + mailbox + "?no_workspace_assignment=true")
@@ -69,7 +75,7 @@
 
     }
 
-    function isValidUsername () {
+    function isValidUsername() {
         var usernameInput = document.getElementById("username") // fixme: maybe its better to acces the form element
         var userInput = usernameInput.value
         if (userInput.length <= 1) {
@@ -126,7 +132,7 @@
 
     }
 
-    function checkPassword () {
+    function checkPassword() {
         var passwordField = document.getElementById("pass-one") // fixme: maybe its better to acces the form element
         if (passwordField.value.length <=7) {
             renderWarning("Your password must be at least 8 characters long.")
@@ -137,7 +143,7 @@
         return OK_STRING
     }
 
-    function checkMailbox () {
+    function checkMailbox() {
         var mailboxField = document.getElementById("mailbox") // fixme: maybe its better to acces the form element
         if (mailboxField.value.indexOf("@") === -1 || mailboxField.value.indexOf(".") === -1) {
             renderWarning("This E-Mail Address would be invalid.")
@@ -149,7 +155,7 @@
         return OK_STRING
     }
 
-    function comparePasswords () {
+    function comparePasswords() {
         var passwordFieldTwo = document.getElementById("pass-one") // fixme: maybe its better to acces the form element
         var passwordFieldOne = document.getElementById("pass-two") // fixme: maybe its better to acces the form element
         if (passwordFieldOne.value !== passwordFieldTwo.value) {
@@ -207,24 +213,24 @@
         messageElement.appendChild(textNode)
     }
 
-    function disableSignupForm () {
+    function disableSignupForm() {
         document.getElementById("create").setAttribute("disabled", "true")
         document.getElementById("create").setAttribute("style", "background-color: #a9a9a9;")
     }
 
-    function enableSignupForm () {
+    function enableSignupForm() {
         document.getElementById("create").removeAttribute("disabled")
         document.getElementById("create").removeAttribute("style")
     }
 
-    function redirectToWebclientUI () {
+    function redirectToWebclientUI() {
         setTimeout(function (e) {
-            window.location.href = '/de.deepamehta.webclient'
+            window.location.href = '/de.deepamehta.webclient/'
         }, 1500)
     }
 
-    function redirectToOK () {
+    function redirectToOK() {
         setTimeout(function (e) {
-            window.location.href = '/token-info'
+            window.location.href = '/sign-up/token-info'
         }, 1500)
     }
