@@ -15,13 +15,6 @@
         <artifactId>deepamehta-plugin-parent</artifactId>
         <version>4.7</version>
     </parent>
-    
-    <repositories>
-        <repository>
-            <id>deepamehta-public-repository</id>
-            <url>http://m2.deepamehta.de</url>
-        </repository>
-    </repositories>
 
     <dependencies>
         <dependency>
@@ -39,11 +32,11 @@
             <artifactId>deepamehta-contacts</artifactId>
             <version>4.7</version>
         </dependency>
-        <dependency>                                 <!-- depend on the DeepaMehta core module.     -->
-            <groupId>de.deepamehta</groupId>         <!-- Copy this declaration as is.              -->
-            <artifactId>deepamehta-accesscontrol</artifactId> <!-- Just update the version number, i-->
-            <version>4.7</version>                   <!-- newer version of DeepaMehta is available. -->
-        </dependency>                                <!-- If your plugin has no Java code at all,   -->
+        <dependency>
+            <groupId>de.deepamehta</groupId>
+            <artifactId>deepamehta-accesscontrol</artifactId>
+            <version>4.7</version>
+        </dependency>
         <dependency>
             <groupId>de.deepamehta</groupId>
             <artifactId>dm47-webactivator</artifactId>
@@ -86,9 +79,7 @@
                         find the @mukil/dm4-mail repo on github.com -->
                         <Embed-Dependency>jsoup,mail,commons-email</Embed-Dependency>
                         <Import-Package>
-                            sun.security.util;resolution:=optional,
-                            !javax.mail,!javax.mail.internet,
-                            !javax.mail.util,*
+                            sun.security.util;resolution:=optional,*
                         </Import-Package>
                         <Bundle-SymbolicName>
                             org.deepamehta.sign-up

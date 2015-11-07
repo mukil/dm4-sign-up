@@ -1,0 +1,7 @@
+target/
+.idea/
+.externalToolBuilders/
+.settings
+.project
+.classpath
+commit.txt

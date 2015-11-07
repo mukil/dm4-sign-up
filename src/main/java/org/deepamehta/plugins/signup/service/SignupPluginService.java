@@ -21,7 +21,7 @@ public interface SignupPluginService {
     
     /** 
      * Creates a token for username and "E Mail Address" for the creation of a 
-	 * new "User Account" topic.
+     * new "User Account" topic.
      * 
      * @param   password    String Password in cleartext.
      * 

@@ -1,7 +1,7 @@
 
 # DeepaMehta 4 Sign-up
 
-This plugin provides service provides a simple, AJAX and HTML-Template based, user-configurable `login` and `registration` dialog. For mailbox validation purposes it requires being installed on a web server with a `postfix` -> `Internet Site? like mail send functionality.
+This plugin provides a simple and configurable `login` and `registration` dialog for DeepaMehta 4. Furthermore account creation is built around a simple Email based confirmation workflow.
 
 This plugin adds:
 *    A `Sign-up`-link next to the `Login`-button in the DeepaMehta 4 Webclient
@@ -10,10 +10,7 @@ This plugin adds:
 
 The special features of the `registration` dialog is comprised of:
 *    Username existence check
-*    Email existence check (Pending)
-*    Sends a notification mail to the configured e-mail address 
-     on each account-creation (new in 4.6)
-*    Defused as of 4.6: E-Mail Address existence and (simple) validation
+*    Email existence check
 *    Simple GUI-Notification mechanism
 *    Minimal CSS Definition
 
@@ -22,6 +19,10 @@ The special features of the `login` dialog is comprised of:
 *    Automatic redirect
 *    Minimal CSS Definition
 
+The special logic of this plugin is comprised of:
+*    Sends confirmation mail with token to registering Email addresss
+*    Confirmation tokens are not persisted and are valid for just 60 minutes
+
 ## Requirements
 
 DeepaMehta 4 is a platform for collaboration and knowledge management.
@@ -29,7 +30,9 @@ https://github.com/jri/deepamehta
 
 To be able to install this module you first and additionally have to install the following DeepaMehta 4 Plugins.
 
-*    `dm46-webactivator-0.4.5`-Bundle - Build from [sources](https://github.com/jri/dm4-webactivator)
+*    `dm47-webactivator-0.4.6`-Bundle - Build from [sources](https://github.com/jri/dm4-webactivator)
+
+For mailbox validation purposes it requires being installed on a web server with a `postfix` -> `Internet Site? like mail send functionality.
 
 ## Download & Installation
 
@@ -51,7 +54,6 @@ The central topic for configuring the sign-up dialog for your DeepaMehta 4 insta
 *    the path to a custom image file as logo
 *    the path to a custom CSS file replacing the default style
 
-
 ## Licensed under the GPL License 3.0
 
 GPL v3 - https://www.gnu.org/licenses/gpl.html
@@ -61,13 +63,12 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 1.1, UPCOMING
 - Email confirmation is now mandatory, confirmation mails are send out
   (this requires a 'postfix' -> 'Internet Site' like web server setup)
-- ...
 - Adapted createUserAccounts to new ACL-Service (remove join Workspace) - no Workspace cookie
 - Maintain configuration topic editble (migrate from postInstall to Migration)
 - Added Email notification to admin on account creation
-- Updated module to be compatible with 4.6.2-SNAPSHOT (as of 16th August 2015 or later)
+- Updated module to be compatible with DeepaMehta 4.7
 - Incorporate some dm4-mail low-level functionality
-- Updated dependency to bundle dm46-webactivator-0.4.5
+- Updated dependency to bundle dm47-webactivator-0.4.6
 - This plugin is not compatible with previous installations of the dm4-sign-up module
 
 1.0.0, Dec 25, 2014
@@ -77,5 +78,5 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 - feature complete
 
 -------------------------------
-Author: Malte Reißig, 2013-2014
+Author: Malte Reißig, 2013-2015
 
