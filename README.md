@@ -20,8 +20,9 @@ The special features of the `login` dialog is comprised of:
 *    Minimal CSS Definition
 
 The special logic of this plugin is comprised of:
-*    Sends confirmation mail with token to registering Email addresss
-*    Confirmation tokens are not persisted and are valid for just 60 minutes
+*    Sends confirmation mail with token to the users registering Email addresss
+*    Sends notification to admin after a new user account was sucessfully created 
+*    Confirmation tokens (which are not persisted & get lost after a bundle/system restart) are valid for 60mins
 
 ## Requirements
 
@@ -32,27 +33,34 @@ To be able to install this module you first and additionally have to install the
 
 *    `dm47-webactivator-0.4.6`-Bundle - Build from [sources](https://github.com/jri/dm4-webactivator)
 
-For mailbox validation purposes it requires being installed on a web server with a `postfix` -> `Internet Site? like mail send functionality.
+For the plugins mailbox validation process to run you must install this plugin with deepamehta4 on a web server with a 
+`postfix` -> `Internet Site` like mail send functionality.
 
 ## Download & Installation
 
-You can find the latest stable version of this plugin bundled for download as `dm46-sign-up-X.Y.Z.jar-` at [http://download.deepamehta.de/nightly/](http://download.deepamehta.de/nightly/).
+You can find the latest stable version of this plugin bundled for download at [http://download.deepamehta.de/nightly/](http://download.deepamehta.de/nightly/).
 
-As mentioned above, you currently need to build the required `dm46-webactivator-0.4.5`-Bundle from [source](https://github.com/jri/dm4-webactivator),
+As mentioned above, you currently need to download and install the aditonally required `dm47-webactivator-0.4
+.6`-Bundle, too.
 
-After downloading the bundle-files, place them in the `bundles` folder of your DeepaMehta installation and restart DeepaMehta.
+After downloading the two bundle-files, place them in the `bundles` folder of your DeepaMehta installation and restart 
+DeepaMehta 4.
 
 ## Usage & Configuration
 
-The central topic for configuring the sign-up dialog for your DeepaMehta 4 installation is of type `Sign-up Configuration`. Editing and associating this topic allows you to interactively control/adapt:
+The central topic for configuring the sign-up dialog for your DeepaMehta 4 installation is of type `Sign-up 
+Configuration`. Editing this topic via your dm4-webclient allows you to interactively control/adapt the following 
+parameters:
 
 *    all text-messages, hyperlinks, titles, logo, css, read more url of the login page
-*    and additionally the terms of service and checkbox labels on the registration page
-*    the page footer (HTML) of the login and registration page
-*    the default workspace-membership assignment for new registrants
-     (simply `associate` your `Sign-up configuration` topic to one topic of type `Workspace` of your choice)
+*    the terms of service and privacy policy (including checkbox labels) used in the sign-up form
+*    the page footer (HTML) of all pages
 *    the path to a custom image file as logo
 *    the path to a custom CSS file replacing the default style
+*    the mailbox emails are sent from
+*    the administrators mailbox where the system sends notifications to
+
+This configuration topic is associated with the "Plugin" topic representing this plugin.
 
 ## Licensed under the GPL License 3.0
 
