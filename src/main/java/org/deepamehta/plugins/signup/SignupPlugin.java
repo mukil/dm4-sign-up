@@ -60,8 +60,10 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     // --- DeepaMehta 4 related URIs --- //
     public static final String MAILBOX_TYPE_URI = "dm4.contacts.email_address";
-    public static final String WS_DM_DEFAULT_URI = "de.workspaces.deepamehta";
     public static final String DM4_HOST_URL = System.getProperty("dm4.host.url");
+    public static final boolean DM4_ACCOUNTS_ENABLED = Boolean.parseBoolean(System.getProperty("dm4.security" +
+            ".new_accounts_are_enabled"));
+    public static final String CONFIG_TOPIC_ACCOUNT_ENABLED = "dm4.accesscontrol.login_enabled";
 
     // --- Sign-up related type URIs (Configuration, Template Data) --- //
     private final String SIGN_UP_PLUGIN_TOPIC_URI = "org.deepamehta.sign-up";
@@ -78,6 +80,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     private final String CONFIG_PD_DETAILS = "org.deepamehta.signup.config_pd_detail";
     private final String CONFIG_FROM_MAILBOX = "org.deepamehta.signup.config_from_mailbox";
     private final String CONFIG_ADMIN_MAILBOX = "org.deepamehta.signup.config_admin_mailbox";
+    private final String CONFIG_EMAIL_CONFIRMATION = "org.deepamehta.signup.config_email_confirmation";
 
     private Topic currentModuleConfiguration = null;
 
@@ -148,30 +151,21 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     }
 
     @GET
-    @Path("/send/{username}/{pass-one}/{mailbox}")
-    public String createUserValidationToken(@PathParam("username") String username,
-        @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox) {
-        //
-        String response = null;
-        try {
-            String key = UUID.randomUUID().toString();
-            long valid = new Date().getTime() + 3600000; // Token is valid fo 60 min
-            JSONObject value = new JSONObject()
-                .put("username", username.trim())
-                .put("mailbox", mailbox.trim())
-                .put("password", password)
-                .put("expiration", valid);
-            token.put(key, value);
-            log.log(Level.INFO, "Set up key {0} for {1} sending confirmation mail valid till {3}",
-                new Object[]{key, mailbox, new Date(valid).toString()});
-            // ### TODO: if sending confirmation mail fails users should know about that and
-            // get to see the "failure" screen next (with a proper message)
-            sendConfirmationMail(key, username, mailbox.trim());
-        } catch (JSONException ex) {
-            Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
-            throw new RuntimeException(ex);
+    @Path("/handle/{username}/{pass-one}/{mailbox}")
+    public Viewable handleSignupRequest(@PathParam("username") String username,
+                                      @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox) {
+        String response = "";
+        if (currentModuleConfiguration.getChildTopics().getBoolean(CONFIG_EMAIL_CONFIRMATION)) {
+            log.info("Sign-up Configuration: Email based confirmation workflow active, send out confirmation mail.");
+            createUserValidationToken(username, password, mailbox);
+            // redirect user to a "token-info" page
+            return getConfirmationInfoView();
+        } else {
+            log.info("Sign-up Configuration: Email based confirmation workflow inactive, creating new user account.");
+            createSimpleUserAccount(username, password, mailbox);
+            // redirecting user to the "your account is now active" page
+            return getAccountCreationOKView();
         }
-        return response;
     }
 
     @GET
@@ -260,6 +254,29 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     // --- Private Helpers --- //
 
+    private void createUserValidationToken(@PathParam("username") String username,
+                                           @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox) {
+        //
+        try {
+            String key = UUID.randomUUID().toString();
+            long valid = new Date().getTime() + 3600000; // Token is valid fo 60 min
+            JSONObject value = new JSONObject()
+                    .put("username", username.trim())
+                    .put("mailbox", mailbox.trim())
+                    .put("password", password)
+                    .put("expiration", valid);
+            token.put(key, value);
+            log.log(Level.INFO, "Set up key {0} for {1} sending confirmation mail valid till {3}",
+                    new Object[]{key, mailbox, new Date(valid).toString()});
+            // ### TODO: if sending confirmation mail fails users should know about that and
+            // get to see the "failure" screen next (with a proper message)
+            sendConfirmationMail(key, username, mailbox.trim());
+        } catch (JSONException ex) {
+            Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+        }
+    }
+
     private String createSimpleUserAccount(@PathParam("username") String username,
                                            @PathParam("pass-one") String password,
                                            @PathParam("mailbox") String mailbox) {
@@ -289,7 +306,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
                     Topic adminWorkspace = dms.getAccessControl().getPrivateWorkspace("admin");
                     acCore.assignToWorkspace(eMailAddress, adminWorkspace.getId());
                     // 5) associate email address to "username" topic too
-                    Association assoc = dms.createAssociation(new AssociationModel("dm4.core.association",
+                    Association assoc = dms.createAssociation(new AssociationModel("org.deepamehta.signup.user_mailbox",
                         new TopicRoleModel(eMailAddress.getId(), "dm4.core.child"),
                         new TopicRoleModel(usernameTopic.getId(), "dm4.core.parent")));
                     // 6) assign that association also to admins "Private Workspace"
@@ -330,10 +347,21 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             URL url = new URL(DM4_HOST_URL);
             log.info("The confirmation mails token request URL should be:"
                 + "\n" + url + "sign-up/confirm/" + key);
-            sendSystemMail("Your account on " + webAppTitle,
-                "Hi " + username + ",\n\nyou can complete the account registration process for " + webAppTitle
-                + " through visiting the following webpage:\n" + url + "sign-up/confirm/" + key
-                + "\n\nCheers!\n\n", mailbox);
+            //
+            if (DM4_ACCOUNTS_ENABLED) {
+                sendSystemMail("Your account on " + webAppTitle,
+                    "Hi " + username + ",\n\nyou can complete the account registration process for " + webAppTitle
+                        + " through visiting the following webpage:\n" + url + "sign-up/confirm/" + key
+                        + "\n\nCheers!", mailbox);
+            } else {
+                sendSystemMail("Your account on " + webAppTitle,
+                    "Hi " + username + ",\n\nyou can proceed with the account registration process for "
+                        + webAppTitle + " through visiting the following webpage:\n"
+                        + url + "sign-up/confirm/" + key
+                        + "\n\n" + "You'll receive another mail once your account is activated by an " +
+                        "administrator. This may need 1 or 2days."
+                        + "\n\nCheers!", mailbox);
+            }
         } catch (MalformedURLException ex) {
             throw new RuntimeException(ex);
         }
@@ -341,8 +369,14 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     private void sendNotificationMail(String username, String mailbox) {
         String webAppTitle = currentModuleConfiguration.getChildTopics().getString(CONFIG_WEBAPP_TITLE);
-        sendSystemMail("Account registration on " + webAppTitle,
-            "\nA user has registered.\n\nUsername: " + username + "\nEmail: " + mailbox + "\n\n", null);
+        String adminMailbox = currentModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX);
+        if (!adminMailbox.isEmpty()) {
+            sendSystemMail("Account registration on " + webAppTitle,
+                "\nA user has registered.\n\nUsername: " + username + "\nEmail: " + mailbox + "\n\n", null);
+        } else {
+            log.info("ADMIN": No \"Admin Mailbox\" configured: A new user account (" + username + ") was created but" +
+                " no notification sent.");
+        }
     }
 
     private void sendSystemMail(String subject, String message, String recipient) {
@@ -359,7 +393,8 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             email.setFrom(sender.trim(), projectName.trim());
             // ..) Set Subject of Mail
             email.setSubject(subject);
-            // ..) Set Message Body
+            // ..) Set Message Body and append the Host URL
+            message += "\n\n" + DM4_HOST_URL + "\n\n";
             email.setTextMsg(message);
             // ..) Set recipient of notification mail
             String recipientValue;
@@ -429,6 +464,13 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     public void postUpdateTopic(Topic topic, TopicModel tm, TopicModel tm1) {
         if (topic.getTypeUri().equals(SIGN_UP_CONFIG_TYPE_URI)) {
             reloadConfiguration();
+        } else if (topic.getTypeUri().equals(CONFIG_TOPIC_ACCOUNT_ENABLED)) {
+            if (!DM4_ACCOUNTS_ENABLED) {
+                // TODO: check which account is involved
+                // TODO: check if the account was en- or disabled
+                log.info("NOTIFICATION: The status of an user account was just changed by an administrator. " +
+                        "Info: " + topic.toString());
+            }
         }
     }
 

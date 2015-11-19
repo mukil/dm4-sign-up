@@ -69,7 +69,7 @@
         xhr.onerror = function(e) {
             renderWarning("Account creation failed." + e)
         }
-        xhr.open("GET", "/sign-up/send/" + usernameVal + "/" + passwordVal + "/" + mailbox + "?no_workspace_assignment=true")
+        xhr.open("GET", "/sign-up/handle/" + usernameVal + "/" + passwordVal + "/" + mailbox + "?no_workspace_assignment=true")
         xhr.setRequestHeader("Content-Type", "text/plain")
         xhr.send()
 

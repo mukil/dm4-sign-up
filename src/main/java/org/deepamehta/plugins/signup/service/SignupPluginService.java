@@ -1,6 +1,7 @@
 package org.deepamehta.plugins.signup.service;
 
 
+import com.sun.jersey.api.view.Viewable;
 
 /**
  *
@@ -20,13 +21,18 @@ public interface SignupPluginService {
     String getUsernameAvailability(String username);
     
     /** 
-     * Creates a token for username and "E Mail Address" for the creation of a 
-     * new "User Account" topic.
-     * 
-     * @param   password    String Password in cleartext.
+     * Handles a sign-up request in regards to whether an Email based confirmation process is configured (true|false)
+     * in the resp. <code>Sign-up Configuration</code> topic.
+     *
+     * To check whether a username is already taken you *must* use the getUsernameAvailability() call before issueing
+     * an account creation request via this method.
+     *
+     * @param   username    String Unique username.
+     * @param   password    String SHA256 encoded password with a prefix of "-SHA26-"
+     * @param   mailbox     String containing a valid Email address related to the account creation request.
      * 
      * @return  String  username
      */
-    String createUserValidationToken(String username, String password, String mailbox);
+    Viewable handleSignupRequest(String username, String password, String mailbox);
 
 }

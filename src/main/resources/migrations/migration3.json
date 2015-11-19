@@ -14,5 +14,12 @@
                 }
             ]
         }
+    ],
+    "assoc_types": [
+        {
+            "uri": "org.deepamehta.signup.user_mailbox",
+            "data_type_uri": "dm4.core.text",
+            "value": "User Mailbox"
+        }
     ]
 }
