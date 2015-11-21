@@ -465,11 +465,17 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         if (topic.getTypeUri().equals(SIGN_UP_CONFIG_TYPE_URI)) {
             reloadConfiguration();
         } else if (topic.getTypeUri().equals(CONFIG_TOPIC_ACCOUNT_ENABLED)) {
-            if (!DM4_ACCOUNTS_ENABLED) {
-                // TODO: check which account is involved
-                // TODO: check if the account was en- or disabled
-                log.info("NOTIFICATION: The status of an user account was just changed by an administrator. " +
-                        "Info: " + topic.toString());
+            // Account status
+            boolean status = Boolean.parseBoolean(topic.getSimpleValue().toString());
+            // Account involved
+            Topic username = topic.getRelatedTopic("dm4.config.configuration", null,
+                    null, "dm4.accesscontrol.username");
+            // Perform notification
+            if (status) { // Enabled=true
+                if (!DM4_ACCOUNTS_ENABLED) {
+                    log.info("Sign-up Notification: User Account \"" + username.getSimpleValue()+"\" is now ENABLED!");
+                    log.info("TODO: Send notification mail to user - Your account is now active!");
+                }
             }
         }
     }
