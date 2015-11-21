@@ -471,11 +471,9 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             Topic username = topic.getRelatedTopic("dm4.config.configuration", null,
                     null, "dm4.accesscontrol.username");
             // Perform notification
-            if (status) { // Enabled=true
-                if (!DM4_ACCOUNTS_ENABLED) {
-                    log.info("Sign-up Notification: User Account \"" + username.getSimpleValue()+"\" is now ENABLED!");
-                    log.info("TODO: Send notification mail to user - Your account is now active!");
-                }
+            if (status && !DM4_ACCOUNTS_ENABLED) { // Enabled=true && new_accounts_are_enabled=false
+                log.info("Sign-up Notification: User Account \"" + username.getSimpleValue()+"\" is now ENABLED!");
+                log.info("TODO: Send notification mail to user - Your account is now active!");
             }
         }
     }
