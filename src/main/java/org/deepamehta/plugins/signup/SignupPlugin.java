@@ -374,7 +374,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             sendSystemMail("Account registration on " + webAppTitle,
                 "\nA user has registered.\n\nUsername: " + username + "\nEmail: " + mailbox + "\n\n", null);
         } else {
-            log.info("ADMIN": No \"Admin Mailbox\" configured: A new user account (" + username + ") was created but" +
+            log.info("ADMIN: No \"Admin Mailbox\" configured: A new user account (" + username + ") was created but" +
                 " no notification sent.");
         }
     }
