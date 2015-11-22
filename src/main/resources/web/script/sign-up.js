@@ -57,22 +57,9 @@
         var usernameVal = encodeURIComponent(document.getElementById("username").value)
         var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
         var passwordVal = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
-        // var password = encodeURIComponent(document.getElementById("pass-one").value)
-
-        // ### set default ws-topicid in cookie in dm4_workspace_id=
-        /** xhr = new XMLHttpRequest()
-        xhr.onload = function(e) {
-            var username = xhr.response
-            renderFriendlyMessage('Submitting ..')
-        }
-        xhr.onerror = function(e) {
-            renderWarning("Account creation failed." + e)
-        }
-        xhr.open("GET", "/sign-up/handle/" + usernameVal + "/" + passwordVal + "/" + mailbox + "?no_workspace_assignment=true")
-        xhr.setRequestHeader("Content-Type", "text/plain")
-        xhr.send() **/
-        window.document.location.href = "http://" +  window.location.host +
-            "/sign-up/handle/" + usernameVal + "/" + passwordVal +"/" + mailbox + "?no_workspace_assignment=true"
+        // employing the w3school way to go to a new resource
+        window.document.location.assign("http://" +  window.location.host + "/sign-up/handle/" + usernameVal + "/"
+            + passwordVal +"/" + mailbox + "?no_workspace_assignment=true")
 
     }
 
