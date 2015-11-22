@@ -17,6 +17,8 @@ import de.deepamehta.plugins.accesscontrol.AccessControlService;
 import de.deepamehta.plugins.webactivator.WebActivatorPlugin;
 import de.deepamehta.plugins.workspaces.WorkspacesService;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,6 +33,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
+
 import org.apache.commons.mail.HtmlEmail;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -153,19 +158,33 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     @GET
     @Path("/handle/{username}/{pass-one}/{mailbox}")
     public Viewable handleSignupRequest(@PathParam("username") String username,
-                                      @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox) {
+                                    @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox)
+            throws WebApplicationException {
         String response = "";
-        if (currentModuleConfiguration.getChildTopics().getBoolean(CONFIG_EMAIL_CONFIRMATION)) {
-            log.info("Sign-up Configuration: Email based confirmation workflow active, send out confirmation mail.");
-            createUserValidationToken(username, password, mailbox);
-            // redirect user to a "token-info" page
-            return getConfirmationInfoView();
-        } else {
-            log.info("Sign-up Configuration: Email based confirmation workflow inactive, creating new user account.");
-            createSimpleUserAccount(username, password, mailbox);
-            // redirecting user to the "your account is now active" page
-            return getAccountCreationOKView();
+        try {
+            if (currentModuleConfiguration.getChildTopics().getBoolean(CONFIG_EMAIL_CONFIRMATION)) {
+                log.info("Sign-up Configuration: Email based confirmation workflow active, send out confirmation mail.");
+                createUserValidationToken(username, password, mailbox);
+                // redirect user to a "token-info" page
+                throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/token-info")).build());
+            } else {
+                createSimpleUserAccount(username, password, mailbox);
+                if (DM4_ACCOUNTS_ENABLED) {
+                    log.info("Sign-up Configuration: Email based confirmation workflow inactive. The new user account" +
+                            " created is ENABLED.");
+                    // redirecting user to the "your account is now active" page
+                    throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/ok")).build());
+                } else {
+                    log.info("Sign-up Configuration: Email based confirmation workflow inactive but new user account " +
+                            "created is DISABLED.");
+                    // redirecting to page displaying "your account was created but needs to be activated"
+                    throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/pending")).build());
+                }
+            }
+        } catch (URISyntaxException e) {
+            log.log(Level.SEVERE, "Could not build response URI while handling sign-up request", e);
         }
+        return getFailureView();
     }
 
     @GET
@@ -199,9 +218,13 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
                 new Object[]{ex.getMessage(), ex.getCause().toString()});
             return getFailureView();
         }
-        log.log(Level.INFO, "Account confirmed & succesfully created, username: {0}", username);
+        log.log(Level.INFO, "Account succesfully created for username: {0}", username);
         viewData("username", username);
         viewData("message", "User account created successfully");
+        if (!DM4_ACCOUNTS_ENABLED) {
+            log.log(Level.INFO, "> Account activation by an administrator remains PENDING ");
+            return getAccountCreationPendingView();
+        }
         return getAccountCreationOKView();
     }
 
@@ -232,6 +255,14 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     public Viewable getAccountCreationOKView() {
         prepareSignupPage();
         return view("ok");
+    }
+
+    @GET
+    @Path("/pending")
+    @Produces(MediaType.TEXT_HTML)
+    public Viewable getAccountCreationPendingView() {
+        prepareSignupPage();
+        return view("pending");
     }
 
     @GET
@@ -347,19 +378,17 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             URL url = new URL(DM4_HOST_URL);
             log.info("The confirmation mails token request URL should be:"
                 + "\n" + url + "sign-up/confirm/" + key);
-            //
             if (DM4_ACCOUNTS_ENABLED) {
                 sendSystemMail("Your account on " + webAppTitle,
-                    "Hi " + username + ",\n\nyou can complete the account registration process for " + webAppTitle
-                        + " through visiting the following webpage:\n" + url + "sign-up/confirm/" + key
+                    "Hi " + username + ",\n\nplease click the following link to activate your account. Your account " +
+                            "is ready to use immediately.\n" + url + "sign-up/confirm/" + key
                         + "\n\nCheers!", mailbox);
             } else {
                 sendSystemMail("Your account on " + webAppTitle,
-                    "Hi " + username + ",\n\nyou can proceed with the account registration process for "
-                        + webAppTitle + " through visiting the following webpage:\n"
+                    "Hi " + username + ",\n\nplease click the following link to proceed with the sign-up process.\n"
                         + url + "sign-up/confirm/" + key
                         + "\n\n" + "You'll receive another mail once your account is activated by an " +
-                        "administrator. This may need 1 or 2days."
+                        "administrator. This may need 1 or 2 days."
                         + "\n\nCheers!", mailbox);
             }
         } catch (MalformedURLException ex) {
@@ -369,16 +398,25 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     private void sendNotificationMail(String username, String mailbox) {
         String webAppTitle = currentModuleConfiguration.getChildTopics().getString(CONFIG_WEBAPP_TITLE);
-        String adminMailbox = currentModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX);
-        if (!adminMailbox.isEmpty()) {
-            sendSystemMail("Account registration on " + webAppTitle,
-                "\nA user has registered.\n\nUsername: " + username + "\nEmail: " + mailbox + "\n\n", null);
+        //
+        if (currentModuleConfiguration.getChildTopics().has(CONFIG_ADMIN_MAILBOX) &&
+            !currentModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX).isEmpty()) {
+            String adminMailbox = currentModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX);
+                sendSystemMail("Account registration on " + webAppTitle,
+                        "\nA user has registered.\n\nUsername: " + username + "\nEmail: " + mailbox + "\n\n" +
+                                DM4_HOST_URL +"\n\n", adminMailbox);
         } else {
             log.info("ADMIN: No \"Admin Mailbox\" configured: A new user account (" + username + ") was created but" +
-                " no notification sent.");
+                    " no notification sent (to sys-admin).");
         }
     }
 
+    /**
+     *
+     * @param subject       String Subject text for the message.
+     * @param message       String Text content of the message.
+     * @param recipient     String of Email Address message is sent to **must not** be NULL.
+     */
     private void sendSystemMail(String subject, String message, String recipient) {
         // Hot Fix: Classloader issue we have in OSGi since using Pax web
         Thread.currentThread().setContextClassLoader(SignupPlugin.class.getClassLoader());
@@ -397,12 +435,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             message += "\n\n" + DM4_HOST_URL + "\n\n";
             email.setTextMsg(message);
             // ..) Set recipient of notification mail
-            String recipientValue;
-            if (recipient != null) {
-                recipientValue = recipient.trim();
-            } else {
-                recipientValue = currentModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX).trim();
-            }
+            String recipientValue = recipient.trim();
             log.info("Loaded current configuration topic, sending notification mail to " + recipientValue);
             Collection<InternetAddress> recipients = new ArrayList<InternetAddress>();
             recipients.add(new InternetAddress(recipientValue));
@@ -473,7 +506,18 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             // Perform notification
             if (status && !DM4_ACCOUNTS_ENABLED) { // Enabled=true && new_accounts_are_enabled=false
                 log.info("Sign-up Notification: User Account \"" + username.getSimpleValue()+"\" is now ENABLED!");
-                log.info("TODO: Send notification mail to user - Your account is now active!");
+                //
+                String webAppTitle = currentModuleConfiguration.getChildTopics().getTopic(CONFIG_WEBAPP_TITLE)
+                        .getSimpleValue().toString();
+                Topic mailbox = username.getRelatedTopic("org.deepamehta.signup.user_mailbox", null, null,
+                        MAILBOX_TYPE_URI);
+                if (mailbox != null) { // for accounts created via sign-up plugin this will always evaluate to true
+                    String mailboxValue = mailbox.getSimpleValue().toString();
+                    sendSystemMail("Your account on " + webAppTitle + " is now active",
+                            "Hi " + username.getSimpleValue() + ",\n\nyour account on " + DM4_HOST_URL + " is now " +
+                                    "active.\n\nCheers!", mailboxValue);
+                    log.info("Send system notification mail to " + mailboxValue + " - The account is now active!");
+                }
             }
         }
     }

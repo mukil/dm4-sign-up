@@ -60,18 +60,19 @@
         // var password = encodeURIComponent(document.getElementById("pass-one").value)
 
         // ### set default ws-topicid in cookie in dm4_workspace_id=
-        xhr = new XMLHttpRequest()
+        /** xhr = new XMLHttpRequest()
         xhr.onload = function(e) {
             var username = xhr.response
             renderFriendlyMessage('Submitting ..')
-            redirectToOK()
         }
         xhr.onerror = function(e) {
             renderWarning("Account creation failed." + e)
         }
         xhr.open("GET", "/sign-up/handle/" + usernameVal + "/" + passwordVal + "/" + mailbox + "?no_workspace_assignment=true")
         xhr.setRequestHeader("Content-Type", "text/plain")
-        xhr.send()
+        xhr.send() **/
+        window.document.location.href = "http://" +  window.location.host +
+            "/sign-up/handle/" + usernameVal + "/" + passwordVal +"/" + mailbox + "?no_workspace_assignment=true"
 
     }
 
@@ -229,8 +230,3 @@
         }, 1500)
     }
 
-    function redirectToOK() {
-        setTimeout(function (e) {
-            window.location.href = '/sign-up/token-info'
-        }, 1500)
-    }

@@ -4,7 +4,7 @@
 
     <head>
         <meta charset="utf-8"></meta>
-        <title th:text="'Account created - ' + ${title}">Account Created</title>
+        <title th:text="'Account creation pending - ' + ${title}">Account creation pending</title>
         <link rel="stylesheet" th:href="${css_path}" type="text/css" />
     </head>
 
@@ -19,15 +19,18 @@
         </div>
         
         <div id="receipt-view">
-            <h2>Account creation complete</h2>
+            <h2>Account creation pending</h2>
             <p>
-                We completed your sign-up request and successfully created a new user account for you.<br/><br/>
-                Your username is <em th:text="${username}"></em> and you can <a href="/sign-up/login">log in</a> now.
+                We processed your sign-up request and successfully created a new user account for you.<br/><br/>
+                However, your account needs to be manually <em>enabled</em> through an administrator of
+                this service. This may take 1 or 2 days.<br/><br/>You'll receive an Email notification as soon
+                as your account is active and ready to use.
             </p>
         </div>
 
         <div class="stats">
-            <img src="http://stats.infokitchen.net/piwik.php?idsite=6&amp;rec=1&amp;action_name=confirmed" style="border:0" alt="" />
+            <img src="http://stats.infokitchen.net/piwik.php?idsite=6&amp;rec=1&amp;action_name=pending" style="border:0"
+                 alt="" />
         </div>
 
     </body>

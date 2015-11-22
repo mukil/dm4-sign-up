@@ -95,7 +95,6 @@ body.ok-page p {
 #sign-up-view,
 #log-in-view {
     background-color: #fafafa;
-    width: 380px;
     padding: 30px;
     margin: 30px auto 0 auto;
     border-radius: 3px;
@@ -109,7 +108,36 @@ body.ok-page p {
 #log-in-view form {
     padding: 15px;
     position: relative;
+}
+
+#log-in-view form {
     text-align: left;
+}
+
+#log-in-view {
+    max-width: 300px;
+}
+
+#sign-up-view {
+    max-width: 380px;
+}
+
+#receipt-view {
+    max-width: 420px;
+}
+
+#log-in-view form input[type="text"],
+#log-in-view form input[type="password"] {
+    width: 90%;
+}
+
+#sign-up-view form input[type="text"],
+#sign-up-view form input[type="password"] {
+    width: 80%;
+}
+
+#sign-up-view form input[type="checkbox"] {
+    cursor: pointer;
 }
 
 #receipt-view h2,
