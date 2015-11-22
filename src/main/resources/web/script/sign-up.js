@@ -58,7 +58,7 @@
         var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
         var passwordVal = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
         // employing the w3school way to go to a new resource
-        window.document.location.assign("http://" +  window.location.host + "/sign-up/handle/" + usernameVal + "/"
+        window.document.location.assign("//" +  window.location.host + "/sign-up/handle/" + usernameVal + "/"
             + passwordVal +"/" + mailbox + "?no_workspace_assignment=true")
 
     }
