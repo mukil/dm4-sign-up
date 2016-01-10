@@ -88,15 +88,13 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     private final String CONFIG_EMAIL_CONFIRMATION = "org.deepamehta.signup.config_email_confirmation";
 
     private Topic currentModuleConfiguration = null;
+    private Topic customWorkspaceAssignmentTopic = null;
 
-    @Inject
-    private AccessControlService acService;
+    @Inject private AccessControlService acService;
 
-    @Inject
-    private WorkspacesService wsService;
+    @Inject private WorkspacesService wsService;
 
-    @Context
-    UriInfo uri;
+    @Context UriInfo uri;
 
     HashMap<String, JSONObject> token = new HashMap<String, JSONObject>();
 
@@ -158,7 +156,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     @GET
     @Path("/handle/{username}/{pass-one}/{mailbox}")
     public Viewable handleSignupRequest(@PathParam("username") String username,
-                                    @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox)
+                                        @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox)
             throws WebApplicationException {
         String response = "";
         try {
@@ -319,8 +317,8 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
                 throw new RuntimeException("Username was already registered and confirmed!");
             }
             Credentials creds = new Credentials(new JSONObject()
-                .put("username", username)
-                .put("password", password));
+                .put("username", username.trim())
+                .put("password", password.trim()));
             // 1) Create new user (in which workspace), just within the private one, no?
             final Topic usernameTopic = acService.createUserAccount(creds);
             final String eMailAddressValue = mailbox;
@@ -342,6 +340,17 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
                         new TopicRoleModel(usernameTopic.getId(), "dm4.core.parent")));
                     // 6) assign that association also to admins "Private Workspace"
                     acCore.assignToWorkspace(assoc, adminWorkspace.getId());
+                    // 7) create membership to custom workspace topic
+                    if (customWorkspaceAssignmentTopic != null) {
+                        acService.createMembership(usernameTopic.getSimpleValue().toString(),
+                                customWorkspaceAssignmentTopic.getId());
+                        // 8) assign new association to "System" workspace (Assocation was not returned)
+                        Association member = usernameTopic.getAssociation("dm4.accesscontrol.membership",
+                                "dm4.core.default", "dm4.core.default",  customWorkspaceAssignmentTopic.getId());
+                        acCore.assignToWorkspace(member, adminWorkspace.getId());
+                        log.info("Created new Membership for " + usernameTopic.getSimpleValue().toString() + " in " +
+                                "workspace=" + customWorkspaceAssignmentTopic.getSimpleValue().toString());
+                    }
                     return eMailAddress;
                 }
             });
@@ -364,9 +373,15 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
      * @see postUpdateTopic()
      */
     private Topic reloadConfiguration() {
-        log.info("Sign-up: Reloading sign-up plugin configuration.");
+        log.info("Sign-up: Reloading sign-up plugin configuration and checking for custom workspace assignment assoc");
         currentModuleConfiguration = getCurrentSignupConfiguration();
         currentModuleConfiguration.loadChildTopics();
+        // check for custom workspace assignment
+        customWorkspaceAssignmentTopic = getCustomWorkspaceAssignmentTopic();
+        if (customWorkspaceAssignmentTopic != null) {
+            log.info("Configure Sign-up Workspace Assignment => \""
+                    + customWorkspaceAssignmentTopic.getSimpleValue() + "\"");
+        }
         log.log(Level.INFO, "Sign-up: Loaded sign-up configuration => \"{0}\", \"{1}\"",
             new Object[]{currentModuleConfiguration.getUri(), currentModuleConfiguration.getSimpleValue()});
         return currentModuleConfiguration;
@@ -472,7 +487,13 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     private Topic getCurrentSignupConfiguration() {
         Topic pluginTopic = dms.getTopic("uri", new SimpleValue(SIGN_UP_PLUGIN_TOPIC_URI));
         return pluginTopic.getRelatedTopic("dm4.core.association", "dm4.core.default", "dm4.core.default",
-            SIGN_UP_CONFIG_TYPE_URI);
+                SIGN_UP_CONFIG_TYPE_URI);
+    }
+
+    private Topic getCustomWorkspaceAssignmentTopic() {
+        // must always be one
+        return currentModuleConfiguration.getRelatedTopic("dm4.core.association", "dm4.core.default",
+                "dm4.core.default","dm4.workspaces.workspace");
     }
 
     private void prepareSignupPage() {
@@ -490,7 +511,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             viewData("pd_details", configuration.getTopic(CONFIG_PD_DETAILS).getSimpleValue().toString());
             viewData("footer", configuration.getTopic(CONFIG_PAGES_FOOTER).getSimpleValue().toString());
         } else {
-            log.warning("Could not load module configuration!");
+            log.warning("Could not load module configuration during page preparation!");
         }
     }
 
