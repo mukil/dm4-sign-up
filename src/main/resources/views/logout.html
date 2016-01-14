@@ -4,13 +4,13 @@
 
     <head>
         <meta charset="utf-8"></meta>
-        <title th:text="'Log in - ' + ${title}">Log in</title>
+        <title th:text="'Logout - ' + ${title}">Log in</title>
         <link rel="stylesheet" th:href="${css_path}" type="text/css" />
         <script type="text/javascript" src="/de.deepamehta.accesscontrol/script/vendor/sha256.js"></script>
         <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
     </head>
 
-    <body class="log-in-page sign-up">
+    <body class="logout-page sign-up">
 
         <div id="page-header">
             <a href="/de.deepamehta.webclient/" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
@@ -20,14 +20,9 @@
             </a>
         </div>
         <div id="log-in-view">
-            <h2>Log in</h2>
-            <form class="log-in-form" action="javascript:doLogin()">
-                <!-- label for="username">Username</label-->
-                <input id="username" type="text" name="username" placeholder="Username" class="log-in username" />
-                <!-- label for="password">Password</label-->
-                <input type="password" id="password" name="password" placeholder="Password" class="log-in password" />
-                <div id="message-view"><span id="message"></span></div>
-                <input type="submit" value="Ok" class="log-in ok" /> or <a href="/sign-up/">create an account</a>.
+            <div id="message-view"><span id="message"></span></div>
+            <form class="log-in-form" action="javascript:doLogout()">
+                <input type="submit" value="Logout" class="log-in ok" />.
             </form>
         </div>
 

@@ -6,6 +6,20 @@
 
     // --- Plain DeepaMehta 4 login method used by "/sign-up/login" page. --- //
 
+    function doLogout() {
+        xhr = new XMLHttpRequest()
+        xhr.onload = function(e) {
+            if (xhr.response === "") {
+                renderFriendlyMessage('Sie werden abgemeldet...') // ## Todo: Configurable Message
+                window.document.location.reload()
+            } else {
+                renderWarning(xhr.response)
+            }
+        }
+        xhr.open("POST", "/accesscontrol/logout", false)
+        xhr.send()
+    }
+
     function doLogin() {
 
         var id = document.getElementById("username").value
@@ -21,7 +35,7 @@
             xhr = new XMLHttpRequest()
             xhr.onload = function(e) {
                 if (xhr.response === "") {
-                    renderFriendlyMessage('Opening Webclient ...')
+                    renderFriendlyMessage('Lade Anwendung...') // ## Todo: Configurable Message
                     redirectToWebclientUI()
                 } else {
                     renderWarning(xhr.response)
@@ -213,7 +227,7 @@
 
     function redirectToWebclientUI() {
         setTimeout(function (e) {
-            window.location.href = '/de.deepamehta.webclient/'
+            window.location.href = '/kiezatlas/' // ### Todo: Make configurable
         }, 1500)
     }
 

@@ -233,8 +233,8 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Viewable getSignupFormView() {
-        // ### use acl service to check if a session already exists and if so, redirect to dm-webclient directly
         prepareSignupPage();
+        if (acService.getUsername() != null) return view("logout");
         return view("sign-up");
     }
 
@@ -242,8 +242,8 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     @Path("/login")
     @Produces(MediaType.TEXT_HTML)
     public Viewable getLoginFormView() {
-        // ### use acl service to check if a session already exists and if so, redirect to dm-webclient directly
         prepareSignupPage();
+        if (acService.getUsername() != null) return view("logout");
         return view("login");
     }
 
@@ -345,9 +345,10 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
                         acService.createMembership(usernameTopic.getSimpleValue().toString(),
                                 customWorkspaceAssignmentTopic.getId());
                         // 8) assign new association to "System" workspace (Assocation was not returned)
-                        Association member = usernameTopic.getAssociation("dm4.accesscontrol.membership",
+                        /** Association member = usernameTopic.getAssociation("dm4.accesscontrol.membership",
                                 "dm4.core.default", "dm4.core.default",  customWorkspaceAssignmentTopic.getId());
-                        acCore.assignToWorkspace(member, adminWorkspace.getId());
+                        log.info("Pre-creating workspace assignment for custom workspace membership association...2");
+                        acCore.assignToWorkspace(member, adminWorkspace.getId());**/
                         log.info("Created new Membership for " + usernameTopic.getSimpleValue().toString() + " in " +
                                 "workspace=" + customWorkspaceAssignmentTopic.getSimpleValue().toString());
                     }
