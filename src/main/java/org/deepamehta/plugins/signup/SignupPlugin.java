@@ -171,6 +171,8 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
                     log.info("Sign-up Configuration: Email based confirmation workflow inactive. The new user account" +
                             " created is ENABLED.");
                     // redirecting user to the "your account is now active" page
+                    prepareSignupPage();
+                    viewData("username", username);
                     throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/ok")).build());
                 } else {
                     log.info("Sign-up Configuration: Email based confirmation workflow inactive but new user account " +
@@ -419,8 +421,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             !currentModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX).isEmpty()) {
             String adminMailbox = currentModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX);
                 sendSystemMail("Account registration on " + webAppTitle,
-                        "\nA user has registered.\n\nUsername: " + username + "\nEmail: " + mailbox + "\n\n" +
-                                DM4_HOST_URL +"\n\n", adminMailbox);
+                        "\nA user has registered.\n\nUsername: " + username + "\nEmail: " + mailbox, adminMailbox);
         } else {
             log.info("ADMIN: No \"Admin Mailbox\" configured: A new user account (" + username + ") was created but" +
                     " no notification sent (to sys-admin).");

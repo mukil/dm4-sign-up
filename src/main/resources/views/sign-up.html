@@ -21,7 +21,7 @@
         </div>
 
         <div id="pre-text">
-            <form name="aggreement" action="javascript:void();">
+            <form name="aggreement" action="javascript:void()">
                 <input id="toscheck" type="checkbox" onclick="javascript:checkAgreements()" class="tos-check"></input>
                 <label for="toscheck" th:text="${tos_label}">I agree with the projects Terms of use.</label>
                 <a href="javascript:showLabsTermsText()" title="Read Details">Read more</a><br/>
@@ -37,7 +37,7 @@
 
         <div id="sign-up-view">
             <h2>Sign up</h2>
-            <form class="sign-up-form" action="javascript:void();" onsubmit="javascript:createAccount()">
+            <form class="sign-up-form" action="javascript:void()" onsubmit="javascript:createAccount()">
                 <!-- label for="username">Username</label-->
                 <input id="username" type="text" name="username" placeholder="Username"
                        onchange="checkUserNameAvailability()" class="sign-up username" />
