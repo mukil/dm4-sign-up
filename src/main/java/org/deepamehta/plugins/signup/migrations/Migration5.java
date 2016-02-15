@@ -4,44 +4,61 @@ import de.deepamehta.core.Topic;
 import de.deepamehta.core.TopicType;
 import de.deepamehta.core.model.AssociationDefinitionModel;
 import de.deepamehta.core.model.SimpleValue;
-import de.deepamehta.core.service.Inject;
+import de.deepamehta.core.model.TopicTypeModel;
 import de.deepamehta.core.service.Migration;
-import de.deepamehta.plugins.accesscontrol.AccessControlService;
-import de.deepamehta.plugins.workspaces.WorkspacesService;
 
 import java.util.logging.Logger;
 
 /**
- * Extends the Sign-up Plugin Configuration about a "Redirect URL" for customizing our login dialog.
+ * Extends the Sign-up Plugin Configuration about a "Start Page URL" and a "Home Page URL" for customizing
+ * our login resp. the registration dialog (in the case of a needed confirmation).
  */
 public class Migration5 extends Migration {
 
     private Logger logger = Logger.getLogger(getClass().getName());
 
-    @Inject
-    private WorkspacesService wsService;
+    // @Inject
+    // private WorkspacesService wsService;
 
     @Override
     public void run() {
 
-        logger.info("### Extending Sign-up Configuration about \"Redirect URL\" option ###");
-        logger.info("### Extending Sign-up Configuration about \"Logged-in Message\" option ###");
-        logger.info("### Extending Sign-up Configuration about \"Logged-out Message\" option ###");
+        logger.info("### Extending Sign-up Configuration about \"Start Page URL\" option ###");
+        dms.createTopicType(new TopicTypeModel("org.deepamehta.signup.start_page_url",
+            "Sign-up: Start Page URL", "dm4.core.text"));
 
-        /** Topic systemWorkspace = wsService.getWorkspace(AccessControlService.SYSTEM_WORKSPACE_URI);
-        TopicType tokenConfirmationType = dms.getTopicType("org.deepamehta.signup.config_email_confirmation");
-        wsService.assignTypeToWorkspace(tokenConfirmationType, systemWorkspace.getId());
+        logger.info("### Extending Sign-up Configuration about \"Home Page URL\" option ###");
+        dms.createTopicType(new TopicTypeModel("org.deepamehta.signup.home_page_url",
+            "Sign-up: Home Page URL", "dm4.core.text"));
 
-        TopicType configComposite = dms.getTopicType("org.deepamehta.signup.configuration");
-        configComposite.addAssocDef(new AssociationDefinitionModel(
+        logger.info("### Extending Sign-up Configuration about \"Loading App Hint\" option ###");
+        dms.createTopicType(new TopicTypeModel("org.deepamehta.signup.loading_app_hint",
+            "Sign-up: Loading App Hint", "dm4.core.text"));
+
+        logger.info("### Extending Sign-up Configuration about \"Logging Out Hint\" option ###");
+        dms.createTopicType(new TopicTypeModel("org.deepamehta.signup.logging_out_hint",
+            "Sign-up: Logging Out Hint", "dm4.core.text"));
+
+        TopicType signupConfigType = dms.getTopicType("org.deepamehta.signup.configuration");
+        signupConfigType.addAssocDef(new AssociationDefinitionModel(
                 "dm4.core.composition_def", "org.deepamehta.signup.configuration",
-                "org.deepamehta.signup.config_email_confirmation", "dm4.core.one", "dm4.core.one"));
+                "org.deepamehta.signup.start_page_url", "dm4.core.one", "dm4.core.one"));
+        signupConfigType.addAssocDef(new AssociationDefinitionModel(
+                "dm4.core.composition_def", "org.deepamehta.signup.configuration",
+                "org.deepamehta.signup.home_page_url", "dm4.core.one", "dm4.core.one"));
+        signupConfigType.addAssocDef(new AssociationDefinitionModel(
+                "dm4.core.composition_def", "org.deepamehta.signup.configuration",
+                "org.deepamehta.signup.loading_app_hint", "dm4.core.one", "dm4.core.one"));
+        signupConfigType.addAssocDef(new AssociationDefinitionModel(
+                "dm4.core.composition_def", "org.deepamehta.signup.configuration",
+                "org.deepamehta.signup.logging_out_hint", "dm4.core.one", "dm4.core.one"));
 
-        Topic standardConfig = dms.getTopic("uri", new SimpleValue("org.deepamehta.signup.default_configuration"));
-        standardConfig.loadChildTopics();
-        standardConfig.getChildTopics().set("org.deepamehta.signup.config_email_confirmation", false); **/
-
-        logger.info("### Setup new Sign-up Config Default: No Email confirmation required during account creation");
+        Topic defaultConfiguration = dms.getTopic("uri", new SimpleValue("org.deepamehta.signup.default_configuration"));
+        defaultConfiguration.loadChildTopics();
+        defaultConfiguration.getChildTopics().set("org.deepamehta.signup.start_page_url", "/de.deepamehta.webclient/");
+        defaultConfiguration.getChildTopics().set("org.deepamehta.signup.home_page_url", "/de.deepamehta.webclient/");
+        defaultConfiguration.getChildTopics().set("org.deepamehta.signup.loading_app_hint", "Loading Webclient..");
+        defaultConfiguration.getChildTopics().set("org.deepamehta.signup.logging_out_hint", "Logging out..");
 
     }
 

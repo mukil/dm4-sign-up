@@ -86,6 +86,11 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     private final String CONFIG_FROM_MAILBOX = "org.deepamehta.signup.config_from_mailbox";
     private final String CONFIG_ADMIN_MAILBOX = "org.deepamehta.signup.config_admin_mailbox";
     private final String CONFIG_EMAIL_CONFIRMATION = "org.deepamehta.signup.config_email_confirmation";
+    private final String CONFIG_START_PAGE_URL = "org.deepamehta.signup.start_page_url";
+    private final String CONFIG_HOME_PAGE_URL = "org.deepamehta.signup.home_page_url";
+    private final String CONFIG_LOADING_HINT = "org.deepamehta.signup.loading_app_hint";
+    private final String CONFIG_LOGGING_OUT_HINT = "org.deepamehta.signup.logging_out_hint";
+
 
     private Topic currentModuleConfiguration = null;
     private Topic customWorkspaceAssignmentTopic = null;
@@ -512,6 +517,10 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             viewData("pd_label", configuration.getTopic(CONFIG_PD_LABEL).getSimpleValue().toString());
             viewData("pd_details", configuration.getTopic(CONFIG_PD_DETAILS).getSimpleValue().toString());
             viewData("footer", configuration.getTopic(CONFIG_PAGES_FOOTER).getSimpleValue().toString());
+            viewData("start_url", configuration.getTopic(CONFIG_START_PAGE_URL).getSimpleValue().toString());
+            viewData("home_url", configuration.getTopic(CONFIG_HOME_PAGE_URL).getSimpleValue().toString());
+            viewData("loading_app_hint", configuration.getTopic(CONFIG_LOADING_HINT).getSimpleValue().toString());
+            viewData("logging_out_hint", configuration.getTopic(CONFIG_LOGGING_OUT_HINT).getSimpleValue().toString());
         } else {
             log.warning("Could not load module configuration during page preparation!");
         }
