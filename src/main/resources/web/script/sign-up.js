@@ -54,6 +54,16 @@
     }
 
 
+    // --- Plain JavaScript form
+
+    function checkAPIAggrement() {
+        console.log("Todo: Implement check if API Terms of use were accepted.")
+        console.log("Todo: Immediately update Membership to the Reporting WS accordingly")
+    }
+
+    function saveAccountEdits() {
+        console.log("Todo: Save edits to account information")
+    }
 
     // --- Plain JavaScript form validation used by "/sign-up/" page. --- //
 

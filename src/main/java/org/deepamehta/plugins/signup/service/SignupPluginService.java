@@ -19,7 +19,13 @@ public interface SignupPluginService {
      * @return  String  JSON-Object with property "isAvailable" set to true or false
      */
     String getUsernameAvailability(String username);
-    
+
+    /**
+     *
+     * @return  String  Workspace Topic ID
+     */
+    long createCustomMembership(long workspaceId);
+
     /** 
      * Handles a sign-up request in regards to whether an Email based confirmation process is configured (true|false)
      * in the resp. <code>Sign-up Configuration</code> topic.

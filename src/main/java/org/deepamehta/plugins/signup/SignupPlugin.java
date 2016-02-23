@@ -9,6 +9,7 @@ import de.deepamehta.core.service.DeepaMehtaEvent;
 import de.deepamehta.core.service.DeepaMehtaService;
 import de.deepamehta.core.service.EventListener;
 import de.deepamehta.core.service.Inject;
+import de.deepamehta.core.service.Transactional;
 import de.deepamehta.core.service.accesscontrol.AccessControl;
 import de.deepamehta.core.service.accesscontrol.Credentials;
 import de.deepamehta.core.service.event.PostUpdateTopicListener;
@@ -71,25 +72,25 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     public static final String CONFIG_TOPIC_ACCOUNT_ENABLED = "dm4.accesscontrol.login_enabled";
 
     // --- Sign-up related type URIs (Configuration, Template Data) --- //
-    private final String SIGN_UP_PLUGIN_TOPIC_URI = "org.deepamehta.sign-up";
-    private final String SIGN_UP_CONFIG_TYPE_URI = "org.deepamehta.signup.configuration";
-    private final String CONFIG_PROJECT_TITLE = "org.deepamehta.signup.config_project_title";
-    private final String CONFIG_WEBAPP_TITLE = "org.deepamehta.signup.config_webapp_title";
-    private final String CONFIG_LOGO_PATH = "org.deepamehta.signup.config_webapp_logo_path";
-    private final String CONFIG_CSS_PATH = "org.deepamehta.signup.config_custom_css_path";
-    private final String CONFIG_READ_MORE_URL = "org.deepamehta.signup.config_read_more_url";
-    private final String CONFIG_PAGES_FOOTER = "org.deepamehta.signup.config_pages_footer";
-    private final String CONFIG_TOS_LABEL = "org.deepamehta.signup.config_tos_label";
-    private final String CONFIG_TOS_DETAILS = "org.deepamehta.signup.config_tos_detail";
-    private final String CONFIG_PD_LABEL = "org.deepamehta.signup.config_pd_label";
-    private final String CONFIG_PD_DETAILS = "org.deepamehta.signup.config_pd_detail";
-    private final String CONFIG_FROM_MAILBOX = "org.deepamehta.signup.config_from_mailbox";
-    private final String CONFIG_ADMIN_MAILBOX = "org.deepamehta.signup.config_admin_mailbox";
-    private final String CONFIG_EMAIL_CONFIRMATION = "org.deepamehta.signup.config_email_confirmation";
-    private final String CONFIG_START_PAGE_URL = "org.deepamehta.signup.start_page_url";
-    private final String CONFIG_HOME_PAGE_URL = "org.deepamehta.signup.home_page_url";
-    private final String CONFIG_LOADING_HINT = "org.deepamehta.signup.loading_app_hint";
-    private final String CONFIG_LOGGING_OUT_HINT = "org.deepamehta.signup.logging_out_hint";
+    private final String SIGN_UP_PLUGIN_TOPIC_URI   = "org.deepamehta.sign-up";
+    private final String SIGN_UP_CONFIG_TYPE_URI    = "org.deepamehta.signup.configuration";
+    private final String CONFIG_PROJECT_TITLE       = "org.deepamehta.signup.config_project_title";
+    private final String CONFIG_WEBAPP_TITLE        = "org.deepamehta.signup.config_webapp_title";
+    private final String CONFIG_LOGO_PATH           = "org.deepamehta.signup.config_webapp_logo_path";
+    private final String CONFIG_CSS_PATH            = "org.deepamehta.signup.config_custom_css_path";
+    private final String CONFIG_READ_MORE_URL       = "org.deepamehta.signup.config_read_more_url";
+    private final String CONFIG_PAGES_FOOTER        = "org.deepamehta.signup.config_pages_footer";
+    private final String CONFIG_TOS_LABEL           = "org.deepamehta.signup.config_tos_label";
+    private final String CONFIG_TOS_DETAILS         = "org.deepamehta.signup.config_tos_detail";
+    private final String CONFIG_PD_LABEL            = "org.deepamehta.signup.config_pd_label";
+    private final String CONFIG_PD_DETAILS          = "org.deepamehta.signup.config_pd_detail";
+    private final String CONFIG_FROM_MAILBOX        = "org.deepamehta.signup.config_from_mailbox";
+    private final String CONFIG_ADMIN_MAILBOX       = "org.deepamehta.signup.config_admin_mailbox";
+    private final String CONFIG_EMAIL_CONFIRMATION  = "org.deepamehta.signup.config_email_confirmation";
+    private final String CONFIG_START_PAGE_URL      = "org.deepamehta.signup.start_page_url";
+    private final String CONFIG_HOME_PAGE_URL       = "org.deepamehta.signup.home_page_url";
+    private final String CONFIG_LOADING_HINT        = "org.deepamehta.signup.loading_app_hint";
+    private final String CONFIG_LOGGING_OUT_HINT    = "org.deepamehta.signup.logging_out_hint";
 
 
     private Topic currentModuleConfiguration = null;
@@ -163,7 +164,6 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     public Viewable handleSignupRequest(@PathParam("username") String username,
                                         @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox)
             throws WebApplicationException {
-        String response = "";
         try {
             if (currentModuleConfiguration.getChildTopics().getBoolean(CONFIG_EMAIL_CONFIRMATION)) {
                 log.info("Sign-up Configuration: Email based confirmation workflow active, send out confirmation mail.");
@@ -233,6 +233,21 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         return getAccountCreationOKView();
     }
 
+    @POST
+    @Path("/confirm/membership/{workspaceId}")
+    @Transactional
+    @Override
+    public long createCustomMembership(@PathParam("workspaceId") long workspaceId) {
+        Topic workspace = dms.getTopic(workspaceId);        
+        if (workspace != null) {
+            Topic usernameTopic = acService.getUsernameTopic(acService.getUsername());
+            // ### Association should belong to the logged in user and workspace set
+            acService.createMembership(usernameTopic.getSimpleValue().toString(), workspace.getId());
+            log.info("Confirmed new Membership for " + usernameTopic.getSimpleValue().toString() + " in " +
+                    "workspace=" + workspace.getSimpleValue().toString());
+        }
+        return workspaceId;
+    }
 
 
     // --- Sign-up Plugin Routes --- //
@@ -284,6 +299,14 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     public Viewable getConfirmationInfoView() {
         prepareSignupPage();
         return view("confirmation");
+    }
+
+    @GET
+    @Path("/edit")
+    @Produces(MediaType.TEXT_HTML)
+    public Viewable getAccountDetailsView() {
+        prepareSignupPage();
+        return view("account");
     }
 
 

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+    <head>
+        <meta charset="utf-8"></meta>
+        <title th:text="'Account Details - ' + ${title}">Account Details</title>
+        <link rel="stylesheet"  th:href="${css_path}" type="text/css" />
+        <script type="text/javascript" src="/de.deepamehta.accesscontrol/script/vendor/sha256.js"></script>
+        <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
+    </head>
+
+    <body class="account-page sign-up">
+
+        <div id="page-header">
+            <span class="project-title" th:text="'Your Account on ' + ${title}">Your Account</span>
+        </div>
+
+        <p>&nbsp;</p>
+
+        <div id="sign-up-view">
+            <h2>Infos associated with your username</h2>
+            <form class="account-edit-form" action="javascript:void()" onsubmit="javascript:saveAccountEdits()">
+                <!-- label for="username">Username</label th:text="${username}" -->
+                <!-- input id="username" disabled="true" type="text" name="username" placeholder="Username" class="api-up username" /-->
+                <!-- Adapt Mailbox -->
+                <input type="text" disabled="true" id="mailbox" name="mailbox" placeholder="Email Address" class="sign-up mailbox" />
+                <!--div id="message-view"><span id="message"></span></div>
+                <input type="submit" id="update" value="Save" disabled="true" class="sign-up ok" /-->
+            </form>
+        </div>
+
+        <div id="pre-text">
+            <h2>API Option</h2>
+            <p>To make use of the Kiezatlas Data in your website or platform you can connect to our API with a client.<br/>
+               To do so you just need to understand and agree to our <i>Terms of service</i> for the API and tick the following box.</p>
+            <form name="api-aggreement" action="javascript:void()">
+                <input id="apischeck" type="checkbox" onclick="javascript:checkAPIAggrement()" class="tos-check"></input>
+                <label for="apischeck" th:text="${tos_label}">I agree with the API <i>Terms of use</i>.</label>
+                <a href="javascript:showAPITermsText()" title="Read Details">Read more</a><br/>
+                <div id="account-info" th:utext="${api_details}"></div>
+            </form>
+        </div>
+
+        <div id="page-footer" th:utext="${footer}">
+        </div>
+
+        <div class="stats">
+            <img src="//stats.infokitchen.net/piwik.php?idsite=6&amp;rec=1&amp;action_name=signup" style="border:0" alt="" />
+        </div>
+
+    </body>
+
+    <noscript>
+        Without JavaScript we can not check if your desired username is already taken and we cannot check in advance
+        if your chosen password meets our requirements (minimum of 8 characters).
+        Thus, your account creation may just silently fail. Thanks for your understanding.
+    </noscript>
+
+</html>
