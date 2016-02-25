@@ -21,17 +21,17 @@
         <div id="sign-up-view">
             <h2>Infos associated with your username</h2>
             <form class="account-edit-form" action="javascript:void()" onsubmit="javascript:saveAccountEdits()">
-                <!-- label for="username">Username</label th:text="${username}" -->
-                <!-- input id="username" disabled="true" type="text" name="username" placeholder="Username" class="api-up username" /-->
+                <!--label for="username">Username</label-->
+                <input id="username" disabled="true" type="text" th:value="${username}" name="username" class="api-up username" />
                 <!-- Adapt Mailbox -->
-                <input type="text" disabled="true" id="mailbox" name="mailbox" placeholder="Email Address" class="sign-up mailbox" />
+                <input type="text" disabled="true" id="mailbox" name="mailbox" th:value="${email}" class="sign-up mailbox" />
                 <!--div id="message-view"><span id="message"></span></div>
                 <input type="submit" id="update" value="Save" disabled="true" class="sign-up ok" /-->
             </form>
         </div>
 
-        <div id="pre-text">
-            <h2>API Option</h2>
+        <div id="api-text">
+            <h2>Activate API Option</h2>
             <p>To make use of the Kiezatlas Data in your website or platform you can connect to our API with a client.<br/>
                To do so you just need to understand and agree to our <i>Terms of service</i> for the API and tick the following box.</p>
             <form name="api-aggreement" action="javascript:void()">

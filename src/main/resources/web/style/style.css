@@ -37,12 +37,16 @@ body.ok-page p {
     display: none;
 }
 
+#api-text,
 #pre-text {
     width: 400px;
-    font-size: small;
     margin-left: auto;
     margin-right: auto;
     margin-top: 20px;
+}
+
+#pre-text {
+    font-size: small;
 }
 
 #page-header {
@@ -151,6 +155,7 @@ body.ok-page p {
 }
 
 input.log-in,
+input.api-up,
 input.sign-up {
     font-size: 20px;
     padding: 10px 15px 10px 15px;
@@ -174,6 +179,13 @@ input.sign-up.ok {
 
 input[disabled] {
     background-color: rgba(99, 99, 99, 1.0);
+}
+
+input.sign-up.ok[disabled],
+input[type="text"][disabled] {
+    color: #999;
+    background-color: #fff;
+    cursor: auto;
 }
 
 #message {

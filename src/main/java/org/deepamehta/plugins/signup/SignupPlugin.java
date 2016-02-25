@@ -72,6 +72,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     public static final String CONFIG_TOPIC_ACCOUNT_ENABLED = "dm4.accesscontrol.login_enabled";
 
     // --- Sign-up related type URIs (Configuration, Template Data) --- //
+    private final String USER_MAILBOX_EDGE_TYPE     = "org.deepamehta.signup.user_mailbox";
     private final String SIGN_UP_PLUGIN_TOPIC_URI   = "org.deepamehta.sign-up";
     private final String SIGN_UP_CONFIG_TYPE_URI    = "org.deepamehta.signup.configuration";
     private final String CONFIG_PROJECT_TITLE       = "org.deepamehta.signup.config_project_title";
@@ -306,6 +307,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     @Produces(MediaType.TEXT_HTML)
     public Viewable getAccountDetailsView() {
         prepareSignupPage();
+        prepareAccountEditPage();
         return view("account");
     }
 
@@ -365,7 +367,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
                     Topic adminWorkspace = dms.getAccessControl().getPrivateWorkspace("admin");
                     acCore.assignToWorkspace(eMailAddress, adminWorkspace.getId());
                     // 5) associate email address to "username" topic too
-                    Association assoc = dms.createAssociation(new AssociationModel("org.deepamehta.signup.user_mailbox",
+                    Association assoc = dms.createAssociation(new AssociationModel(USER_MAILBOX_EDGE_TYPE,
                         new TopicRoleModel(eMailAddress.getId(), "dm4.core.child"),
                         new TopicRoleModel(usernameTopic.getId(), "dm4.core.parent")));
                     // 6) assign that association also to admins "Private Workspace"
@@ -544,8 +546,34 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             viewData("home_url", configuration.getTopic(CONFIG_HOME_PAGE_URL).getSimpleValue().toString());
             viewData("loading_app_hint", configuration.getTopic(CONFIG_LOADING_HINT).getSimpleValue().toString());
             viewData("logging_out_hint", configuration.getTopic(CONFIG_LOGGING_OUT_HINT).getSimpleValue().toString());
+            // api_details
+            // api_label
+            // api_enabled
+            // api_workspace_uri
         } else {
             log.warning("Could not load module configuration during page preparation!");
+        }
+    }
+
+    private void prepareAccountEditPage() {
+        String username = acService.getUsername();
+        if (!username.isEmpty()) {
+            // Someone is logged in, prepare her account page
+            Topic usernameTopic = acService.getUsernameTopic(username);
+            Topic mailbox = usernameTopic.getRelatedTopic(USER_MAILBOX_EDGE_TYPE, "dm4.core.parent",
+                "dm4.core.child", MAILBOX_TYPE_URI);
+            String eMailAddressValue = "No value";
+            if (mailbox != null) {
+                 eMailAddressValue = mailbox.getSimpleValue().toString();
+            } else {
+                log.warning("User \"" + username + "\" has no E-Mail Address Value associted."); // Just "admin"
+            }
+            viewData("username", username);
+            viewData("email", eMailAddressValue);
+        } else {
+            // Not authenticated, can't edit a user account
+            viewData("username", "Not authenticated");
+            viewData("email", "Not authenticated");
         }
     }
 
@@ -564,8 +592,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
                 //
                 String webAppTitle = currentModuleConfiguration.getChildTopics().getTopic(CONFIG_WEBAPP_TITLE)
                         .getSimpleValue().toString();
-                Topic mailbox = username.getRelatedTopic("org.deepamehta.signup.user_mailbox", null, null,
-                        MAILBOX_TYPE_URI);
+                Topic mailbox = username.getRelatedTopic(USER_MAILBOX_EDGE_TYPE, null, null, MAILBOX_TYPE_URI);
                 if (mailbox != null) { // for accounts created via sign-up plugin this will always evaluate to true
                     String mailboxValue = mailbox.getSimpleValue().toString();
                     sendSystemMail("Your account on " + webAppTitle + " is now active",
