@@ -72,8 +72,8 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     public static final String CONFIG_TOPIC_ACCOUNT_ENABLED = "dm4.accesscontrol.login_enabled";
 
     // --- Sign-up related type URIs (Configuration, Template Data) --- //
-    private final String USER_MAILBOX_EDGE_TYPE     = "org.deepamehta.signup.user_mailbox";
     private final String SIGN_UP_PLUGIN_TOPIC_URI   = "org.deepamehta.sign-up";
+    private final String USER_MAILBOX_EDGE_TYPE     = "org.deepamehta.signup.user_mailbox";
     private final String SIGN_UP_CONFIG_TYPE_URI    = "org.deepamehta.signup.configuration";
     private final String CONFIG_PROJECT_TITLE       = "org.deepamehta.signup.config_project_title";
     private final String CONFIG_WEBAPP_TITLE        = "org.deepamehta.signup.config_webapp_title";
@@ -92,6 +92,10 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     private final String CONFIG_HOME_PAGE_URL       = "org.deepamehta.signup.home_page_url";
     private final String CONFIG_LOADING_HINT        = "org.deepamehta.signup.loading_app_hint";
     private final String CONFIG_LOGGING_OUT_HINT    = "org.deepamehta.signup.logging_out_hint";
+    private final String CONFIG_API_ENABLED         = "org.deepamehta.signup.config_api_enabled";
+    private final String CONFIG_API_DESCRIPTION     = "org.deepamehta.signup.config_api_description";
+    private final String CONFIG_API_DETAILS         = "org.deepamehta.signup.config_api_details";
+    private final String CONFIG_API_WORKSPACE_URI   = "org.deepamehta.signup.config_api_workspace_uri";
 
 
     private Topic currentModuleConfiguration = null;
@@ -235,19 +239,22 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     }
 
     @POST
-    @Path("/confirm/membership/{workspaceId}")
+    @Path("/confirm/membership/{workspaceUri}")
     @Transactional
     @Override
-    public long createCustomMembership(@PathParam("workspaceId") long workspaceId) {
-        Topic workspace = dms.getTopic(workspaceId);        
+    public String createCustomMembership(@PathParam("workspaceUri") String workspaceUri) {
+        Topic workspace = wsService.getWorkspace(workspaceUri);
         if (workspace != null) {
             Topic usernameTopic = acService.getUsernameTopic(acService.getUsername());
             // ### Association should belong to the logged in user and workspace set
+            // ### Check if membership exists and do not create it twice
             acService.createMembership(usernameTopic.getSimpleValue().toString(), workspace.getId());
             log.info("Confirmed new Membership for " + usernameTopic.getSimpleValue().toString() + " in " +
                     "workspace=" + workspace.getSimpleValue().toString());
+            return "{ \"membership_created\" : " + true + "}";
+        } else {
+            return "{ \"membership_created\" : " + false + "}";
         }
-        return workspaceId;
     }
 
 
@@ -546,10 +553,10 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             viewData("home_url", configuration.getTopic(CONFIG_HOME_PAGE_URL).getSimpleValue().toString());
             viewData("loading_app_hint", configuration.getTopic(CONFIG_LOADING_HINT).getSimpleValue().toString());
             viewData("logging_out_hint", configuration.getTopic(CONFIG_LOGGING_OUT_HINT).getSimpleValue().toString());
-            // api_details
-            // api_label
-            // api_enabled
-            // api_workspace_uri
+            viewData("api_enabled", configuration.getBoolean(CONFIG_API_ENABLED));
+            viewData("api_details", configuration.getTopic(CONFIG_API_DETAILS).getSimpleValue().toString());
+            viewData("api_description", configuration.getTopic(CONFIG_API_DESCRIPTION).getSimpleValue().toString());
+            viewData("api_workspace_uri", configuration.getTopic(CONFIG_API_WORKSPACE_URI).getSimpleValue().toString());
         } else {
             log.warning("Could not load module configuration during page preparation!");
         }
@@ -557,7 +564,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     private void prepareAccountEditPage() {
         String username = acService.getUsername();
-        if (!username.isEmpty()) {
+        if (username != null) {
             // Someone is logged in, prepare her account page
             Topic usernameTopic = acService.getUsernameTopic(username);
             Topic mailbox = usernameTopic.getRelatedTopic(USER_MAILBOX_EDGE_TYPE, "dm4.core.parent",
@@ -570,10 +577,13 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             }
             viewData("username", username);
             viewData("email", eMailAddressValue);
+            viewData("link", "");
+            // ### viewData("confirmed", true); // Check if user already has confirmed for a membership
         } else {
             // Not authenticated, can't edit a user account
             viewData("username", "Not authenticated");
             viewData("email", "Not authenticated");
+            viewData("link", "/sign-up/login");
         }
     }
 

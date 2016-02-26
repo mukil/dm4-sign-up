@@ -8,6 +8,15 @@
         <link rel="stylesheet"  th:href="${css_path}" type="text/css" />
         <script type="text/javascript" src="/de.deepamehta.accesscontrol/script/vendor/sha256.js"></script>
         <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
+        <script th:inline="javascript">
+        /*<![CDATA[*/
+            signupConfig.apiEnabled = /*[[${api_enabled}]]*/ false;
+            signupConfig.apiWorkspaceURI = /*[[${api_workspace_uri}]]*/ '';
+            signupConfig.appLoadingMessage = /*[[${loading_app_hint}]]*/ 'Loading Webclient';
+            signupConfig.appLoggingOutHint = /*[[${logging_out_hint}]]*/ 'Logging out..';
+            signupConfig.appStartPageURL = /*[[${start_url}]]*/ '/';
+        /*]]>*/
+        </script>
     </head>
 
     <body class="account-page sign-up">
@@ -28,9 +37,14 @@
                 <!--div id="message-view"><span id="message"></span></div>
                 <input type="submit" id="update" value="Save" disabled="true" class="sign-up ok" /-->
             </form>
+            <div th:if="${!#strings.isEmpty(link)}">
+                <p>
+                    <a class="button" th:href="${link}">Please log in first</a>
+                </p>
+            </div>
         </div>
 
-        <div id="api-text">
+        <div th:if="${api_enabled}" id="api-text">
             <h2>Activate API Option</h2>
             <p>To make use of the Kiezatlas Data in your website or platform you can connect to our API with a client.<br/>
                To do so you just need to understand and agree to our <i>Terms of service</i> for the API and tick the following box.</p>

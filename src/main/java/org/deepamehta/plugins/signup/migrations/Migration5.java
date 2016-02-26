@@ -17,11 +17,10 @@ public class Migration5 extends Migration {
 
     private Logger logger = Logger.getLogger(getClass().getName());
 
-    // @Inject
-    // private WorkspacesService wsService;
-
     @Override
     public void run() {
+
+        // ### TODO: We have (deliberately) missed to create new Workspace Assignments here.
 
         logger.info("### Extending Sign-up Configuration about \"Start Page URL\" option ###");
         dms.createTopicType(new TopicTypeModel("org.deepamehta.signup.start_page_url",

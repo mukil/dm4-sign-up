@@ -2,6 +2,15 @@
     var EMPTY_STRING = ""
     var OK_STRING = "OK"
 
+    // Sign-up Configuration Object Initialized via Thymeleaf
+    var signupConfig = {
+        "apiEnabled"        : false,
+        "apiWorkspaceURI"   : "",
+        "appLoadingMessage" : "Loading Webclient",
+        "appLoggingOutHint" : "Logging out...",
+        "appStartPageURL"   : "/",
+        "appHomePageURL"    : "/"
+    }
 
 
     // --- Plain DeepaMehta 4 login method used by "/sign-up/login" page. --- //
@@ -10,7 +19,8 @@
         xhr = new XMLHttpRequest()
         xhr.onload = function(e) {
             if (xhr.response === "") {
-                renderFriendlyMessage('Sie werden abgemeldet...') // ## Todo: Configurable Message
+                renderFriendlyMessage(signupConfig.appLoggingOutHint)
+                // could/should utilize // signupConfig.appHomePageURL // here
                 window.document.location.reload()
             } else {
                 renderWarning(xhr.response)
@@ -35,8 +45,8 @@
             xhr = new XMLHttpRequest()
             xhr.onload = function(e) {
                 if (xhr.response === "") {
-                    renderFriendlyMessage('Lade Anwendung...') // ## Todo: Configurable Message
-                    redirectToWebclientUI()
+                    renderFriendlyMessage(signupConfig.appLoadingMessage)
+                    redirectToStartPageURL()
                 } else {
                     renderWarning(xhr.response)
                 }
@@ -56,9 +66,17 @@
 
     // --- Plain JavaScript form
 
+    // TODO: This needs a proper workspace cookie, otherwise the server fails upon this request
     function checkAPIAggrement() {
-        console.log("Todo: Implement check if API Terms of use were accepted.")
-        console.log("Todo: Immediately update Membership to the Reporting WS accordingly")
+        if (signupConfig.apiWorkspaceURI !== "") {
+            console.log("Custom Workspace URI", signupConfig.apiWorkspaceURI)
+            xhr = new XMLHttpRequest()
+            xhr.open("POST", "/sign-up/confirm/membership/" + signupConfig.apiWorkspaceURI, false)
+            xhr.send()
+        }
+        // console.log("Todo: Implement check if API Terms of use were accepted.")
+        // console.log("Todo: Immediately update Membership to the Reporting WS accordingly")
+        
     }
 
     function saveAccountEdits() {
@@ -235,9 +253,8 @@
         document.getElementById("create").removeAttribute("style")
     }
 
-    function redirectToWebclientUI() {
+    function redirectToStartPageURL() {
         setTimeout(function (e) {
-            window.location.href = '/kiezatlas/' // ### Todo: Make configurable
+            window.location.href = signupConfig.appStartPageURL
         }, 1500)
     }
-
