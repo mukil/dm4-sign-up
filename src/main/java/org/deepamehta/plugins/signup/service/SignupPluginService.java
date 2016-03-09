@@ -41,4 +41,6 @@ public interface SignupPluginService {
      */
     Viewable handleSignupRequest(String username, String password, String mailbox);
 
+    void sendSystemMailboxNotification(String subject, String message);
+
 }

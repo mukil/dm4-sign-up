@@ -246,11 +246,15 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         Topic workspace = wsService.getWorkspace(workspaceUri);
         if (workspace != null) {
             Topic usernameTopic = acService.getUsernameTopic(acService.getUsername());
-            // ### Association should belong to the logged in user and workspace set
-            // ### Check if membership exists and do not create it twice
-            acService.createMembership(usernameTopic.getSimpleValue().toString(), workspace.getId());
-            log.info("Confirmed new Membership for " + usernameTopic.getSimpleValue().toString() + " in " +
+            if (!acService.isMember(usernameTopic.getSimpleValue().toString(), workspace.getId())) {
+                acService.createMembership(usernameTopic.getSimpleValue().toString(), workspace.getId());
+                log.info("Confirmed new Membership for " + usernameTopic.getSimpleValue().toString() + " in " +
                     "workspace=" + workspace.getSimpleValue().toString());
+                sendSystemMailboxNotification("Custom Workspace Membership Confirmed", "\nHi admin,\n\n"
+                    + usernameTopic + " accepted the Terms of Service and confirmed membership in Workspace \""
+                    + workspace.getSimpleValue().toString() + "\"\n\nJust wanted to let you know.\nCheers!");
+            }
+            // ### Confirm that Assoc belongs to the logged in user (and workspace)
             return "{ \"membership_created\" : " + true + "}";
         } else {
             return "{ \"membership_created\" : " + false + "}";
@@ -318,7 +322,16 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         return view("account");
     }
 
-
+    @Override
+    public void sendSystemMailboxNotification(String subject, String message) {
+        if (currentModuleConfiguration.getChildTopics().has(CONFIG_ADMIN_MAILBOX) &&
+            !currentModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX).isEmpty()) {
+            String recipient = currentModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX);
+            sendSystemMail(subject, message, recipient);
+        } else {
+            log.warning("Did not send notification mail to System Mailbox - Admin Mailbox Empty");
+        }
+    }
 
     // --- Private Helpers --- //
 
