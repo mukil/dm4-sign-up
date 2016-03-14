@@ -90,11 +90,11 @@
     function createAccount() {
 
         // any of these should prevent submission of form
-        if (!isValidUsername()) return
-        if (checkPassword() !== OK_STRING) return
-        if (comparePasswords() !== OK_STRING) return
-        if (checkMailbox() === null) return
-        if (checkAgreements() !== OK_STRING) return
+        if (!isValidUsername()) return undefined
+        if (checkPassword() !== OK_STRING) return undefined
+        if (comparePasswords() !== OK_STRING) return undefined
+        if (checkMailbox() === null) return undefined
+        if (checkAgreements() !== OK_STRING) return undefined
 
         var usernameVal = encodeURIComponent(document.getElementById("username").value)
         var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
@@ -118,10 +118,8 @@
     }
 
     function checkUserNameAvailability() {
-
         var usernameInput = document.getElementById("username") // fixme: maybe its better to acces the form element
         var userInput = usernameInput.value
-        
         xhr = new XMLHttpRequest()
         xhr.onload = function(e) {
             var response = JSON.parse(xhr.response)
@@ -136,8 +134,7 @@
             }
         }
         xhr.open("GET", "/sign-up/check/" + userInput, false)
-        xhr.send()   
-
+        xhr.send()
     }
     
     function checkMailboxAvailability() {
@@ -147,7 +144,6 @@
         xhr.onload = function(e) {
             var response = JSON.parse(xhr.response)
             if (!response.isAvailable) {
-                console.log("This mailbox is already registered")
                 renderWarning("This E-Mail address is already registered.")
                 disableSignupForm()
                 return null
@@ -159,7 +155,7 @@
         }
         xhr.open("GET", "/sign-up/check/mailbox/" + mailBox, false)
         xhr.send()
-
+        checkUserNameAvailability() // fire user name check again here (on our last input field)
     }
 
     function checkPassword() {
