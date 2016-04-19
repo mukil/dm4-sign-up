@@ -6,7 +6,7 @@ import de.deepamehta.core.ChildTopics;
 import de.deepamehta.core.Topic;
 import de.deepamehta.core.model.*;
 import de.deepamehta.core.service.DeepaMehtaEvent;
-import de.deepamehta.core.service.DeepaMehtaService;
+import de.deepamehta.core.service.CoreService;
 import de.deepamehta.core.service.EventListener;
 import de.deepamehta.core.service.Inject;
 import de.deepamehta.core.service.Transactional;
@@ -14,9 +14,9 @@ import de.deepamehta.core.service.accesscontrol.AccessControl;
 import de.deepamehta.core.service.accesscontrol.Credentials;
 import de.deepamehta.core.service.event.PostUpdateTopicListener;
 import de.deepamehta.core.storage.spi.DeepaMehtaTransaction;
-import de.deepamehta.plugins.accesscontrol.AccessControlService;
-import de.deepamehta.plugins.webactivator.WebActivatorPlugin;
-import de.deepamehta.plugins.workspaces.WorkspacesService;
+import de.deepamehta.accesscontrol.AccessControlService;
+import de.deepamehta.thymeleaf.ThymeleafPlugin;
+import de.deepamehta.workspaces.WorkspacesService;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -60,7 +60,7 @@ import org.deepamehta.plugins.signup.service.SignupPluginService;
  * @author <a href="mailto:malte@mikromedia.de">Malte Reissig</a>;
  */
 @Path("/sign-up")
-public class SignupPlugin extends WebActivatorPlugin implements SignupPluginService, PostUpdateTopicListener {
+public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService, PostUpdateTopicListener {
 
     private static Logger log = Logger.getLogger(SignupPlugin.class.getName());
 
@@ -123,7 +123,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
      */
     static DeepaMehtaEvent USER_ACCOUNT_CREATE_LISTENER = new DeepaMehtaEvent(UserAccountCreateListener.class) {
         @Override
-        public void deliver(EventListener listener, Object... params) {
+        public void dispatch(EventListener listener, Object... params) {
             ((UserAccountCreateListener) listener).userAccountCreated((Topic) params[0]);
         }
     };
@@ -324,7 +324,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     @Override
     public void sendSystemMailboxNotification(String subject, String message) {
-        if (currentModuleConfiguration.getChildTopics().has(CONFIG_ADMIN_MAILBOX) &&
+        if (currentModuleConfiguration.getChildTopics().getTopicOrNull(CONFIG_ADMIN_MAILBOX) != null && // 4.8 migration
             !currentModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX).isEmpty()) {
             String recipient = currentModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX);
             sendSystemMail(subject, message, recipient);
@@ -361,7 +361,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     private String createSimpleUserAccount(@PathParam("username") String username,
                                            @PathParam("pass-one") String password,
                                            @PathParam("mailbox") String mailbox) {
-        DeepaMehtaTransaction tx = dms.beginTx();
+        DeepaMehtaTransaction tx = dm4.beginTx();
         try {
             if (isUsernameTaken(username)) {
                 // Might be thrown if two users compete for registration (of the same username)
@@ -375,21 +375,21 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             final Topic usernameTopic = acService.createUserAccount(creds);
             final String eMailAddressValue = mailbox;
             // 2) create and associate e-mail address topic
-            dms.getAccessControl().runWithoutWorkspaceAssignment(new Callable<Topic>() {
+            dm4.getAccessControl().runWithoutWorkspaceAssignment(new Callable<Topic>() {
                 @Override
                 public Topic call() {
-                    Topic eMailAddress = dms.createTopic(new TopicModel(MAILBOX_TYPE_URI,
+                    Topic eMailAddress = dm4.createTopic(mf.newTopicModel(MAILBOX_TYPE_URI,
                         new SimpleValue(eMailAddressValue)));
                     // 3) fire custom event ### this is useless since fired by "anonymous" (this request scope)
-                    dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, usernameTopic);
-                    AccessControl acCore = dms.getAccessControl();
+                    dm4.fireEvent(USER_ACCOUNT_CREATE_LISTENER, usernameTopic);
+                    AccessControl acCore = dm4.getAccessControl();
                     // 4) assign new e-mail address topic to admins "Private workspace"
-                    Topic adminWorkspace = dms.getAccessControl().getPrivateWorkspace("admin");
+                    Topic adminWorkspace = dm4.getAccessControl().getPrivateWorkspace("admin");
                     acCore.assignToWorkspace(eMailAddress, adminWorkspace.getId());
                     // 5) associate email address to "username" topic too
-                    Association assoc = dms.createAssociation(new AssociationModel(USER_MAILBOX_EDGE_TYPE,
-                        new TopicRoleModel(eMailAddress.getId(), "dm4.core.child"),
-                        new TopicRoleModel(usernameTopic.getId(), "dm4.core.parent")));
+                    Association assoc = dm4.createAssociation(mf.newAssociationModel(USER_MAILBOX_EDGE_TYPE,
+                        mf.newTopicRoleModel(eMailAddress.getId(), "dm4.core.child"),
+                        mf.newTopicRoleModel(usernameTopic.getId(), "dm4.core.parent")));
                     // 6) assign that association also to admins "Private Workspace"
                     acCore.assignToWorkspace(assoc, adminWorkspace.getId());
                     // 7) create membership to custom workspace topic
@@ -467,7 +467,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     private void sendNotificationMail(String username, String mailbox) {
         String webAppTitle = currentModuleConfiguration.getChildTopics().getString(CONFIG_WEBAPP_TITLE);
         //
-        if (currentModuleConfiguration.getChildTopics().has(CONFIG_ADMIN_MAILBOX) &&
+        if (currentModuleConfiguration.getChildTopics().getTopicOrNull(CONFIG_ADMIN_MAILBOX) != null &&
             !currentModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX).isEmpty()) {
             String adminMailbox = currentModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX);
                 sendSystemMail("Account registration on " + webAppTitle,
@@ -513,7 +513,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             throw new RuntimeException("Sending notification mail FAILED", ex);
         } finally {
             // Fix: Classloader issue we have in OSGi since using Pax web
-            Thread.currentThread().setContextClassLoader(DeepaMehtaService.class.getClassLoader());
+            Thread.currentThread().setContextClassLoader(CoreService.class.getClassLoader());
             log.info("AfterSend: Set Classloader back " + Thread.currentThread().getContextClassLoader().toString());
         }
     }
@@ -526,7 +526,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     private boolean isMailboxTaken(String email) {
         String value = email.toLowerCase().trim();
-        return dms.getAccessControl().emailAddressExists(value);
+        return dm4.getAccessControl().emailAddressExists(value);
     }
 
     /**
@@ -537,7 +537,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
      * @see reloadConfiguration()
      */
     private Topic getCurrentSignupConfiguration() {
-        Topic pluginTopic = dms.getTopic("uri", new SimpleValue(SIGN_UP_PLUGIN_TOPIC_URI));
+        Topic pluginTopic = dm4.getTopicByUri(SIGN_UP_PLUGIN_TOPIC_URI);
         return pluginTopic.getRelatedTopic("dm4.core.association", "dm4.core.default", "dm4.core.default",
                 SIGN_UP_CONFIG_TYPE_URI);
     }
