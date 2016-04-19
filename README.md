@@ -63,8 +63,13 @@ parameters:
 *    the mailbox emails are sent from
 *    the administrators mailbox where the system sends notifications to
 *    the flag `Email Confirmation Required` is there to decide whether to involve Emails at all
+*    the workspace a user becomes automatically member of when signing up is now configurable<br/>
+     this is reflected in _Association_ between the sign-up configuration topic and the workspace
+*    the `API Activation` options (namely _API Enabled_, _API Description_, _API Details_, _API Workspace URI_)
+     allow for setting up a second workspace membership which user can opt-in via the new `/sign-up/edit` page
+*    the home page url (redirecting after log-out) and the start page url (redirecting after login) are new options and come with respective configurable messages/labels which are displayed by the UI when redirecting
 
-This configuration topic is associated with the "Plugin" topic representing this plugin.
+A configuration topic is associated with the "Plugin" topic representing this plugin upon installation and can be altered by user `admin`.
 
 ## Licensed under the GPL License 3.0
 
@@ -77,9 +82,25 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 
 ## Version history
 
-Note: These three are still open questions, it is yet unclear how (easy) we can solve this in detail.
+**1.3**, UPCOMING, 2016
 
-1.1, Nov 23, 2015
+Changes:
+
+- New Configuration options in particular as required by dm4-kiezatlas-website:<br/>
+  Added Logout screen and routing to it (on `/sign-up/log-in`) if the user is already logged-in<br/>
+  Added `API Activation` feature which is modelled as an additional workspace membership<br/>
+  Added `/sign-up/edit` view allowing to manage settings  per user account<br/>
+  Added new routing options to have redirects after login/logout configurable<br/>
+- Signed up mailboxes are now stored in the _Administration_ workspace<br/>
+- Provides a OSGi mail notification service for other plugins to send mails to the mailbox configured in _System Recipient Mailbox_
+
+Fixes:
+
+- Bug in client side form validation leading to a possible registration when the username is already taken
+
+
+**1.1**, Nov 23, 2015
+
 - "Email Confirmation Required" is now a new configuration option:<br/>
   If `.. Required`, confirmation mails are send out including a token<br/>
   (valid for 60mins) and a link to proceed with the sign-up process<br/>
@@ -93,7 +114,7 @@ Note: These three are still open questions, it is yet unclear how (easy) we can 
 
 Note: This plugin is not compatible with previous installations of the dm4-sign-up module.
 
-1.0.0, Dec 25, 2014
+**1.0.0**, Dec 25, 2014
 
 - configurable by end-users
 - compatible with 4.4
