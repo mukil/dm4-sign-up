@@ -3,12 +3,14 @@ package org.deepamehta.plugins.signup;
 import com.sun.jersey.api.view.Viewable;
 import de.deepamehta.core.Association;
 import de.deepamehta.core.ChildTopics;
+import de.deepamehta.core.RelatedTopic;
 import de.deepamehta.core.Topic;
 import de.deepamehta.core.model.*;
 import de.deepamehta.core.service.DeepaMehtaEvent;
 import de.deepamehta.core.service.DeepaMehtaService;
 import de.deepamehta.core.service.EventListener;
 import de.deepamehta.core.service.Inject;
+import de.deepamehta.core.service.ResultList;
 import de.deepamehta.core.service.Transactional;
 import de.deepamehta.core.service.accesscontrol.AccessControl;
 import de.deepamehta.core.service.accesscontrol.Credentials;
@@ -239,20 +241,29 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     }
 
     @POST
-    @Path("/confirm/membership/{workspaceUri}")
+    @Path("/confirm/membership/custom")
     @Transactional
     @Override
-    public String createCustomMembership(@PathParam("workspaceUri") String workspaceUri) {
-        Topic workspace = wsService.getWorkspace(workspaceUri);
-        if (workspace != null) {
+    public String createCustomWorkspaceMembershipRequest() {
+        Topic apiMembershipRequestNote = dms.getTopic("uri",
+            new SimpleValue("org.deepamehta.signup.api_membership_requests"));
+        if (apiMembershipRequestNote != null) {
             Topic usernameTopic = acService.getUsernameTopic(acService.getUsername());
-            if (!acService.isMember(usernameTopic.getSimpleValue().toString(), workspace.getId())) {
-                acService.createMembership(usernameTopic.getSimpleValue().toString(), workspace.getId());
-                log.info("Confirmed new Membership for " + usernameTopic.getSimpleValue().toString() + " in " +
-                    "workspace=" + workspace.getSimpleValue().toString());
-                sendSystemMailboxNotification("Custom Workspace Membership Confirmed", "\nHi admin,\n\n"
+            Association requestRelation = getDefaultAssocation(usernameTopic.getId(), apiMembershipRequestNote.getId());
+            if (requestRelation == null) {
+                // acService.createMembership(usernameTopic.getSimpleValue().toString(), workspace.getId());
+                dms.createAssociation(new AssociationModel("dm4.core.association", new TopicRoleModel(usernameTopic.getId(), "dm4.core.default"),
+                    new TopicRoleModel(apiMembershipRequestNote.getId(), "dm4.core.default")));
+                log.info("Request for new custom Workspace Membership by " + usernameTopic.getSimpleValue().toString());
+                sendSystemMailboxNotification("Custom Workspace Membership Requested", "\nHi admin,\n\n"
                     + usernameTopic + " accepted the Terms of Service and confirmed membership in Workspace \""
-                    + workspace.getSimpleValue().toString() + "\"\n\nJust wanted to let you know.\nCheers!");
+                    + customWorkspaceAssignmentTopic.getSimpleValue().toString() + "\"\n\nJust wanted to let you know.\nCheers!");
+            } else {
+                log.info("Revoke Request for custom Workspace Membership by " + usernameTopic.getSimpleValue().toString());
+                sendSystemMailboxNotification("Custom Workspace Membership Revoked", "\nHi admin,\n\n"
+                    + usernameTopic + " just revoked the membership in Workspace \""
+                    + customWorkspaceAssignmentTopic.getSimpleValue().toString() + "\"\n\nJust wanted to let you know.\nCheers!");
+                dms.deleteAssociation(requestRelation.getId());
             }
             // ### Confirm that Assoc belongs to the logged in user (and workspace)
             return "{ \"membership_created\" : " + true + "}";
@@ -383,7 +394,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
                     // 3) fire custom event ### this is useless since fired by "anonymous" (this request scope)
                     dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, usernameTopic);
                     AccessControl acCore = dms.getAccessControl();
-                    // 4) assign new e-mail address topic to admins "Private workspace"
+                    // 4) assign new e-mail address topic to admins "Private workspace" // ###
                     Topic adminWorkspace = dms.getAccessControl().getPrivateWorkspace("admin");
                     acCore.assignToWorkspace(eMailAddress, adminWorkspace.getId());
                     // 5) associate email address to "username" topic too
@@ -529,6 +540,10 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         return dms.getAccessControl().emailAddressExists(value);
     }
 
+    private Association getDefaultAssocation(long topic1, long topic2) {
+        return dms.getAssociation("dm4.core.association",  topic1, topic2, "dm4.core.default", "dm4.core.default");
+    }
+
     /**
      * The sign-up configuration object is loaded once when this bundle/plugin
      * is initialized by the framework and as soon as one configuration was
@@ -579,23 +594,23 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         String username = acService.getUsername();
         if (username != null) {
             // Someone is logged in, prepare her account page
-            Topic usernameTopic = acService.getUsernameTopic(username);
-            Topic mailbox = usernameTopic.getRelatedTopic(USER_MAILBOX_EDGE_TYPE, "dm4.core.parent",
-                "dm4.core.child", MAILBOX_TYPE_URI);
-            String eMailAddressValue = "No value";
-            if (mailbox != null) {
+            // Topic usernameTopic = acService.getUsernameTopic(username);
+            // Topic mailbox = usernameTopic.getRelatedTopic(USER_MAILBOX_EDGE_TYPE, "dm4.core.parent",
+                // "dm4.core.child", MAILBOX_TYPE_URI);
+            String eMailAddressValue = "Email Address Hidden";
+            /** if (mailbox != null) {
                  eMailAddressValue = mailbox.getSimpleValue().toString();
             } else {
                 log.warning("User \"" + username + "\" has no E-Mail Address Value associted."); // Just "admin"
-            }
+            } **/
             viewData("username", username);
             viewData("email", eMailAddressValue);
             viewData("link", "");
             // ### viewData("confirmed", true); // Check if user already has confirmed for a membership
         } else {
             // Not authenticated, can't edit a user account
-            viewData("username", "Not authenticated");
-            viewData("email", "Not authenticated");
+            viewData("username", "Not logged in");
+            viewData("email", "Not logged in");
             viewData("link", "/sign-up/login");
         }
     }

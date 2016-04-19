@@ -24,7 +24,7 @@ public interface SignupPluginService {
      *
      * @return  String  Workspace Topic ID
      */
-    String createCustomMembership(String workspaceUri);
+    String createCustomWorkspaceMembershipRequest();
 
     /** 
      * Handles a sign-up request in regards to whether an Email based confirmation process is configured (true|false)

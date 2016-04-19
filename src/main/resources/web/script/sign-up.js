@@ -69,9 +69,9 @@
     // TODO: This needs a proper workspace cookie, otherwise the server fails upon this request
     function checkAPIAggrement() {
         if (signupConfig.apiWorkspaceURI !== "") {
-            console.log("Custom Workspace URI", signupConfig.apiWorkspaceURI)
+            // console.log("Custom Workspace URI", signupConfig.apiWorkspaceURI)
             xhr = new XMLHttpRequest()
-            xhr.open("POST", "/sign-up/confirm/membership/" + signupConfig.apiWorkspaceURI, false)
+            xhr.open("POST", "/sign-up/confirm/membership/custom", false)
             xhr.send()
         }
         // console.log("Todo: Implement check if API Terms of use were accepted.")

@@ -4,19 +4,22 @@ import de.deepamehta.core.Topic;
 import de.deepamehta.core.TopicType;
 import de.deepamehta.core.model.AssociationDefinitionModel;
 import de.deepamehta.core.model.SimpleValue;
-import de.deepamehta.core.model.TopicTypeModel;
+import de.deepamehta.core.service.Inject;
 import de.deepamehta.core.service.Migration;
+import de.deepamehta.plugins.workspaces.WorkspacesService;
 
 import java.util.logging.Logger;
 
 /**
- * Extends the Sign-up Plugin Configuration about all "API" related configuration options.
+ * Extends the Sign-up Plugin Configuration about "API" related sign-up configuration options.
  */
 public class Migration7 extends Migration {
 
     private Logger logger = Logger.getLogger(getClass().getName());
 
-    // ### TODO: We have (deliberately) missed to create new Workspace Assignments here.
+    // ### TODO: We have (deliberately) missed to create new Workspace Assignments (for these new child topics) here.
+    @Inject
+    private WorkspacesService wsService;
 
     @Override
     public void run() {
