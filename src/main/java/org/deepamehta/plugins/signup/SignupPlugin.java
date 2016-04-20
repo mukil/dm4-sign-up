@@ -242,15 +242,14 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Transactional
     @Override
     public String createCustomWorkspaceMembershipRequest() {
-        Topic apiMembershipRequestNote = dms.getTopic("uri",
-            new SimpleValue("org.deepamehta.signup.api_membership_requests"));
+        Topic apiMembershipRequestNote = dm4.getTopicByUri("org.deepamehta.signup.api_membership_requests");
         if (apiMembershipRequestNote != null) {
             Topic usernameTopic = acService.getUsernameTopic(acService.getUsername());
             Association requestRelation = getDefaultAssocation(usernameTopic.getId(), apiMembershipRequestNote.getId());
             if (requestRelation == null) {
                 // acService.createMembership(usernameTopic.getSimpleValue().toString(), workspace.getId());
-                dms.createAssociation(new AssociationModel("dm4.core.association", new TopicRoleModel(usernameTopic.getId(), "dm4.core.default"),
-                    new TopicRoleModel(apiMembershipRequestNote.getId(), "dm4.core.default")));
+                dm4.createAssociation(mf.newAssociationModel("dm4.core.association", mf.newTopicRoleModel(usernameTopic.getId(), "dm4.core.default"),
+                    mf.newTopicRoleModel(apiMembershipRequestNote.getId(), "dm4.core.default")));
                 log.info("Request for new custom Workspace Membership by " + usernameTopic.getSimpleValue().toString());
                 sendSystemMailboxNotification("Custom Workspace Membership Requested", "\nHi admin,\n\n"
                     + usernameTopic + " accepted the Terms of Service and confirmed membership in Workspace \""
@@ -260,7 +259,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                 sendSystemMailboxNotification("Custom Workspace Membership Revoked", "\nHi admin,\n\n"
                     + usernameTopic + " just revoked the membership in Workspace \""
                     + customWorkspaceAssignmentTopic.getSimpleValue().toString() + "\"\n\nJust wanted to let you know.\nCheers!");
-                dms.deleteAssociation(requestRelation.getId());
+                dm4.deleteAssociation(requestRelation.getId());
             }
             // ### Confirm that Assoc belongs to the logged in user (and workspace)
             return "{ \"membership_created\" : " + true + "}";
@@ -366,7 +365,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     }
 
     private String createSimpleUserAccount(String username, String password, String mailbox) {
-        DeepaMehtaTransaction tx = dms.beginTx();
+        DeepaMehtaTransaction tx = dm4.beginTx();
         try {
             if (isUsernameTaken(username)) {
                 // Might be thrown if two users compete for registration (of the same username)
@@ -386,10 +385,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     Topic eMailAddress = dm4.createTopic(mf.newTopicModel(MAILBOX_TYPE_URI,
                         new SimpleValue(eMailAddressValue)));
                     // 3) fire custom event ### this is useless since fired by "anonymous" (this request scope)
-                    dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, usernameTopic);
-                    AccessControl acCore = dms.getAccessControl();
+                    dm4.fireEvent(USER_ACCOUNT_CREATE_LISTENER, usernameTopic);
+                    AccessControl acCore = dm4.getAccessControl();
                     // 4) assign new e-mail address topic to admins "Private workspace" // ### administration workspace
-                    Topic adminWorkspace = dms.getAccessControl().getPrivateWorkspace("admin");
+                    Topic adminWorkspace = dm4.getAccessControl().getPrivateWorkspace("admin");
                     acCore.assignToWorkspace(eMailAddress, adminWorkspace.getId());
                     // 5) associate email address to "username" topic too
                     Association assoc = dm4.createAssociation(mf.newAssociationModel(USER_MAILBOX_EDGE_TYPE,
@@ -535,7 +534,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     }
 
     private Association getDefaultAssocation(long topic1, long topic2) {
-        return dms.getAssociation("dm4.core.association",  topic1, topic2, "dm4.core.default", "dm4.core.default");
+        return dm4.getAssociation("dm4.core.association",  topic1, topic2, "dm4.core.default", "dm4.core.default");
     }
 
     /**

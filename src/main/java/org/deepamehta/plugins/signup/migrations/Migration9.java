@@ -4,8 +4,8 @@ import de.deepamehta.core.Topic;
 import de.deepamehta.core.model.SimpleValue;
 import de.deepamehta.core.service.Inject;
 import de.deepamehta.core.service.Migration;
-import de.deepamehta.plugins.accesscontrol.AccessControlService;
-import de.deepamehta.plugins.workspaces.WorkspacesService;
+import de.deepamehta.accesscontrol.AccessControlService;
+import de.deepamehta.workspaces.WorkspacesService;
 
 import java.util.logging.Logger;
 
@@ -24,7 +24,7 @@ public class Migration9 extends Migration {
 
         logger.info("### Assigning \"API Workspace Membership Request Topic\" to System Workspace ###");
         Topic systemWorkspace = wsService.getWorkspace(AccessControlService.SYSTEM_WORKSPACE_URI);
-        Topic apiMembershipNote = dms.getTopic("uri", new SimpleValue("org.deepamehta.signup.api_membership_requests"));
+        Topic apiMembershipNote = dm4.getTopicByUri("org.deepamehta.signup.api_membership_requests");
         wsService.assignToWorkspace(apiMembershipNote, systemWorkspace.getId());
 
     }
