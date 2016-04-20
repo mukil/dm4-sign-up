@@ -64,9 +64,9 @@ parameters:
 *    the administrators mailbox where the system sends notifications to
 *    the flag `Email Confirmation Required` is there to decide whether to involve Emails at all
 *    the workspace a user becomes automatically member of when signing up is now configurable<br/>
-     this is reflected in _Association_ between the sign-up configuration topic and the workspace
-*    the `API Activation` options (namely _API Enabled_, _API Description_, _API Details_, _API Workspace URI_)
-     allow for setting up a second workspace membership which user can opt-in via the new `/sign-up/edit` page
+     this is simply reflected in _Association_ between the sign-up configuration topic and the workspace, meaning if there is such an assocation members will automatically get a membership to this workspace (if it is not _Confidential_ or _Private_)
+*    furthermore, an additional custom workspace setting is available<br/>
+     (_API Enabled_, _API Description_, _API Details_, _API Workspace URI_), this allows to configure a second, opt-in style, workspace membership for which user can make a membership request on the new `/sign-up/edit` page
 *    the home page url (redirecting after log-out) and the start page url (redirecting after login) are new options and come with respective configurable messages/labels which are displayed by the UI when redirecting
 
 A configuration topic is associated with the "Plugin" topic representing this plugin upon installation and can be altered by user `admin`. Setting input fields to an empty value means deactivating the features who depend on this configuration value it.
@@ -88,7 +88,7 @@ Changes:
 
 - New Configuration options in particular as required by dm4-kiezatlas-website:<br/>
   Displaying Logout functionality if the user is currently logged-in and visits the login page<br/>
-  Added custom workspace feature, modelled as a _Note_ relating requests for an additional workspace membership<br/>
+  Added two custom workspace membership features: 1) is set up via a simple _Association_ between the Workspace and the Sign-up Configuraton topic and the other 2) is modelled as a _Note_ relating requests for an additional workspace membership (which works for _private_ or _confidential_ workspaces)<br/>
   A new route `/sign-up/edit` view allowing to manage this custom workspace feature<br/>
   Added options to have redirects after login/logout configurable<br/>
 - Signed up mailboxes are for now stored in _admins_ _Private Workspace_ workspace<br/>

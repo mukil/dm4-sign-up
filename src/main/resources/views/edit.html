@@ -10,8 +10,8 @@
         <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
         <script th:inline="javascript">
         /*<![CDATA[*/
-            signupConfig.apiEnabled = /*[[${api_enabled}]]*/ false;
-            signupConfig.apiWorkspaceURI = /*[[${api_workspace_uri}]]*/ '';
+            signupConfig.customWorkspaceEnabled = /*[[${custom_workspace_enabled}]]*/ false;
+            signupConfig.customWorkspaceURI = /*[[${custom_workspace_uri}]]*/ '';
             signupConfig.appLoadingMessage = /*[[${loading_app_hint}]]*/ 'Loading Webclient';
             signupConfig.appLoggingOutHint = /*[[${logging_out_hint}]]*/ 'Logging out..';
             signupConfig.appStartPageURL = /*[[${start_url}]]*/ '/';
@@ -27,11 +27,11 @@
 
         <p>&nbsp;</p>
 
-        <div id="sign-up-view">
+        <div class="dialog-body">
             <h2>Infos associated with your username</h2>
             <form class="account-edit-form" action="javascript:voidFunction();" onsubmit="javascript:saveAccountEdits()">
                 <!--label for="username">Username</label-->
-                <input id="username" disabled="true" type="text" th:value="${username}" name="username" class="api-up username" />
+                <input id="username" disabled="true" type="text" th:value="${username}" name="username" class="custom-ws-up username" />
                 <!-- Adapt Mailbox -->
                 <input type="text" disabled="true" id="mailbox" name="mailbox" th:value="${email}" class="sign-up mailbox" />
                 <!--div id="message-view"><span id="message"></span></div>
@@ -44,15 +44,15 @@
             </div>
         </div>
 
-        <div th:if="${api_enabled}" id="api-text">
-            <h2>Activate API Option</h2>
+        <div th:if="${custom_workspace_enabled} and ${logged_in}" id="custom-ws-text" class="dialog-body">
+            <h2>Aktivierung der API Option</h2>
             <p>To make use of the Kiezatlas Data in your website or platform you can connect to our API with a client.<br/>
                To do so you just need to understand and agree to our <i>Terms of service</i> for the API and tick the following box.</p>
-            <form name="api-aggreement" action="javascript:voidFunction();">
-                <input id="apischeck" type="checkbox" onclick="javascript:doCheckAPIAggrement()" class="tos-check"></input>
-                <label for="apischeck" th:text="${tos_label}">I agree with the API <i>Terms of use</i>.</label>
-                <a href="javascript:showAPITermsText()" title="Read Details">Read more</a><br/>
-                <div id="api-info" th:utext="${api_details}"></div>
+            <form name="custom-aggreement" action="javascript:voidFunction();">
+                <input id="custom-ws-check" type="checkbox" onclick="javascript:doCheckCustomWorkspaceAggrement()" class="tos-check"></input>
+                <label for="custom-ws-check" th:utext="${custom_workspace_description}">I also agree with the custom workspace <i>Terms of use</i>.</label>
+                <a href="javascript:showCustomWorkspaceTermsText()" title="Read Details">Read more</a><br/>
+                <div id="custom-ws-info" th:utext="${custom_workspace_details}"></div>
                 <div id="message-view"><span id="message"></span></div>
             </form>
         </div>

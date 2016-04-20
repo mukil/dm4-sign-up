@@ -3,14 +3,12 @@ package org.deepamehta.plugins.signup;
 import com.sun.jersey.api.view.Viewable;
 import de.deepamehta.core.Association;
 import de.deepamehta.core.ChildTopics;
-import de.deepamehta.core.RelatedTopic;
 import de.deepamehta.core.Topic;
 import de.deepamehta.core.model.*;
 import de.deepamehta.core.service.DeepaMehtaEvent;
 import de.deepamehta.core.service.DeepaMehtaService;
 import de.deepamehta.core.service.EventListener;
 import de.deepamehta.core.service.Inject;
-import de.deepamehta.core.service.ResultList;
 import de.deepamehta.core.service.Transactional;
 import de.deepamehta.core.service.accesscontrol.AccessControl;
 import de.deepamehta.core.service.accesscontrol.Credentials;
@@ -577,10 +575,10 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             viewData("home_url", configuration.getTopic(CONFIG_HOME_PAGE_URL).getSimpleValue().toString());
             viewData("loading_app_hint", configuration.getTopic(CONFIG_LOADING_HINT).getSimpleValue().toString());
             viewData("logging_out_hint", configuration.getTopic(CONFIG_LOGGING_OUT_HINT).getSimpleValue().toString());
-            viewData("api_enabled", configuration.getBoolean(CONFIG_API_ENABLED));
-            viewData("api_details", configuration.getTopic(CONFIG_API_DETAILS).getSimpleValue().toString());
-            viewData("api_description", configuration.getTopic(CONFIG_API_DESCRIPTION).getSimpleValue().toString());
-            viewData("api_workspace_uri", configuration.getTopic(CONFIG_API_WORKSPACE_URI).getSimpleValue().toString());
+            viewData("custom_workspace_enabled", configuration.getBoolean(CONFIG_API_ENABLED));
+            viewData("custom_workspace_description", configuration.getTopic(CONFIG_API_DESCRIPTION).getSimpleValue().toString());
+            viewData("custom_workspace_details", configuration.getTopic(CONFIG_API_DETAILS).getSimpleValue().toString());
+            viewData("custom_workspace_uri", configuration.getTopic(CONFIG_API_WORKSPACE_URI).getSimpleValue().toString());
         } else {
             log.warning("Could not load module configuration during page preparation!");
         }
@@ -589,22 +587,18 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     private void prepareAccountEditPage() {
         String username = acService.getUsername();
         if (username != null) {
-            // Someone is logged in, prepare her account page
-            // Topic usernameTopic = acService.getUsernameTopic(username);
+            // Someone is logged in, prepare her account page has no permission to edit or view her mailbox
             // Topic mailbox = usernameTopic.getRelatedTopic(USER_MAILBOX_EDGE_TYPE, "dm4.core.parent",
                 // "dm4.core.child", MAILBOX_TYPE_URI);
             String eMailAddressValue = "Email Address Hidden";
-            /** if (mailbox != null) {
-                 eMailAddressValue = mailbox.getSimpleValue().toString();
-            } else {
-                log.warning("User \"" + username + "\" has no E-Mail Address Value associted."); // Just "admin"
-            } **/
+            viewData("logged_in", true);
             viewData("username", username);
             viewData("email", eMailAddressValue);
             viewData("link", "");
             // ### viewData("confirmed", true); // Check if user already has confirmed for a membership
         } else {
-            // Not authenticated, can't edit a user account
+            // Not authenticated, can't do nothing but login
+            viewData("logged_in", false);
             viewData("username", "Not logged in");
             viewData("email", "Not logged in");
             viewData("link", "/sign-up/login");

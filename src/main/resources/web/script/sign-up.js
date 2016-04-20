@@ -4,8 +4,8 @@
 
     // Sign-up Configuration Object Initialized via Thymeleaf
     var signupConfig = {
-        "apiEnabled"        : false,
-        "apiWorkspaceURI"   : "",
+        "customWorkspaceEnabled" : false,
+        "customWorkspaceURI" : "",
         "appLoadingMessage" : "Loading Webclient",
         "appLoggingOutHint" : "Logging out...",
         "appStartPageURL"   : "/",
@@ -67,9 +67,9 @@
     // --- Plain JavaScript form
 
     // Assigns username to a Note topic residing in System workspace, if apiWorkspaceUri is set
-    function doCheckAPIAggrement() {
+    function doCheckCustomWorkspaceAggrement() {
         if (signupConfig.apiWorkspaceURI !== "") {
-            // console.log("Custom Workspace URI", signupConfig.apiWorkspaceURI)
+            // console.log("Custom Workspace URI", signupConfig.customWorkspaceURI)
             xhr = new XMLHttpRequest()
             xhr.open("POST", "/sign-up/confirm/membership/custom", false) // Synchronous request
             xhr.send()
@@ -215,8 +215,8 @@
         // a custom void(); return false; }
     }
 
-    function showAPITermsText() {
-        var textArea = document.getElementById('api-info')
+    function showCustomWorkspaceTermsText() {
+        var textArea = document.getElementById('custom-ws-info')
             textArea.setAttribute("style", "display: block;")
     }
 
