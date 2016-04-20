@@ -77,6 +77,7 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 
 ### TODOs
 
+- Internationalization of all button labels
 - Switch plugin configuration to the new dm4-config facility
 
 ## Version history

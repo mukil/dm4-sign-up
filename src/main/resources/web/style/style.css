@@ -33,6 +33,7 @@ body.ok-page p {
 }
 
 #account-info,
+#api-info,
 #private-info {
     display: none;
 }

@@ -4,7 +4,7 @@
 
     <head>
         <meta charset="utf-8"></meta>
-        <title th:text="'Account Details - ' + ${title}">Account Details</title>
+        <title th:text="'Edit Subscription - ' + ${title}">Account Details</title>
         <link rel="stylesheet"  th:href="${css_path}" type="text/css" />
         <script type="text/javascript" src="/de.deepamehta.accesscontrol/script/vendor/sha256.js"></script>
         <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
@@ -29,7 +29,7 @@
 
         <div id="sign-up-view">
             <h2>Infos associated with your username</h2>
-            <form class="account-edit-form" action="javascript:void()" onsubmit="javascript:saveAccountEdits()">
+            <form class="account-edit-form" action="javascript:voidFunction();" onsubmit="javascript:saveAccountEdits()">
                 <!--label for="username">Username</label-->
                 <input id="username" disabled="true" type="text" th:value="${username}" name="username" class="api-up username" />
                 <!-- Adapt Mailbox -->
@@ -48,11 +48,12 @@
             <h2>Activate API Option</h2>
             <p>To make use of the Kiezatlas Data in your website or platform you can connect to our API with a client.<br/>
                To do so you just need to understand and agree to our <i>Terms of service</i> for the API and tick the following box.</p>
-            <form name="api-aggreement" action="javascript:void()">
-                <input id="apischeck" type="checkbox" onclick="javascript:checkAPIAggrement()" class="tos-check"></input>
+            <form name="api-aggreement" action="javascript:voidFunction();">
+                <input id="apischeck" type="checkbox" onclick="javascript:doCheckAPIAggrement()" class="tos-check"></input>
                 <label for="apischeck" th:text="${tos_label}">I agree with the API <i>Terms of use</i>.</label>
                 <a href="javascript:showAPITermsText()" title="Read Details">Read more</a><br/>
-                <div id="account-info" th:utext="${api_details}"></div>
+                <div id="api-info" th:utext="${api_details}"></div>
+                <div id="message-view"><span id="message"></span></div>
             </form>
         </div>
 

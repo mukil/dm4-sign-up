@@ -180,12 +180,11 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             } else {
                 createSimpleUserAccount(username, password, mailbox);
                 if (DM4_ACCOUNTS_ENABLED) {
-                    log.info("Sign-up Configuration: Email based confirmation workflow inactive. The new user account" +
-                            " created is ENABLED.");
+                    log.info("Sign-up Configuration: Email based confirmation workflow inactive."
+                        + "The new account is ENABLED.");
                     // redirecting user to the "your account is now active" page
                     prepareSignupPage();
-                    viewData("username", username);
-                    throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/ok")).build());
+                    throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/"+username+"/ok")).build());
                 } else {
                     log.info("Sign-up Configuration: Email based confirmation workflow inactive but new user account " +
                             "created is DISABLED.");
@@ -237,7 +236,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
             log.log(Level.INFO, "> Account activation by an administrator remains PENDING ");
             return getAccountCreationPendingView();
         }
-        return getAccountCreationOKView();
+        return getAccountCreationOKView(username);
     }
 
     @POST
@@ -293,10 +292,11 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     }
 
     @GET
-    @Path("/ok")
+    @Path("/{username}/ok")
     @Produces(MediaType.TEXT_HTML)
-    public Viewable getAccountCreationOKView() {
+    public Viewable getAccountCreationOKView(@PathParam("username") String username) {
         prepareSignupPage();
+        viewData("username", username);
         return view("ok");
     }
 
@@ -330,7 +330,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
     public Viewable getAccountDetailsView() {
         prepareSignupPage();
         prepareAccountEditPage();
-        return view("account");
+        return view("edit");
     }
 
     @Override
@@ -346,9 +346,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
 
     // --- Private Helpers --- //
 
-    private void createUserValidationToken(@PathParam("username") String username,
-                                           @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox) {
-        //
+    private void createUserValidationToken(String username, String password, String mailbox) {
         try {
             String key = UUID.randomUUID().toString();
             long valid = new Date().getTime() + 3600000; // Token is valid fo 60 min
@@ -369,9 +367,7 @@ public class SignupPlugin extends WebActivatorPlugin implements SignupPluginServ
         }
     }
 
-    private String createSimpleUserAccount(@PathParam("username") String username,
-                                           @PathParam("pass-one") String password,
-                                           @PathParam("mailbox") String mailbox) {
+    private String createSimpleUserAccount(String username, String password, String mailbox) {
         DeepaMehtaTransaction tx = dms.beginTx();
         try {
             if (isUsernameTaken(username)) {

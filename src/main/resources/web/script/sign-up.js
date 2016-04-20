@@ -66,17 +66,14 @@
 
     // --- Plain JavaScript form
 
-    // Assigns username to a Note topic residing in System workspace
-    function checkAPIAggrement() {
+    // Assigns username to a Note topic residing in System workspace, if apiWorkspaceUri is set
+    function doCheckAPIAggrement() {
         if (signupConfig.apiWorkspaceURI !== "") {
             // console.log("Custom Workspace URI", signupConfig.apiWorkspaceURI)
             xhr = new XMLHttpRequest()
-            xhr.open("POST", "/sign-up/confirm/membership/custom", false)
+            xhr.open("POST", "/sign-up/confirm/membership/custom", false) // Synchronous request
             xhr.send()
         }
-        // console.log("Todo: Implement check if API Terms of use were accepted.")
-        // console.log("Todo: Immediately update Membership to the Reporting WS accordingly")
-        
     }
 
     function saveAccountEdits() {
@@ -125,7 +122,6 @@
         xhr = new XMLHttpRequest()
         if (userInput) {
             xhr.onload = function(e) {
-                console.log("Checked Username Availability")
                 var response = JSON.parse(xhr.response)
                 if (!response.isAvailable) {
                     renderWarning("This username is already taken.")
@@ -148,7 +144,6 @@
         if (mailBox) {
             xhr = new XMLHttpRequest()
             xhr.onload = function(e) {
-                console.log("Checked Mailbox Availability")
                 var response = JSON.parse(xhr.response)
                 if (!response.isAvailable) {
                     renderWarning("This E-Mail address is already registered.")
@@ -214,6 +209,15 @@
         renderWarning("First, please check our terms and conditions.")
         disableSignupForm()
         return null
+    }
+
+    function voidFunction() {
+        // a custom void(); return false; }
+    }
+
+    function showAPITermsText() {
+        var textArea = document.getElementById('api-info')
+            textArea.setAttribute("style", "display: block;")
     }
 
     function showLabsPrivateText() {
