@@ -19,15 +19,15 @@
     <body class="log-in-page sign-up">
 
         <div id="page-header">
-            <a href="/de.deepamehta.webclient/" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
+            <a th:href="${home_url}" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
                 <img th:src="${logo_path}" src="/org.deepamehta.sign-up/images/deepamehta-logo.png" class="webapp-logo"
                     th:title="${title} + ' Logo'" th:alt="${title} + ' Logo'" width="160" /><br/>
                 <span class="project-title" th:title="'Click to Launch ' + ${title}" th:text="${title}">DeepaMehta Webclient</span>
             </a>
         </div>
-        <div id="log-in-view">
+        <div id="log-in-view" class="dialog-body">
             <h2>Log in</h2>
-            <form class="log-in-form" action="javascript:doLogin()">
+            <form class="log-in-form" action="javascript:voidFunction();" onsubmit="javascript:doLogin()">
                 <!-- label for="username">Username</label-->
                 <input id="username" type="text" name="username" placeholder="Username" class="log-in username" />
                 <!-- label for="password">Password</label-->
@@ -40,9 +40,9 @@
         <div id="page-footer" th:utext="${footer}">
         </div>
 
-        <div class="stats">
+        <!-- div class="stats">ka:2, wtui:3, mydm:6 
             <img src="//stats.infokitchen.net/piwik.php?idsite=6&amp;rec=1&amp;action_name=login" style="border:0" alt="" />
-        </div>
+        </div-->
 
     </body>
 

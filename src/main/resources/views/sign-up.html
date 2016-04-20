@@ -5,7 +5,7 @@
     <head>
         <meta charset="utf-8"></meta>
         <title th:text="'Sign up - ' + ${title}">Sign up</title>
-        <link rel="stylesheet"  th:href="${css_path}" type="text/css" />
+        <link rel="stylesheet" th:href="${css_path}" type="text/css" />
         <script type="text/javascript" src="/de.deepamehta.accesscontrol/script/vendor/sha256.js"></script>
         <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
     </head>
@@ -13,7 +13,7 @@
     <body class="sign-up-page sign-up">
 
         <div id="page-header">
-            <a href="/de.deepamehta.webclient" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
+            <a th:href="${home_url}" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
                 <img th:src="${logo_path}" src="/org.deepamehta.sign-up/images/deepamehta-logo.png" class="webapp-logo"
                     th:title="${title} + ' Logo'" th:alt="${title} + ' Logo'" width="160" /><br/>
                 <span class="project-title" th:title="'Click to Launch ' + ${title}" th:text="${title}">DeepaMehta Webclient</span>
@@ -21,12 +21,12 @@
         </div>
 
         <div id="pre-text">
-            <form name="aggreement" action="javascript:void()">
+            <form name="aggreement">
                 <input id="toscheck" type="checkbox" onclick="javascript:checkAgreements()" class="tos-check"></input>
                 <label for="toscheck" th:text="${tos_label}">I agree with the projects Terms of use.</label>
-                <a href="javascript:showLabsTermsText()" title="Read Details">Read more</a><br/>
-                <div id="account-info" th:utext="${tos_details}">
-                </div>
+                <a href="javascript:showLabsTermsText()" title="Read Details">Read more</a>
+                <br/>
+                <div id="account-info" th:utext="${tos_details}"></div>
                 <input id="privateinfo" type="checkbox" onclick="javascript:checkAgreements()" class="private-info-check"></input>
                 <label for="privateinfo" th:text="${pd_label}">I understand that any private information I give to this site may be made publicly available.</label>
                 <a href="javascript:showLabsPrivateText()" title="Read Details">Read more</a><br/>
@@ -35,12 +35,12 @@
             </form>
         </div>
 
-        <div id="sign-up-view">
+        <div id="sign-up-view" class="dialog-body">
             <h2>Sign up</h2>
-            <form class="sign-up-form" action="javascript:void()" onsubmit="javascript:createAccount()">
+            <form class="sign-up-form" action="javascript:voidFunction();" onsubmit="javascript:createAccount();">
                 <!-- label for="username">Username</label-->
                 <input id="username" type="text" name="username" placeholder="Username"
-                       onchange="checkUserNameAvailability()" onblur="checkUserNameAvailability()" class="sign-up username" />
+                       onchange="checkUserNameAvailability()" class="sign-up username" />
                 <!-- label for="pass-one">Password</label-->
                 <input type="password" id="pass-one" name="pass-one" placeholder="Password"
                        onchange="checkPassword()" class="sign-up password" />
@@ -59,16 +59,16 @@
         <div id="page-footer" th:utext="${footer}">
         </div>
 
-        <div class="stats">
+        <!-- div class="stats">ka:2, wtui:3, mydm:6 
             <img src="//stats.infokitchen.net/piwik.php?idsite=6&amp;rec=1&amp;action_name=signup" style="border:0" alt="" />
-        </div>
+        </div> -->
 
     </body>
 
     <noscript>
-        Without JavaScript we can not check if your desired username is already taken and we cannot check in advance
+        Without JavaScript we can not check if your desired username or mailbox is already in use. This means we cannot check in advance
         if your chosen password meets our requirements (minimum of 8 characters).
-        Thus, your account creation may just silently fail. Thanks for your understanding.
+        Thus, your account creation may just fail. Thanks for your understanding.
     </noscript>
 
 </html>

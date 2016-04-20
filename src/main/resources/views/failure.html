@@ -11,14 +11,14 @@
     <body class="ok-page sign-up">
         
         <div id="page-header">
-            <a href="/de.deepamehta.webclient/" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
+            <a th:href="${home_url}" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
                 <img th:src="${logo_path}" src="/org.deepamehta.sign-up/images/deepamehta-logo.png" class="webapp-logo"
                     th:title="${title} + ' Logo'" th:alt="${title} + ' Logo'" width="160" /><br/>
                 <span class="project-title" th:title="'Click to Launch ' + ${title}" th:text="${title}">DeepaMehta Webclient</span>
             </a>
         </div>
         
-        <div id="receipt-view">
+        <div id="receipt-view" class="dialog-body">
             <h2 th:text="${message}"></h2>
             <p>
                 Your user account could not be created.
@@ -27,9 +27,9 @@
             </p>
         </div>
 
-        <div class="stats">
+        <!-- div class="stats">ka:2, wtui:3, mydm:6 
             <img src="//stats.infokitchen.net/piwik.php?idsite=6&amp;rec=1&amp;action_name=failure" style="border:0" alt="" />
-        </div>
+        </div-->
 
     </body>
 

@@ -178,12 +178,11 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             } else {
                 createSimpleUserAccount(username, password, mailbox);
                 if (DM4_ACCOUNTS_ENABLED) {
-                    log.info("Sign-up Configuration: Email based confirmation workflow inactive. The new user account" +
-                            " created is ENABLED.");
+                    log.info("Sign-up Configuration: Email based confirmation workflow inactive."
+                        + "The new account is ENABLED.");
                     // redirecting user to the "your account is now active" page
                     prepareSignupPage();
-                    viewData("username", username);
-                    throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/ok")).build());
+                    throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/"+username+"/ok")).build());
                 } else {
                     log.info("Sign-up Configuration: Email based confirmation workflow inactive but new user account " +
                             "created is DISABLED.");
@@ -235,24 +234,33 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             log.log(Level.INFO, "> Account activation by an administrator remains PENDING ");
             return getAccountCreationPendingView();
         }
-        return getAccountCreationOKView();
+        return getAccountCreationOKView(username);
     }
 
     @POST
-    @Path("/confirm/membership/{workspaceUri}")
+    @Path("/confirm/membership/custom")
     @Transactional
     @Override
-    public String createCustomMembership(@PathParam("workspaceUri") String workspaceUri) {
-        Topic workspace = wsService.getWorkspace(workspaceUri);
-        if (workspace != null) {
+    public String createCustomWorkspaceMembershipRequest() {
+        Topic apiMembershipRequestNote = dms.getTopic("uri",
+            new SimpleValue("org.deepamehta.signup.api_membership_requests"));
+        if (apiMembershipRequestNote != null) {
             Topic usernameTopic = acService.getUsernameTopic(acService.getUsername());
-            if (!acService.isMember(usernameTopic.getSimpleValue().toString(), workspace.getId())) {
-                acService.createMembership(usernameTopic.getSimpleValue().toString(), workspace.getId());
-                log.info("Confirmed new Membership for " + usernameTopic.getSimpleValue().toString() + " in " +
-                    "workspace=" + workspace.getSimpleValue().toString());
-                sendSystemMailboxNotification("Custom Workspace Membership Confirmed", "\nHi admin,\n\n"
+            Association requestRelation = getDefaultAssocation(usernameTopic.getId(), apiMembershipRequestNote.getId());
+            if (requestRelation == null) {
+                // acService.createMembership(usernameTopic.getSimpleValue().toString(), workspace.getId());
+                dms.createAssociation(new AssociationModel("dm4.core.association", new TopicRoleModel(usernameTopic.getId(), "dm4.core.default"),
+                    new TopicRoleModel(apiMembershipRequestNote.getId(), "dm4.core.default")));
+                log.info("Request for new custom Workspace Membership by " + usernameTopic.getSimpleValue().toString());
+                sendSystemMailboxNotification("Custom Workspace Membership Requested", "\nHi admin,\n\n"
                     + usernameTopic + " accepted the Terms of Service and confirmed membership in Workspace \""
-                    + workspace.getSimpleValue().toString() + "\"\n\nJust wanted to let you know.\nCheers!");
+                    + customWorkspaceAssignmentTopic.getSimpleValue().toString() + "\"\n\nJust wanted to let you know.\nCheers!");
+            } else {
+                log.info("Revoke Request for custom Workspace Membership by " + usernameTopic.getSimpleValue().toString());
+                sendSystemMailboxNotification("Custom Workspace Membership Revoked", "\nHi admin,\n\n"
+                    + usernameTopic + " just revoked the membership in Workspace \""
+                    + customWorkspaceAssignmentTopic.getSimpleValue().toString() + "\"\n\nJust wanted to let you know.\nCheers!");
+                dms.deleteAssociation(requestRelation.getId());
             }
             // ### Confirm that Assoc belongs to the logged in user (and workspace)
             return "{ \"membership_created\" : " + true + "}";
@@ -282,10 +290,11 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     }
 
     @GET
-    @Path("/ok")
+    @Path("/{username}/ok")
     @Produces(MediaType.TEXT_HTML)
-    public Viewable getAccountCreationOKView() {
+    public Viewable getAccountCreationOKView(@PathParam("username") String username) {
         prepareSignupPage();
+        viewData("username", username);
         return view("ok");
     }
 
@@ -319,7 +328,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     public Viewable getAccountDetailsView() {
         prepareSignupPage();
         prepareAccountEditPage();
-        return view("account");
+        return view("edit");
     }
 
     @Override
@@ -335,9 +344,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     // --- Private Helpers --- //
 
-    private void createUserValidationToken(@PathParam("username") String username,
-                                           @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox) {
-        //
+    private void createUserValidationToken(String username, String password, String mailbox) {
         try {
             String key = UUID.randomUUID().toString();
             long valid = new Date().getTime() + 3600000; // Token is valid fo 60 min
@@ -358,10 +365,8 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         }
     }
 
-    private String createSimpleUserAccount(@PathParam("username") String username,
-                                           @PathParam("pass-one") String password,
-                                           @PathParam("mailbox") String mailbox) {
-        DeepaMehtaTransaction tx = dm4.beginTx();
+    private String createSimpleUserAccount(String username, String password, String mailbox) {
+        DeepaMehtaTransaction tx = dms.beginTx();
         try {
             if (isUsernameTaken(username)) {
                 // Might be thrown if two users compete for registration (of the same username)
@@ -381,10 +386,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     Topic eMailAddress = dm4.createTopic(mf.newTopicModel(MAILBOX_TYPE_URI,
                         new SimpleValue(eMailAddressValue)));
                     // 3) fire custom event ### this is useless since fired by "anonymous" (this request scope)
-                    dm4.fireEvent(USER_ACCOUNT_CREATE_LISTENER, usernameTopic);
-                    AccessControl acCore = dm4.getAccessControl();
-                    // 4) assign new e-mail address topic to admins "Private workspace"
-                    Topic adminWorkspace = dm4.getAccessControl().getPrivateWorkspace("admin");
+                    dms.fireEvent(USER_ACCOUNT_CREATE_LISTENER, usernameTopic);
+                    AccessControl acCore = dms.getAccessControl();
+                    // 4) assign new e-mail address topic to admins "Private workspace" // ### administration workspace
+                    Topic adminWorkspace = dms.getAccessControl().getPrivateWorkspace("admin");
                     acCore.assignToWorkspace(eMailAddress, adminWorkspace.getId());
                     // 5) associate email address to "username" topic too
                     Association assoc = dm4.createAssociation(mf.newAssociationModel(USER_MAILBOX_EDGE_TYPE,
@@ -529,6 +534,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return dm4.getAccessControl().emailAddressExists(value);
     }
 
+    private Association getDefaultAssocation(long topic1, long topic2) {
+        return dms.getAssociation("dm4.core.association",  topic1, topic2, "dm4.core.default", "dm4.core.default");
+    }
+
     /**
      * The sign-up configuration object is loaded once when this bundle/plugin
      * is initialized by the framework and as soon as one configuration was
@@ -566,10 +575,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("home_url", configuration.getTopic(CONFIG_HOME_PAGE_URL).getSimpleValue().toString());
             viewData("loading_app_hint", configuration.getTopic(CONFIG_LOADING_HINT).getSimpleValue().toString());
             viewData("logging_out_hint", configuration.getTopic(CONFIG_LOGGING_OUT_HINT).getSimpleValue().toString());
-            viewData("api_enabled", configuration.getBoolean(CONFIG_API_ENABLED));
-            viewData("api_details", configuration.getTopic(CONFIG_API_DETAILS).getSimpleValue().toString());
-            viewData("api_description", configuration.getTopic(CONFIG_API_DESCRIPTION).getSimpleValue().toString());
-            viewData("api_workspace_uri", configuration.getTopic(CONFIG_API_WORKSPACE_URI).getSimpleValue().toString());
+            viewData("custom_workspace_enabled", configuration.getBoolean(CONFIG_API_ENABLED));
+            viewData("custom_workspace_description", configuration.getTopic(CONFIG_API_DESCRIPTION).getSimpleValue().toString());
+            viewData("custom_workspace_details", configuration.getTopic(CONFIG_API_DETAILS).getSimpleValue().toString());
+            viewData("custom_workspace_uri", configuration.getTopic(CONFIG_API_WORKSPACE_URI).getSimpleValue().toString());
         } else {
             log.warning("Could not load module configuration during page preparation!");
         }
@@ -578,24 +587,20 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     private void prepareAccountEditPage() {
         String username = acService.getUsername();
         if (username != null) {
-            // Someone is logged in, prepare her account page
-            Topic usernameTopic = acService.getUsernameTopic(username);
-            Topic mailbox = usernameTopic.getRelatedTopic(USER_MAILBOX_EDGE_TYPE, "dm4.core.parent",
-                "dm4.core.child", MAILBOX_TYPE_URI);
-            String eMailAddressValue = "No value";
-            if (mailbox != null) {
-                 eMailAddressValue = mailbox.getSimpleValue().toString();
-            } else {
-                log.warning("User \"" + username + "\" has no E-Mail Address Value associted."); // Just "admin"
-            }
+            // Someone is logged in, prepare her account page has no permission to edit or view her mailbox
+            // Topic mailbox = usernameTopic.getRelatedTopic(USER_MAILBOX_EDGE_TYPE, "dm4.core.parent",
+                // "dm4.core.child", MAILBOX_TYPE_URI);
+            String eMailAddressValue = "Email Address Hidden";
+            viewData("logged_in", true);
             viewData("username", username);
             viewData("email", eMailAddressValue);
             viewData("link", "");
             // ### viewData("confirmed", true); // Check if user already has confirmed for a membership
         } else {
-            // Not authenticated, can't edit a user account
-            viewData("username", "Not authenticated");
-            viewData("email", "Not authenticated");
+            // Not authenticated, can't do nothing but login
+            viewData("logged_in", false);
+            viewData("username", "Not logged in");
+            viewData("email", "Not logged in");
             viewData("link", "/sign-up/login");
         }
     }

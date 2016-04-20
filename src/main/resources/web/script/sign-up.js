@@ -1,11 +1,12 @@
 
     var EMPTY_STRING = ""
     var OK_STRING = "OK"
+    var inputInvalidated = false
 
     // Sign-up Configuration Object Initialized via Thymeleaf
     var signupConfig = {
-        "apiEnabled"        : false,
-        "apiWorkspaceURI"   : "",
+        "customWorkspaceEnabled" : false,
+        "customWorkspaceURI" : "",
         "appLoadingMessage" : "Loading Webclient",
         "appLoggingOutHint" : "Logging out...",
         "appStartPageURL"   : "/",
@@ -66,17 +67,14 @@
 
     // --- Plain JavaScript form
 
-    // TODO: This needs a proper workspace cookie, otherwise the server fails upon this request
-    function checkAPIAggrement() {
+    // Assigns username to a Note topic residing in System workspace, if apiWorkspaceUri is set
+    function doCheckCustomWorkspaceAggrement() {
         if (signupConfig.apiWorkspaceURI !== "") {
-            console.log("Custom Workspace URI", signupConfig.apiWorkspaceURI)
+            // console.log("Custom Workspace URI", signupConfig.customWorkspaceURI)
             xhr = new XMLHttpRequest()
-            xhr.open("POST", "/sign-up/confirm/membership/" + signupConfig.apiWorkspaceURI, false)
+            xhr.open("POST", "/sign-up/confirm/membership/custom", false) // Synchronous request
             xhr.send()
         }
-        // console.log("Todo: Implement check if API Terms of use were accepted.")
-        // console.log("Todo: Immediately update Membership to the Reporting WS accordingly")
-        
     }
 
     function saveAccountEdits() {
@@ -89,20 +87,31 @@
     // This is the form.onsubmit() implementation.
     function createAccount() {
 
+        function doCreateRequest() {
+            var usernameVal = encodeURIComponent(document.getElementById("username").value)
+            var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
+            var passwordVal = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
+            // employing the w3school way to go to GET the sign-up resource
+            window.document.location.assign("//" +  window.location.host + "/sign-up/handle/" + usernameVal + "/"
+               + passwordVal +"/" + mailbox)
+        }
         // any of these should prevent submission of form
-        if (!isValidUsername()) return undefined
-        if (checkPassword() !== OK_STRING) return undefined
-        if (comparePasswords() !== OK_STRING) return undefined
-        if (checkMailbox() === null) return undefined
-        if (checkAgreements() !== OK_STRING) return undefined
-
-        var usernameVal = encodeURIComponent(document.getElementById("username").value)
-        var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
-        var passwordVal = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
-        // employing the w3school way to go to a new resource
-        window.document.location.assign("//" +  window.location.host + "/sign-up/handle/" + usernameVal + "/"
-            + passwordVal +"/" + mailbox + "?no_workspace_assignment=true")
-
+        if (!isValidUsername()) return false
+        if (checkPassword() !== OK_STRING) return false
+        if (comparePasswords() !== OK_STRING) return false
+        if (checkMailbox() === null) return false
+        if (checkAgreements() !== OK_STRING) return false
+        if (inputInvalidated) {
+            checkUserNameAvailability(function(response) {
+                if (response) {
+                    checkMailboxAvailability(function(response) {
+                        if (response) doCreateRequest()
+                    })
+                }
+            })
+        } else {
+            doCreateRequest()
+        }
     }
 
     function isValidUsername() {
@@ -117,45 +126,50 @@
         return true
     }
 
-    function checkUserNameAvailability() {
+    function checkUserNameAvailability(handler) {
         var usernameInput = document.getElementById("username") // fixme: maybe its better to acces the form element
         var userInput = usernameInput.value
         xhr = new XMLHttpRequest()
-        xhr.onload = function(e) {
-            var response = JSON.parse(xhr.response)
-            if (!response.isAvailable) {
-                renderWarning("This username is already taken.")
-                disableSignupForm()
-                return null
-            } else {
-                enableSignupForm()
-                renderWarning(EMPTY_STRING)
-                return OK_STRING
+        if (userInput) {
+            xhr.onload = function(e) {
+                var response = JSON.parse(xhr.response)
+                if (!response.isAvailable) {
+                    renderWarning("This username is already taken.")
+                    disableSignupForm()
+                    inputInvalidated = true
+                    handler(false)
+                } else {
+                    enableSignupForm()
+                    renderWarning(EMPTY_STRING)
+                    handler(true)
+                }
             }
+            xhr.open("GET", "/sign-up/check/" + userInput, true) // Asynchronous request
+            xhr.send()   
         }
-        xhr.open("GET", "/sign-up/check/" + userInput, false)
-        xhr.send()
     }
     
-    function checkMailboxAvailability() {
+    function checkMailboxAvailability(handler) {
         var mailboxField = document.getElementById("mailbox") // fixme: maybe its better to acces the form element
         var mailBox = mailboxField.value
-        xhr = new XMLHttpRequest()
-        xhr.onload = function(e) {
-            var response = JSON.parse(xhr.response)
-            if (!response.isAvailable) {
-                renderWarning("This E-Mail address is already registered.")
-                disableSignupForm()
-                return null
-            } else {
-                enableSignupForm()
-                renderWarning(EMPTY_STRING)
-                return OK_STRING
+        if (mailBox) {
+            xhr = new XMLHttpRequest()
+            xhr.onload = function(e) {
+                var response = JSON.parse(xhr.response)
+                if (!response.isAvailable) {
+                    renderWarning("This E-Mail address is already registered.")
+                    disableSignupForm()
+                    inputInvalidated = true
+                    handler(false)
+                } else {
+                    enableSignupForm()
+                    renderWarning(EMPTY_STRING)
+                    handler(true)
+                }
             }
+            xhr.open("GET", "/sign-up/check/mailbox/" + mailBox, true) // Asynchronous request
+            xhr.send()   
         }
-        xhr.open("GET", "/sign-up/check/mailbox/" + mailBox, false)
-        xhr.send()
-        checkUserNameAvailability() // fire user name check again here (on our last input field)
     }
 
     function checkPassword() {
@@ -207,6 +221,15 @@
         renderWarning("First, please check our terms and conditions.")
         disableSignupForm()
         return null
+    }
+
+    function voidFunction() {
+        // a custom void(); return false; }
+    }
+
+    function showCustomWorkspaceTermsText() {
+        var textArea = document.getElementById('custom-ws-info')
+            textArea.setAttribute("style", "display: block;")
     }
 
     function showLabsPrivateText() {
