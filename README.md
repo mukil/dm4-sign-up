@@ -6,26 +6,26 @@ This plugin introduces a configurable registration process for DeepaMehta 4 _Use
 This plugin adds:
 *    A `Sign-up`-link next to the `Login`-button in the DeepaMehta 4 Webclient
 *    A `Sign-up Configuration` topic associated to the `DeepaMehta 4 Sign up` Plugin
-     (part of the "System" workspace and thus editable by `admin`)
+     (part of the "System" workspace and thus editable by all members of it)
 
-The special features of the `registration` dialog is comprised of:
+The special features of the **registration dialog** is comprised of:
 *    Username existence check
 *    Email existence check
 *    Simple GUI-Notification mechanism
 *    Minimal CSS Definition
 
-The special features of the `login` dialog is comprised of:
+The special features of the **login dialog** is comprised of:
 *    Simple GUI-Notification mechanism
 *    Automatic redirect
 *    Minimal CSS Definition
 
-The special logic of this plugin is comprised of:
+The **special logic** of this plugin is comprised of:
 *    Optionally: Configure a sign-up process with an Email based confirmation workflow
 *    Optionally: Sends confirmation mail with token to the users registering Email address
 *    Optionally: Sends notification to admin after a new user account was sucessfully created
 *    Optionally: If `new_accounts_are_enabled=true`, an account activation notice is sent
 
-Note: If `Email Confirmation Required` is set to _true_ the confirmation tokens the system sends out are **not persisted** and get lost after a bundle/system restart. Once a token was send out the link containing it is valid for sixty minutes.
+**Note:** If `Email Confirmation Required` is set to _true_ the confirmation tokens the system sends out are **not persisted** and get lost after a bundle/system restart. Once a token was send out the link containing it is valid for sixty minutes.
 
 ## Requirements
 
@@ -36,7 +36,7 @@ To be able to install this module you first and additionally have to install the
 
 *    `dm47-webactivator-0.4.6`-Bundle - Build from [sources](https://github.com/jri/dm4-webactivator)
 
-For the plugins mailbox validation process to run you must install this plugin with deepamehta4 on a web server with a 
+**Operations:** For the plugins mailbox validation process to run you must install this plugin with deepamehta4 on a web server with a 
 `postfix` -> `Internet Site` like mail send functionality.
 
 ## Download & Installation
@@ -49,13 +49,13 @@ As mentioned above, you currently need to download and install the aditonally re
 After downloading the two bundle-files, place them in the `bundles` folder of your DeepaMehta installation and restart 
 DeepaMehta 4.
 
-## Usage & Configuration
+## Plugin Configuration
 
 The central topic for configuring the sign-up dialog for your DeepaMehta 4 installation is of type `Sign-up 
 Configuration`. Editing this topic via your dm4-webclient allows you to interactively control/adapt the following 
 parameters:
 
-*    all text-messages, hyperlinks, titles, logo, css, read more url of the login page
+*    all text-messages, hyperlinks, titles, logo, css, read more url of the login and sign-up pages
 *    the terms of service and privacy policy (including checkbox labels) used in the sign-up form
 *    the page footer (HTML) of all pages
 *    the path to a custom image file as logo
@@ -69,7 +69,7 @@ parameters:
      allow for setting up a second workspace membership which user can opt-in via the new `/sign-up/edit` page
 *    the home page url (redirecting after log-out) and the start page url (redirecting after login) are new options and come with respective configurable messages/labels which are displayed by the UI when redirecting
 
-A configuration topic is associated with the "Plugin" topic representing this plugin upon installation and can be altered by user `admin`.
+A configuration topic is associated with the "Plugin" topic representing this plugin upon installation and can be altered by user `admin`. Setting input fields to an empty value means deactivating the features who depend on this configuration value it.
 
 ## Licensed under the GPL License 3.0
 
@@ -77,7 +77,6 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 
 ### TODOs
 
-- Assign newly registered user account to a specific workspace by default (and configuration)
 - Switch plugin configuration to the new dm4-config facility
 
 ## Version history
@@ -87,12 +86,12 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 Changes:
 
 - New Configuration options in particular as required by dm4-kiezatlas-website:<br/>
-  Added Logout screen and routing to it (on `/sign-up/log-in`) if the user is already logged-in<br/>
-  Added `API Activation` feature which is modelled as an additional workspace membership<br/>
-  Added `/sign-up/edit` view allowing to manage settings  per user account<br/>
-  Added new routing options to have redirects after login/logout configurable<br/>
-- Signed up mailboxes are now stored in the _Administration_ workspace<br/>
-- Provides a OSGi mail notification service for other plugins to send mails to the mailbox configured in _System Recipient Mailbox_
+  Displaying Logout functionality if the user is currently logged-in and visits the login page<br/>
+  Added custom workspace feature, modelled as a _Note_ relating requests for an additional workspace membership<br/>
+  A new route `/sign-up/edit` view allowing to manage this custom workspace feature<br/>
+  Added options to have redirects after login/logout configurable<br/>
+- Signed up mailboxes are for now stored in _admins_ _Private Workspace_ workspace<br/>
+- Providing a OSGi mail notification service for other plugins to send mails to the mailbox configured in _System Recipient Mailbox_
 
 Fixes:
 

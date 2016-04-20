@@ -5,7 +5,7 @@
     <head>
         <meta charset="utf-8"></meta>
         <title th:text="'Sign up - ' + ${title}">Sign up</title>
-        <link rel="stylesheet"  th:href="${css_path}" type="text/css" />
+        <link rel="stylesheet" th:href="${css_path}" type="text/css" />
         <script type="text/javascript" src="/de.deepamehta.accesscontrol/script/vendor/sha256.js"></script>
         <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
     </head>
@@ -13,7 +13,7 @@
     <body class="sign-up-page sign-up">
 
         <div id="page-header">
-            <a href="/de.deepamehta.webclient" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
+            <a th:href="${home_url}" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
                 <img th:src="${logo_path}" src="/org.deepamehta.sign-up/images/deepamehta-logo.png" class="webapp-logo"
                     th:title="${title} + ' Logo'" th:alt="${title} + ' Logo'" width="160" /><br/>
                 <span class="project-title" th:title="'Click to Launch ' + ${title}" th:text="${title}">DeepaMehta Webclient</span>

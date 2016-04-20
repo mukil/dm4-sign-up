@@ -66,7 +66,7 @@
 
     // --- Plain JavaScript form
 
-    // TODO: This needs a proper workspace cookie, otherwise the server fails upon this request
+    // Assigns username to a Note topic residing in System workspace
     function checkAPIAggrement() {
         if (signupConfig.apiWorkspaceURI !== "") {
             // console.log("Custom Workspace URI", signupConfig.apiWorkspaceURI)
@@ -90,18 +90,20 @@
     function createAccount() {
 
         // any of these should prevent submission of form
-        if (!isValidUsername()) return undefined
-        if (checkPassword() !== OK_STRING) return undefined
-        if (comparePasswords() !== OK_STRING) return undefined
-        if (checkMailbox() === null) return undefined
-        if (checkAgreements() !== OK_STRING) return undefined
+        if (!isValidUsername()) return false
+        if (checkPassword() !== OK_STRING) return false
+        if (comparePasswords() !== OK_STRING) return false
+        if (checkMailbox() === null) return false
+        if (checkAgreements() !== OK_STRING) return false
+        if (checkUserNameAvailability() === null) return false
+        if (checkMailboxAvailability() === null) return false
 
         var usernameVal = encodeURIComponent(document.getElementById("username").value)
         var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
         var passwordVal = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
-        // employing the w3school way to go to a new resource
+        // employing the w3school way to go to GET the sign-up resource
         window.document.location.assign("//" +  window.location.host + "/sign-up/handle/" + usernameVal + "/"
-            + passwordVal +"/" + mailbox + "?no_workspace_assignment=true")
+            + passwordVal +"/" + mailbox)
 
     }
 
@@ -121,41 +123,46 @@
         var usernameInput = document.getElementById("username") // fixme: maybe its better to acces the form element
         var userInput = usernameInput.value
         xhr = new XMLHttpRequest()
-        xhr.onload = function(e) {
-            var response = JSON.parse(xhr.response)
-            if (!response.isAvailable) {
-                renderWarning("This username is already taken.")
-                disableSignupForm()
-                return null
-            } else {
-                enableSignupForm()
-                renderWarning(EMPTY_STRING)
-                return OK_STRING
+        if (userInput) {
+            xhr.onload = function(e) {
+                console.log("Checked Username Availability")
+                var response = JSON.parse(xhr.response)
+                if (!response.isAvailable) {
+                    renderWarning("This username is already taken.")
+                    disableSignupForm()
+                    return null
+                } else {
+                    enableSignupForm()
+                    renderWarning(EMPTY_STRING)
+                    return OK_STRING
+                }
             }
+            xhr.open("GET", "/sign-up/check/" + userInput, false) // Synchronous request
+            xhr.send()   
         }
-        xhr.open("GET", "/sign-up/check/" + userInput, false)
-        xhr.send()
     }
     
     function checkMailboxAvailability() {
         var mailboxField = document.getElementById("mailbox") // fixme: maybe its better to acces the form element
         var mailBox = mailboxField.value
-        xhr = new XMLHttpRequest()
-        xhr.onload = function(e) {
-            var response = JSON.parse(xhr.response)
-            if (!response.isAvailable) {
-                renderWarning("This E-Mail address is already registered.")
-                disableSignupForm()
-                return null
-            } else {
-                enableSignupForm()
-                renderWarning(EMPTY_STRING)
-                return OK_STRING
+        if (mailBox) {
+            xhr = new XMLHttpRequest()
+            xhr.onload = function(e) {
+                console.log("Checked Mailbox Availability")
+                var response = JSON.parse(xhr.response)
+                if (!response.isAvailable) {
+                    renderWarning("This E-Mail address is already registered.")
+                    disableSignupForm()
+                    return null
+                } else {
+                    enableSignupForm()
+                    renderWarning(EMPTY_STRING)
+                    return OK_STRING
+                }
             }
+            xhr.open("GET", "/sign-up/check/mailbox/" + mailBox, false)  // Synchronous request
+            xhr.send()   
         }
-        xhr.open("GET", "/sign-up/check/mailbox/" + mailBox, false)
-        xhr.send()
-        checkUserNameAvailability() // fire user name check again here (on our last input field)
     }
 
     function checkPassword() {
