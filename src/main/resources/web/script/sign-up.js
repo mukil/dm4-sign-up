@@ -1,6 +1,7 @@
 
     var EMPTY_STRING = ""
     var OK_STRING = "OK"
+    var inputInvalidated = false
 
     // Sign-up Configuration Object Initialized via Thymeleaf
     var signupConfig = {
@@ -86,22 +87,31 @@
     // This is the form.onsubmit() implementation.
     function createAccount() {
 
+        function doCreateRequest() {
+            var usernameVal = encodeURIComponent(document.getElementById("username").value)
+            var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
+            var passwordVal = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
+            // employing the w3school way to go to GET the sign-up resource
+            window.document.location.assign("//" +  window.location.host + "/sign-up/handle/" + usernameVal + "/"
+               + passwordVal +"/" + mailbox)
+        }
         // any of these should prevent submission of form
         if (!isValidUsername()) return false
         if (checkPassword() !== OK_STRING) return false
         if (comparePasswords() !== OK_STRING) return false
         if (checkMailbox() === null) return false
         if (checkAgreements() !== OK_STRING) return false
-        if (checkUserNameAvailability() === null) return false
-        if (checkMailboxAvailability() === null) return false
-
-        var usernameVal = encodeURIComponent(document.getElementById("username").value)
-        var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
-        var passwordVal = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
-        // employing the w3school way to go to GET the sign-up resource
-        window.document.location.assign("//" +  window.location.host + "/sign-up/handle/" + usernameVal + "/"
-            + passwordVal +"/" + mailbox)
-
+        if (inputInvalidated) {
+            checkUserNameAvailability(function(response) {
+                if (response) {
+                    checkMailboxAvailability(function(response) {
+                        if (response) doCreateRequest()
+                    })
+                }
+            })
+        } else {
+            doCreateRequest()
+        }
     }
 
     function isValidUsername() {
@@ -116,7 +126,7 @@
         return true
     }
 
-    function checkUserNameAvailability() {
+    function checkUserNameAvailability(handler) {
         var usernameInput = document.getElementById("username") // fixme: maybe its better to acces the form element
         var userInput = usernameInput.value
         xhr = new XMLHttpRequest()
@@ -126,19 +136,20 @@
                 if (!response.isAvailable) {
                     renderWarning("This username is already taken.")
                     disableSignupForm()
-                    return null
+                    inputInvalidated = true
+                    handler(false)
                 } else {
                     enableSignupForm()
                     renderWarning(EMPTY_STRING)
-                    return OK_STRING
+                    handler(true)
                 }
             }
-            xhr.open("GET", "/sign-up/check/" + userInput, false) // Synchronous request
+            xhr.open("GET", "/sign-up/check/" + userInput, true) // Asynchronous request
             xhr.send()   
         }
     }
     
-    function checkMailboxAvailability() {
+    function checkMailboxAvailability(handler) {
         var mailboxField = document.getElementById("mailbox") // fixme: maybe its better to acces the form element
         var mailBox = mailboxField.value
         if (mailBox) {
@@ -148,14 +159,15 @@
                 if (!response.isAvailable) {
                     renderWarning("This E-Mail address is already registered.")
                     disableSignupForm()
-                    return null
+                    inputInvalidated = true
+                    handler(false)
                 } else {
                     enableSignupForm()
                     renderWarning(EMPTY_STRING)
-                    return OK_STRING
+                    handler(true)
                 }
             }
-            xhr.open("GET", "/sign-up/check/mailbox/" + mailBox, false)  // Synchronous request
+            xhr.open("GET", "/sign-up/check/mailbox/" + mailBox, true) // Asynchronous request
             xhr.send()   
         }
     }
