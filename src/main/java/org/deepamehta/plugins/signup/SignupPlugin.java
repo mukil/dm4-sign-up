@@ -388,14 +388,14 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     dm4.fireEvent(USER_ACCOUNT_CREATE_LISTENER, usernameTopic);
                     AccessControl acCore = dm4.getAccessControl();
                     // 4) assign new e-mail address topic to admins "Private workspace" // ### administration workspace
-                    Topic adminWorkspace = dm4.getAccessControl().getPrivateWorkspace("admin");
-                    acCore.assignToWorkspace(eMailAddress, adminWorkspace.getId());
+                    long adminWorkspaceId = dm4.getAccessControl().getAdministrationWorkspaceId();
+                    acCore.assignToWorkspace(eMailAddress, adminWorkspaceId);
                     // 5) associate email address to "username" topic too
                     Association assoc = dm4.createAssociation(mf.newAssociationModel(USER_MAILBOX_EDGE_TYPE,
                         mf.newTopicRoleModel(eMailAddress.getId(), "dm4.core.child"),
                         mf.newTopicRoleModel(usernameTopic.getId(), "dm4.core.parent")));
                     // 6) assign that association also to admins "Private Workspace"
-                    acCore.assignToWorkspace(assoc, adminWorkspace.getId());
+                    acCore.assignToWorkspace(assoc, adminWorkspaceId);
                     // 7) create membership to custom workspace topic
                     if (customWorkspaceAssignmentTopic != null) {
                         acService.createMembership(usernameTopic.getSimpleValue().toString(),
