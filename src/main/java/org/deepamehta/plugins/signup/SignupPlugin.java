@@ -108,6 +108,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Context UriInfo uri;
 
     HashMap<String, JSONObject> token = new HashMap<String, JSONObject>();
+    HashMap<String, JSONObject> pwToken = new HashMap<String, JSONObject>();
 
     @Override
     public void init() {
@@ -162,6 +163,67 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @GET
+    @Path("/password-reset/{username}/{email}")
+    @Produces(MediaType.TEXT_HTML)
+    public String initiatePasswordReset(@PathParam("username") String username, @PathParam("email") String email) {
+        JSONObject response = new JSONObject();
+        log.info("Password reset requested for User \"" + username + "\", Email: \"" + email + "\"");
+        try {
+            boolean emailExists = dm4.getAccessControl().emailAddressExists(email);
+            Topic usernameTopic = dm4.getAccessControl().getUsernameTopic(username);
+            /** Topic emailTopic = usernameTopic.getRelatedTopic("org.deepamehta.signup.user_mailbox",
+                "dm4.core.parent", "dm4.core.child", "dm4.contacts.email_address"); throws 401 */
+            log.info("> Checking Username Topic: \"" + usernameTopic + "\", Email Addres Exists?: \"" + emailExists + "\"");
+            if (currentModuleConfiguration.getChildTopics().getBoolean(CONFIG_EMAIL_CONFIRMATION)) {
+                log.info("> Email based password reset workflow do'able, sending out passwort reset mail.");
+                createPasswordResetToken(username, email);
+                // redirect user to a "token-info" page
+                response.put("sendOut", true);
+                throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/token-info")).build());
+            } else {
+                log.info("> Email based password reset workflow not do'able, Email Addresses unconfirmed.");
+                response.put("sendOut", false);
+            }
+        } catch (JSONException ex) {
+            Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return response.toString();
+    }
+
+    @GET
+    @Path("/password-correct/{token}")
+    @Produces(MediaType.TEXT_HTML)
+    public Response handlePasswordResetRequest(@PathParam("token") String token) {
+        try { // ### Untested
+            // 1) Assert token exists: It may not exist due to e.g. bundle refresh, system restart, token invalid
+            if (!pwToken.containsKey(token)) {
+                viewData("username", null);
+                viewData("message", "Sorry, the link is invalid");
+            }
+            // 2) Process available token and remove it from stack
+            String username, email;
+            JSONObject input = pwToken.get(token);
+            pwToken.remove(token);
+            // 3) Update the user account credentials OR ### present an error message.
+            username = input.getString("username");
+            email = input.getString("mailbox");
+            if (input.getLong("expiration") > new Date().getTime()) {
+                log.info("Handling password reset requested for Token \"" + token + "\", Email: \"" + email + "\"");
+                // boolean emailExists = dm4.getAccessControl().emailAddressExists(email);
+                // Topic usernameTopic = dm4.getAccessControl().getUsernameTopic(username);
+            } else {
+                log.warning("Sorry the link to reset the password for ... has expired.");
+            }
+            return Response.ok().build();
+        } catch (JSONException ex) {
+            Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return Response.serverError().build(); // ###
     }
 
     @GET
@@ -282,10 +344,18 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @GET
     @Path("/login")
     @Produces(MediaType.TEXT_HTML)
-    public Viewable getLoginFormView() {
+    public Viewable getLoginView() {
         prepareSignupPage();
         if (acService.getUsername() != null) return view("logout");
         return view("login");
+    }
+
+    @GET
+    @Path("/password-reset")
+    @Produces(MediaType.TEXT_HTML)
+    public Viewable getPasswordResetView() {
+        prepareSignupPage();
+        return view("password-reset");
     }
 
     @GET
@@ -358,6 +428,27 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             // ### TODO: if sending confirmation mail fails users should know about that and
             // get to see the "failure" screen next (with a proper message)
             sendConfirmationMail(key, username, mailbox.trim());
+        } catch (JSONException ex) {
+            Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+        }
+    }
+
+    /** ### Untested */
+    private void createPasswordResetToken(String username, String mailbox) {
+        try {
+            String key = UUID.randomUUID().toString();
+            long valid = new Date().getTime() + 3600000; // Token is valid fo 60 min
+            JSONObject value = new JSONObject()
+                    .put("username", username.trim())
+                    .put("mailbox", mailbox.trim())
+                    .put("expiration", valid);
+            pwToken.put(key, value);
+            log.log(Level.INFO, "Set up pwToken {0} for {1} send passwort reset mail valid till {3}",
+                    new Object[]{key, mailbox, new Date(valid).toString()});
+            // ### TODO: if sending confirmation mail fails users should know about that and
+            // get to see the "failure" screen next (with a proper message)
+            sendPasswordResetMail(key, username, mailbox.trim());
         } catch (JSONException ex) {
             Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex);
@@ -463,6 +554,24 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                         "administrator. This may need 1 or 2 days."
                         + "\n\nCheers!", mailbox);
             }
+        } catch (MalformedURLException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    /** ### Untested */
+    private void sendPasswordResetMail(String key, String username, String mailbox) {
+        try {
+            String webAppTitle = currentModuleConfiguration.getChildTopics().getString(CONFIG_WEBAPP_TITLE);
+            URL url = new URL(DM4_HOST_URL);
+            log.info("The password reset mails token request URL should be:"
+                + "\n" + url + "sign-up/password-correct/" + key);
+            sendSystemMail("Password reset for " + webAppTitle,
+                "Hi " + username + ",\n\nplease click the following link to enter a new password for your account.\n"
+                    + url + "sign-up/password-correct/" + key
+                    + "\n\n" + "You'll receive another mail once your account is activated by an " +
+                    "administrator. This may need 1 or 2 days."
+                    + "\n\nCheers!", mailbox);
         } catch (MalformedURLException ex) {
             throw new RuntimeException(ex);
         }

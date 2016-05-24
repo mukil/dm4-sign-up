@@ -223,6 +223,18 @@
         return null
     }
 
+    function resetPassword() {
+        console.log("Initiate password reset dialog...")
+        var username = document.getElementById("username").value.trim()
+        var emailAddress = document.getElementById("mailbox").value.trim()
+        xhr = new XMLHttpRequest()
+        xhr.onload = function(e) {
+            console.log("Loaded Password Reset Functionality")
+        }
+        xhr.open("GET", "/sign-up/password-reset/" + username + "/" + emailAddress, true) // Asynchronous request
+        xhr.send()
+    }
+
     function voidFunction() {
         // a custom void(); return false; }
     }

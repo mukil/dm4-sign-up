@@ -3,6 +3,7 @@ body.sign-up {
     font-family: Myriad Pro, Myriad Web Pro Regular, Lucida Grande, Geneva, Trebuchet MS, sans-serif;
     color: rgba(39, 99, 140, 1.0);
     font-size: 16px;
+    line-height: 1.4em;
 }
 
 body.sign-up a {
@@ -17,8 +18,9 @@ body.sign-up label {
     padding-left: 5px;
 }
 
-body.sign-up p {
-    line-height: 1.2em;
+.sign-up p.password-reset {
+    font-size: .8em;
+    margin: 0px;
 }
 
 .sign-up #account-info,
@@ -120,12 +122,19 @@ body.sign-up p {
     padding-left: 0px;
 }
 
+.reset-page #sign-up-view,
 .sign-up #log-in-view form {
     text-align: left;
 }
 
+.sign-up.reset-page #sign-up-view,
 .sign-up #log-in-view {
     max-width: 300px;
+}
+
+.reset-page #sign-up-view p {
+    margin: 0px;
+    padding: 0px;
 }
 
 .sign-up .dialog-body,
@@ -166,7 +175,7 @@ body.sign-up p {
 .sign-up #log-in-view h2 {
     text-align: center;
     color: #666;
-    margin: 0 0 30px 0;
+    margin: 0 0 15px 0;
     /** font: normal 26px/1 Verdana, Helvetica; **/
     position: relative;
 }
@@ -184,7 +193,6 @@ body.sign-up p {
 }
 
 .sign-up input.ok {
-    margin-top: 20px;
     background-color: rgba(39, 99, 140, 1.0);
     color: rgba(255, 255, 255, 1.0);
     cursor: pointer;
