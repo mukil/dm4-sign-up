@@ -173,13 +173,13 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         try {
             String emailAddressValue = email.trim();
             boolean emailExists = dm4.getAccessControl().emailAddressExists(emailAddressValue);
-            log.info("> Checking if Email Address Exists = \"" + emailExists + "\"");
-            if (currentModuleConfiguration.getChildTopics().getBoolean(CONFIG_EMAIL_CONFIRMATION)) {
-                log.info("> Email based password reset workflow do'able, sending out passwort reset mail.");
+            log.info("Checking if Email Address Exists = \"" + emailExists + "\"");
+            if (emailExists) {
+                log.info("Email based password reset workflow do'able, sending out passwort reset mail.");
                 createPasswordResetToken(emailAddressValue);
                 throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/token-info")).build());
             } else {
-                log.info("> Email based password reset workflow not do'able, Email Addresses possibly unconfirmed.");
+                log.info("Email based password reset workflow not do'able, Email Addresses does not exist.");
             }
         } catch (URISyntaxException ex) {
             Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
