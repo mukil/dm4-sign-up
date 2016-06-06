@@ -224,15 +224,30 @@
     }
 
     function resetPassword() {
-        console.log("Initiate password reset dialog...")
-        var username = document.getElementById("username").value.trim()
         var emailAddress = document.getElementById("mailbox").value.trim()
         xhr = new XMLHttpRequest()
         xhr.onload = function(e) {
-            console.log("Loaded Password Reset Functionality")
+            console.log("Loaded Password Reset Response", e)
         }
-        xhr.open("GET", "/sign-up/password-reset/" + username + "/" + emailAddress, true) // Asynchronous request
+        xhr.open("GET", "/sign-up/password-token/" + emailAddress, true) // Asynchronous request
         xhr.send()
+        redirectToTokenInfoPage()
+    }
+
+    function updatePassword() {
+        comparePasswords()
+        var token = document.getElementById("token-info").value
+        var secret = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
+        document.location.replace("/sign-up/password-reset/" + token + "/" + secret)
+        /** xhr = new XMLHttpRequest()
+        xhr.onload = function(e) {
+            console.log("Updated Password for ", token, "to", document.getElementById("pass-one").value)
+        }
+        xhr.open("GET", "/sign-up/password-reset/" + token + "/" + secret, true)
+        // xhr.setRequestHeader('Content-Type', 'application/json');
+        // var creds = { username: username, password: secret }
+        // console.log("Credentials", creds)
+        xhr.send() // JSON.stringify(creds) **/
     }
 
     function voidFunction() {
@@ -288,4 +303,10 @@
         setTimeout(function (e) {
             window.location.href = signupConfig.appStartPageURL
         }, 1500)
+    }
+
+    function redirectToTokenInfoPage() {
+        setTimeout(function (e) {
+            window.location.replace("/sign-up/token-info")
+        }, 500)
     }
