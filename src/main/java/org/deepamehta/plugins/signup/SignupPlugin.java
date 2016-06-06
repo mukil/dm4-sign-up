@@ -206,18 +206,19 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             if (input != null && input.getLong("expiration") > new Date().getTime()) {
                 username = input.getString("username");
                 email = input.getString("mailbox");
-                log.info("Handling password reset requested for Token \"" + token + "\", Email: \"" + email + "\", Username: " + username);
+                log.info("Handling password reset request for Email: \"" + email);
                 viewData("username", username);
                 return view("password-reset");
             } else {
                 log.warning("Sorry the link to reset the password for ... has expired.");
                 viewData("message", "Sorry, the link to reset the password has expired.");
-                return getFailureView();
+                viewData("status", "updated");
+                return view("failure");
             }
         } catch (JSONException ex) {
             Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
             viewData("message", "Sorry, an error occured during the handling of the reset password link.");
-            return getFailureView();
+            return view("failure");
         }
     }
 
@@ -241,12 +242,12 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     return view("password-ok");
             } else {
                 viewData("message", "Sorry, an error occured while updating the credentials.");
-                return getFailureView();
+                return view("failure");
             }
         } catch (JSONException ex) {
             Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
             viewData("message", "Sorry, an error occured while updating the credentials.");
-            return getFailureView();
+            return view("failure");
         }
     }
 
@@ -688,7 +689,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     private void prepareSignupPage() {
         if (currentModuleConfiguration != null) {
-            log.info("Preparing views according to current module configuration.");
             ChildTopics configuration = currentModuleConfiguration.getChildTopics();
             viewData("title", configuration.getTopic(CONFIG_WEBAPP_TITLE).getSimpleValue().toString());
             viewData("logo_path", configuration.getTopic(CONFIG_LOGO_PATH).getSimpleValue().toString());
@@ -710,7 +710,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("custom_workspace_uri", configuration.getTopic(CONFIG_API_WORKSPACE_URI).getSimpleValue().toString());
             viewData("status", "created");
         } else {
-            log.warning("Could not load module configuration during page preparation!");
+            log.warning("Could not load module configuration of sign-up plugin during page preparation!");
         }
     }
 
