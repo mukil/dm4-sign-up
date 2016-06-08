@@ -6,6 +6,14 @@ dm4c.add_plugin('org.deepamehta.sign-up', function() {
     dm4c.add_listener("init_3", function() {
         aclPlugin = dm4c.get_plugin("de.deepamehta.accesscontrol")
         if (!is_logged_in()) show_sign_up_button()
+        $(document).on("dialogopen", function(event, ui) {
+            var $login_message = $("#login-message", event.target)
+            if ($login_message.length > 0) {
+                $('<span class="password-reset">Forgot your password?<br/>'
+                    + '<a href="/sign-up/request-password">Password reset</a></span>')
+                    .insertAfter($('.ui-dialog .ui-dialog-buttonset'))
+            }
+        })
     })
 
     dm4c.add_listener("authority_increased", function() {
