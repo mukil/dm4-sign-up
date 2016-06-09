@@ -229,8 +229,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @GET
     @Path("/handle/{username}/{pass-one}/{mailbox}")
     public Viewable handleSignupRequest(@PathParam("username") String username,
-                                        @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox)
-            throws WebApplicationException {
+            @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox) throws WebApplicationException {
         try {
             if (currentModuleConfiguration.getChildTopics().getBoolean(CONFIG_EMAIL_CONFIRMATION)) {
                 log.info("Sign-up Configuration: Email based confirmation workflow active, send out confirmation mail.");
