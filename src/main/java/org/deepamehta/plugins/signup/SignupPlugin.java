@@ -168,7 +168,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @GET
     @Path("/password-token/{email}")
     @Produces(MediaType.TEXT_HTML)
-    public void initiatePasswordReset(@PathParam("email") String email) {
+    public Response initiatePasswordReset(@PathParam("email") String email) throws URISyntaxException {
         log.info("Password reset requested for user with Email: \"" + email + "\"");
         try {
             String emailAddressValue = email.trim();
@@ -177,13 +177,14 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             if (emailExists) {
                 log.info("Email based password reset workflow do'able, sending out passwort reset mail.");
                 createPasswordResetToken(emailAddressValue);
-                throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/token-info")).build());
+                return Response.temporaryRedirect(new URI("/sign-up/token-info")).build();
             } else {
                 log.info("Email based password reset workflow not do'able, Email Addresses does not exist.");
             }
         } catch (URISyntaxException ex) {
             Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return Response.temporaryRedirect(new URI("/sign-up/error")).build();
     }
 
     @GET
