@@ -11,7 +11,7 @@ dm4c.add_plugin('org.deepamehta.sign-up', function() {
             if ($login_message.length > 0) {
                 $('<span class="password-reset">Forgot your password?<br/>'
                     + '<a href="/sign-up/request-password">Password reset</a></span>')
-                    .insertAfter($('.ui-dialog .ui-dialog-buttonset'))
+                    .insertAfter($('.ui-dialog #login-message'))
             }
         })
     })

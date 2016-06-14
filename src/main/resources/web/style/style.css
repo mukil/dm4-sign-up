@@ -237,13 +237,11 @@ body.sign-up label {
     margin-right: 1em;
 }
 
-.ui-dialog .ui-dialog-buttonpane .password-reset {
+.ui-dialog .ui-dialog-content .password-reset {
     font-size: .8em;
     color: gray;
 }
 
-.ui-dialog .ui-dialog-buttonpane .password-reset a {
+.ui-dialog .ui-dialog-content .password-reset a {
     color: rgba(39, 99, 140, 1.0);
-    position: relative;
-    top: 5px; left: 13px;
 }
