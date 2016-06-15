@@ -173,7 +173,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         try {
             String emailAddressValue = email.trim();
             boolean emailExists = dm4.getAccessControl().emailAddressExists(emailAddressValue);
-            log.info("Checking if Email Address Exists = \"" + emailExists + "\"");
             if (emailExists) {
                 log.info("Email based password reset workflow do'able, sending out passwort reset mail.");
                 createPasswordResetToken(emailAddressValue);
@@ -562,7 +561,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         // check for custom workspace assignment
         customWorkspaceAssignmentTopic = getCustomWorkspaceAssignmentTopic();
         if (customWorkspaceAssignmentTopic != null) {
-            log.info("Configure Sign-up Workspace Assignment => \""
+            log.info("Configured Custom Sign-up Workspace => \""
                     + customWorkspaceAssignmentTopic.getSimpleValue() + "\"");
         }
         log.log(Level.INFO, "Sign-up: Loaded sign-up configuration => \"{0}\", \"{1}\"",
