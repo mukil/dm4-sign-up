@@ -238,6 +238,7 @@ body.sign-up label {
 }
 
 .ui-dialog .ui-dialog-content .password-reset {
+    position: relative; top: 5px;
     font-size: .8em;
     color: gray;
 }
