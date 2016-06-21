@@ -445,6 +445,16 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         }
     }
 
+    @Override
+    public void sendUserMailboxNotification(String mailbox, String subject, String message) {
+        sendSystemMail(subject, message, mailbox);
+        /** if (dm4.getAccessControl().emailAddressExists(mailbox)) { // is a mailbox of a user
+            sendSystemMail(subject, message, mailbox);
+        } else {
+            log.warning("Did not send notification mail to System Mailbox - User with Mailbox ("+mailbox+") not known");
+        }*/
+    }
+
     // --- Private Helpers --- //
 
     private void createUserValidationToken(String username, String password, String mailbox) {
@@ -649,7 +659,13 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             String recipientValue = recipient.trim();
             log.info("Loaded current configuration topic, sending notification mail to " + recipientValue);
             Collection<InternetAddress> recipients = new ArrayList<InternetAddress>();
-            recipients.add(new InternetAddress(recipientValue));
+            if (recipientValue.contains(";")) {
+                for (String recipientPart : recipientValue.split(";")) {
+                    recipients.add(new InternetAddress(recipientPart));
+                }
+            } else {
+                recipients.add(new InternetAddress(recipientValue));
+            }
             email.setTo(recipients);
             email.send();
             log.info("Mail was SUCCESSFULLY sent to " + email.getToAddresses() + " mail addresses");

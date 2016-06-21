@@ -41,6 +41,10 @@ public interface SignupPluginService {
      */
     Viewable handleSignupRequest(String username, String password, String mailbox);
 
+    /** Send notification email to system administrator mailbox configured in current \"Sign-up Configuration\" topic.*/
     void sendSystemMailboxNotification(String subject, String message);
+
+    /** Send notification email to all mailboxes in String (many are seperated by a simple ";" and without spaces. */
+    void sendUserMailboxNotification(String mailboxes, String subject, String message);
 
 }
