@@ -535,11 +535,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     if (customWorkspaceAssignmentTopic != null) {
                         acService.createMembership(usernameTopic.getSimpleValue().toString(),
                                 customWorkspaceAssignmentTopic.getId());
-                        // 8) assign new association to "System" workspace (Assocation was not returned)
-                        /** Association member = usernameTopic.getAssociation("dm4.accesscontrol.membership",
-                                "dm4.core.default", "dm4.core.default",  customWorkspaceAssignmentTopic.getId());
-                        log.info("Pre-creating workspace assignment for custom workspace membership association...2");
-                        acCore.assignToWorkspace(member, adminWorkspace.getId());**/
                         log.info("Created new Membership for " + usernameTopic.getSimpleValue().toString() + " in " +
                                 "workspace=" + customWorkspaceAssignmentTopic.getSimpleValue().toString());
                     }
@@ -610,7 +605,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             URL url = new URL(DM4_HOST_URL);
             log.info("The password reset mails token request URL should be:"
                 + "\n" + url + "sign-up/password-reset/" + key);
-            sendSystemMail("Password reset for " + webAppTitle,
+            sendSystemMail("Password Reset " + webAppTitle,
                 "Hi " + username + ",\n\nplease click the following link to enter a new password for your account.\n"
                     + url + "sign-up/password-reset/" + key + "\n\nCheers!", mailbox);
         } catch (MalformedURLException ex) {
@@ -660,10 +655,12 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             log.info("Loaded current configuration topic, sending notification mail to " + recipientValue);
             Collection<InternetAddress> recipients = new ArrayList<InternetAddress>();
             if (recipientValue.contains(";")) {
+                // ..) Many Recipients
                 for (String recipientPart : recipientValue.split(";")) {
-                    recipients.add(new InternetAddress(recipientPart));
+                    recipients.add(new InternetAddress(recipientPart.trim()));
                 }
             } else {
+                // ..) A Single Recipient
                 recipients.add(new InternetAddress(recipientValue));
             }
             email.setTo(recipients);
