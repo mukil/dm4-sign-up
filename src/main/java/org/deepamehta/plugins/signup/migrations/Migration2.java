@@ -20,7 +20,7 @@ public class Migration2 extends Migration {
     public void run() {
 
         Topic pluginTopic = dm4.getTopicByUri("org.deepamehta.sign-up");
-        Topic config_topic = dm4.getTopicByUri("org.deepamehta.signup.default_configuration");
+        Topic standardConfiguration = dm4.getTopicByUri("org.deepamehta.signup.default_configuration");
         // 1) Assign the (default) "Sign-up Configuration" to the Plugin topic
         List<Association> configs = pluginTopic.getAssociations();
         boolean hasConfiguration = false;
@@ -31,7 +31,7 @@ public class Migration2 extends Migration {
             logger.info("Sign-up => Assigning default \"Sign-up Configuration\" to \"DeepaMehta 4 Sign up\" Topic");
             Association assoc = dm4.createAssociation(mf.newAssociationModel("dm4.core.association",
                     mf.newTopicRoleModel(pluginTopic.getId(), "dm4.core.default"),
-                    mf.newTopicRoleModel(config_topic.getId(), "dm4.core.default")
+                    mf.newTopicRoleModel(standardConfiguration.getId(), "dm4.core.default")
             ));
             Topic systemWorkspace = wsService.getWorkspace(AccessControlService.SYSTEM_WORKSPACE_URI);
             wsService.assignToWorkspace(assoc, systemWorkspace.getId());
@@ -41,7 +41,7 @@ public class Migration2 extends Migration {
         }
         // 2) Set Configuration Topic Workspace Assignment to ("System") (editable for admin)
         Topic systemWorkspace = wsService.getWorkspace(AccessControlService.SYSTEM_WORKSPACE_URI);
-        wsService.assignToWorkspace(config_topic, systemWorkspace.getId());
+        wsService.assignToWorkspace(standardConfiguration, systemWorkspace.getId());
 
     }
 

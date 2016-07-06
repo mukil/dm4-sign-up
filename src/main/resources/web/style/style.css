@@ -32,7 +32,6 @@ body.sign-up label {
 .sign-up #pre-text {
     width: 400px;
     margin-top: 20px;
-    font-size: small;
 }
 
 .sign-up #custom-ws-text label p {
@@ -127,7 +126,6 @@ body.sign-up label {
     text-align: left;
 }
 
-.sign-up.reset-page #sign-up-view,
 .sign-up #log-in-view {
     max-width: 300px;
 }
@@ -159,10 +157,14 @@ body.sign-up label {
     width: 90%;
 }
 
+.sign-up.reset-page #sign-up-view form input[type="text"] {
+    width: 90%;
+}
+
 .sign-up #account-view form input[type="text"],
 .sign-up #sign-up-view form input[type="text"],
 .sign-up #sign-up-view form input[type="password"] {
-    width: 80%;
+    width: 85%;
 }
 
 .sign-up #account-view form input[type="checkbox"]
@@ -233,4 +235,14 @@ body.sign-up label {
 
 #sign-up-button {
     margin-right: 1em;
+}
+
+.ui-dialog .ui-dialog-content .password-reset {
+    position: relative; top: 5px;
+    font-size: .8em;
+    color: gray;
+}
+
+.ui-dialog .ui-dialog-content .password-reset a {
+    color: rgba(39, 99, 140, 1.0);
 }
