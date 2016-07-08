@@ -24,7 +24,10 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
@@ -100,9 +103,9 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     private Topic activeModuleConfiguration = null;
     private Topic customWorkspaceAssignmentTopic = null;
+    private ResourceBundle rb = null;
 
     @Inject private AccessControlService acService;
-
     @Inject private WorkspacesService wsService;
 
     @Context UriInfo uri;
@@ -113,6 +116,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Override
     public void init() {
         initTemplateEngine();
+        rb = ResourceBundle.getBundle("SignupMessages", Locale.GERMAN);
         reloadActiveSignupConfiguration();
     }
 
@@ -132,6 +136,26 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
 
     // --- Plugin Service Implementation --- //
+
+    @GET
+    @Path("/translation/{locale}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public String getTranslationTable(@PathParam("locale") String language) {
+        if (language.isEmpty()) return null;
+        Locale le = new Locale(language);
+        ResourceBundle newRb = ResourceBundle.getBundle("SignupMessages", le);
+        Enumeration bundleKeys = newRb.getKeys();
+        JSONObject response = new JSONObject();
+        while (bundleKeys.hasMoreElements()) {
+            try {
+                String key = (String) bundleKeys.nextElement();
+                response.put(key, newRb.getString(key));
+            } catch (JSONException ex) {
+                Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return response.toString();
+    }
 
     @GET
     @Path("/check/{username}")
@@ -194,7 +218,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             // 1) Assert token exists: It may not exist due to e.g. bundle refresh, system restart, token invalid
             if (!pwToken.containsKey(token)) {
                 viewData("username", null);
-                viewData("message", "Sorry, the link is invalid");
+                viewData("message", rb.getString("link_invalid"));
             }
             // 2) Process available token and remove it from stack
             String username, email;
@@ -211,13 +235,13 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                 return view("password-reset");
             } else {
                 log.warning("Sorry the link to reset the password for ... has expired.");
-                viewData("message", "Sorry, the link to reset the password has expired.");
+                viewData("message", rb.getString("reset_link_expired"));
                 viewData("status", "updated");
                 return view("failure");
             }
         } catch (JSONException ex) {
             log.severe("Sorry, an error occured during retriving your token. Please try again. " + ex.getMessage());
-            viewData("message", "Sorry, an error occured during the handling of the reset password link.");
+            viewData("message", rb.getString("reset_link_error"));
             return view("failure");
         }
     }
@@ -238,15 +262,15 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     dm4.getAccessControl().changePassword(newCreds);
                     pwToken.remove(token);
                     log.info("Credentials for user " + newCreds.username + " were changed succesfully.");
-                    viewData("message", "Your password was succesfully updated.");
+                    viewData("message", rb.getString("reset_password_ok"));
                     return view("password-ok");
             } else {
-                viewData("message", "Sorry, an error occured while updating the credentials.");
+                viewData("message", rb.getString("reset_password_error"));
                 return view("failure");
             }
         } catch (JSONException ex) {
             Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
-            viewData("message", "Sorry, an error occured while updating the credentials.");
+            viewData("message", rb.getString("reset_password_error"));
             return view("failure");
         }
     }
@@ -288,7 +312,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         // 1) Assert token exists: It may not exist due to e.g. bundle refresh, system restart, token invalid
         if (!token.containsKey(key)) {
             viewData("username", null);
-            viewData("message", "Sorry, the link is invalid");
+            viewData("message", rb.getString("link_invalid"));
             return getFailureView();
         }
         // 2) Process available token and remove it from stack
@@ -303,19 +327,19 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                 createSimpleUserAccount(username, input.getString("password"), input.getString("mailbox"));
             } else {
                 viewData("username", null);
-                viewData("message", "Sorry, the link has expired");
+                viewData("message", rb.getString("link_expired"));
                 return getFailureView();
             }
         } catch (JSONException ex) {
             Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
-            viewData("message", "An error occured processing your request");
+            viewData("message", rb.getString("internal_error"));
             log.log(Level.SEVERE, "Account creation failed due to {0} caused by {1}",
                 new Object[]{ex.getMessage(), ex.getCause().toString()});
             return getFailureView();
         }
         log.log(Level.INFO, "Account succesfully created for username: {0}", username);
         viewData("username", username);
-        viewData("message", "User account created successfully");
+        viewData("message", rb.getString("account_created"));
         if (!DM4_ACCOUNTS_ENABLED) {
             log.log(Level.INFO, "> Account activation by an administrator remains PENDING ");
             return getAccountCreationPendingView();
@@ -579,18 +603,20 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             URL url = new URL(DM4_HOST_URL);
             log.info("The confirmation mails token request URL should be:"
                 + "\n" + url + "sign-up/confirm/" + key);
+            // Localize "sentence" structure for german, maybe via Formatter
+            String mailSubject = rb.getString("mail_confirmation_subject") + webAppTitle;
             if (DM4_ACCOUNTS_ENABLED) {
-                sendSystemMail("Your account on " + webAppTitle,
-                    "Hi " + username + ",\n\nplease click the following link to activate your account. Your account " +
-                            "is ready to use immediately.\n" + url + "sign-up/confirm/" + key
-                        + "\n\nCheers!", mailbox);
+                sendSystemMail(mailSubject,
+                    rb.getString("mail_hello") + " " + username + ",\n\n"
+                        +rb.getString("mail_confirmation_active_body")+"\n"
+                        + url + "sign-up/confirm/" + key + "\n\n" + rb.getString("mail_ciao"), mailbox);
             } else {
-                sendSystemMail("Your account on " + webAppTitle,
+                sendSystemMail(mailSubject,
                     "Hi " + username + ",\n\nplease click the following link to proceed with the sign-up process.\n"
                         + url + "sign-up/confirm/" + key
                         + "\n\n" + "You'll receive another mail once your account is activated by an " +
                         "administrator. This may need 1 or 2 days."
-                        + "\n\nCheers!", mailbox);
+                        + "\n\n" + rb.getString("mail_ciao"), mailbox);
             }
         } catch (MalformedURLException ex) {
             throw new RuntimeException(ex);
@@ -730,6 +756,9 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("custom_workspace_details", configuration.getTopic(CONFIG_API_DETAILS).getSimpleValue().toString());
             viewData("custom_workspace_uri", configuration.getTopic(CONFIG_API_WORKSPACE_URI).getSimpleValue().toString());
             viewData("status", "created");
+            viewData("create_account", "Create account");
+            viewData("log_in", "log in");
+            viewData("or_label", "or");
         } else {
             log.warning("Could not load module configuration of sign-up plugin during page preparation!");
         }
@@ -775,8 +804,8 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                 if (mailbox != null) { // for accounts created via sign-up plugin this will always evaluate to true
                     String mailboxValue = mailbox.getSimpleValue().toString();
                     sendSystemMail("Your account on " + webAppTitle + " is now active",
-                            "Hi " + username.getSimpleValue() + ",\n\nyour account on " + DM4_HOST_URL + " is now " +
-                                    "active.\n\nCheers!", mailboxValue);
+                            rb.getString("mail_hello") + " " + username.getSimpleValue() + ",\n\nyour account on " + DM4_HOST_URL + " is now " +
+                                    "active.\n\n" + rb.getString("mail_ciao"), mailboxValue);
                     log.info("Send system notification mail to " + mailboxValue + " - The account is now active!");
                 }
             }

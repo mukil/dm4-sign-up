@@ -51,7 +51,7 @@
                 <input type="text" id="mailbox" name="mailbox" placeholder="Email Address"
                        onchange="checkMailboxAvailability()" onblur="checkMailboxAvailability()" class="sign-up mailbox" />
                 <div id="message-view"><span id="message"></span></div>
-                <input type="submit" id="create" value="Create account" class="sign-up ok" /> or <a href="/sign-up/login">log in</a>.
+                <input type="submit" id="create" th:value="${create_account}" class="sign-up ok" /><span th:text="${or_label}">or</span> <a href="/sign-up/login" th:text="${log_in}">log in</a>.
             </form>
         </div>
 
