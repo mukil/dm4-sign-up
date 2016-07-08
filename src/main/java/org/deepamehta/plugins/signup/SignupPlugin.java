@@ -117,7 +117,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     public void init() {
         initTemplateEngine();
         rb = ResourceBundle.getBundle("SignupMessages", Locale.GERMAN);
-        reloadActiveSignupConfiguration();
+        reloadAssociatedSignupConfiguration();
     }
 
     /**
@@ -577,13 +577,13 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     }
 
     /**
-     * Loads the next sign-up configuration topic for this plugin.
+     * Loads the sign-up configuration, a topic of type "Sign-up Configuration" associated to this plugins
+     * topic of type "Plugin".
      *
      * @see init()
      * @see postUpdateTopic()
      */
-    private Topic reloadActiveSignupConfiguration() {
-        log.info("Sign-up: Reloading sign-up plugin configuration and checking for custom workspace assignment assoc");
+    private Topic reloadAssociatedSignupConfiguration() {
         activeModuleConfiguration = getCurrentSignupConfiguration();
         activeModuleConfiguration.loadChildTopics();
         // check for custom workspace assignment
@@ -592,7 +592,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             log.info("Configured Custom Sign-up Workspace => \""
                     + customWorkspaceAssignmentTopic.getSimpleValue() + "\"");
         }
-        log.log(Level.INFO, "Sign-up: Loaded sign-up configuration => \"{0}\", \"{1}\"",
+        log.log(Level.INFO, "Sign-up Configuration Loaded (URI=\"{0}\"), Name=\"{1}\"",
             new Object[]{activeModuleConfiguration.getUri(), activeModuleConfiguration.getSimpleValue()});
         return activeModuleConfiguration;
     }
@@ -787,7 +787,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     public void postUpdateTopic(Topic topic, TopicModel tm, TopicModel tm1) {
         if (topic.getTypeUri().equals(SIGN_UP_CONFIG_TYPE_URI)) {
-            reloadActiveSignupConfiguration();
+            reloadAssociatedSignupConfiguration();
         } else if (topic.getTypeUri().equals(CONFIG_TOPIC_ACCOUNT_ENABLED)) {
             // Account status
             boolean status = Boolean.parseBoolean(topic.getSimpleValue().toString());
