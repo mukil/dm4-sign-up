@@ -2,6 +2,7 @@ package org.deepamehta.plugins.signup.service;
 
 
 import com.sun.jersey.api.view.Viewable;
+import org.osgi.framework.Bundle;
 
 /**
  *
@@ -46,5 +47,15 @@ public interface SignupPluginService {
 
     /** Send notification email to all mailboxes in String (many are seperated by a simple ";" and without spaces. */
     void sendUserMailboxNotification(String mailboxes, String subject, String message);
+
+    /**
+     * IMPORTANT: If you register your own bundle as a resource for thymeleaf templates you must call
+     * reinitTemplateEngine afterwards.
+     */
+    void addTemplateResolverBundle(Bundle bundle);
+
+    void removeTemplateResolverBundle(Bundle bundle);
+
+    void reinitTemplateEngine();
 
 }

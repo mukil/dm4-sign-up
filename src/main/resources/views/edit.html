@@ -21,6 +21,8 @@
 
     <body class="account-page sign-up">
 
+        <div class="top-menu" th:include="fragments/navigation :: top (publisher=${is_publisher})"></div>
+
         <div id="page-header">
             <span class="project-title" th:text="'Your Account on ' + ${title}">Your Account</span>
         </div>

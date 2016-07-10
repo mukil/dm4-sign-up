@@ -12,6 +12,8 @@
 
     <body class="sign-up-page sign-up">
 
+        <div class="top-menu" th:include="fragments/navigation :: top (publisher=${is_publisher})"></div>
+
         <div id="page-header">
             <a th:href="${home_url}" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
                 <img th:src="${logo_path}" src="/org.deepamehta.sign-up/images/deepamehta-logo.png" class="webapp-logo"

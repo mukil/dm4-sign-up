@@ -45,7 +45,7 @@
         <dependency>
             <groupId>de.deepamehta</groupId>
             <artifactId>dm48-thymeleaf</artifactId>
-            <version>0.5</version>
+            <version>0.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>

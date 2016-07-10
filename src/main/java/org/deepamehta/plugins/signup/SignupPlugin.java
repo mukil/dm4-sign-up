@@ -44,6 +44,7 @@ import org.apache.commons.mail.HtmlEmail;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.deepamehta.plugins.signup.service.SignupPluginService;
+import org.osgi.framework.Bundle;
 
 /**
  * This plugin enables anonymous users to create themselves a user account in DeepaMehta 4
@@ -217,32 +218,30 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         try {
             // 1) Assert token exists: It may not exist due to e.g. bundle refresh, system restart, token invalid
             if (!pwToken.containsKey(token)) {
-                viewData("username", null);
                 viewData("message", rb.getString("link_invalid"));
             }
             // 2) Process available token and remove it from stack
             String username, email;
             JSONObject input = pwToken.get(token);
             // 3) Update the user account credentials OR present an error message.
-            prepareSignupPage();
             viewData("status", "updated");
             viewData("token", token);
             if (input != null && input.getLong("expiration") > new Date().getTime()) {
                 username = input.getString("username");
                 email = input.getString("mailbox");
                 log.info("Handling password reset request for Email: \"" + email);
-                viewData("username", username);
+                prepareSignupPage("password-reset");
                 return view("password-reset");
             } else {
                 log.warning("Sorry the link to reset the password for ... has expired.");
                 viewData("message", rb.getString("reset_link_expired"));
                 viewData("status", "updated");
-                return view("failure");
+                return getFailureView();
             }
         } catch (JSONException ex) {
             log.severe("Sorry, an error occured during retriving your token. Please try again. " + ex.getMessage());
             viewData("message", rb.getString("reset_link_error"));
-            return view("failure");
+            return getFailureView();
         }
     }
 
@@ -251,7 +250,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Transactional
     public Viewable processPasswordUpdateRequest(@PathParam("token") String token, @PathParam("password") String password) {
         log.info("Processing Password Update Request Token... ");
-        prepareSignupPage();
         viewData("status", "updated");
         try {
             JSONObject entry = pwToken.get(token);
@@ -263,15 +261,16 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     pwToken.remove(token);
                     log.info("Credentials for user " + newCreds.username + " were changed succesfully.");
                     viewData("message", rb.getString("reset_password_ok"));
+                    prepareSignupPage("password-ok");
                     return view("password-ok");
             } else {
                 viewData("message", rb.getString("reset_password_error"));
-                return view("failure");
+                return getFailureView();
             }
         } catch (JSONException ex) {
             Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
             viewData("message", rb.getString("reset_password_error"));
-            return view("failure");
+            return getFailureView();
         }
     }
 
@@ -291,7 +290,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     log.info("Sign-up Configuration: Email based confirmation workflow inactive."
                         + "The new account is ENABLED.");
                     // redirecting user to the "your account is now active" page
-                    prepareSignupPage();
                     throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/"+username+"/ok")).build());
                 } else {
                     log.info("Sign-up Configuration: Email based confirmation workflow inactive but new user account " +
@@ -393,8 +391,11 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Viewable getSignupFormView() {
-        prepareSignupPage();
-        if (acService.getUsername() != null) return view("logout");
+        if (acService.getUsername() != null) {
+            prepareSignupPage("logout");
+            return view("logout");
+        }
+        prepareSignupPage("sign-up");
         return view("sign-up");
     }
 
@@ -402,8 +403,11 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Path("/login")
     @Produces(MediaType.TEXT_HTML)
     public Viewable getLoginView() {
-        prepareSignupPage();
-        if (acService.getUsername() != null) return view("logout");
+        if (acService.getUsername() != null) {
+            prepareSignupPage("logout");
+            return view("logout");
+        }
+        prepareSignupPage("login");
         return view("login");
     }
 
@@ -411,7 +415,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Path("/request-password")
     @Produces(MediaType.TEXT_HTML)
     public Viewable getPasswordResetView() {
-        prepareSignupPage();
+        prepareSignupPage("request-password");
         return view("request-password");
     }
 
@@ -419,8 +423,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Path("/{username}/ok")
     @Produces(MediaType.TEXT_HTML)
     public Viewable getAccountCreationOKView(@PathParam("username") String username) {
-        prepareSignupPage();
-        viewData("username", username);
+        prepareSignupPage("ok");
         return view("ok");
     }
 
@@ -428,7 +431,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Path("/pending")
     @Produces(MediaType.TEXT_HTML)
     public Viewable getAccountCreationPendingView() {
-        prepareSignupPage();
+        prepareSignupPage("pending");
         return view("pending");
     }
 
@@ -436,7 +439,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Path("/error")
     @Produces(MediaType.TEXT_HTML)
     public Viewable getFailureView() {
-        prepareSignupPage();
+        prepareSignupPage("failure");
         return view("failure");
     }
 
@@ -444,7 +447,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Path("/token-info")
     @Produces(MediaType.TEXT_HTML)
     public Viewable getConfirmationInfoView() {
-        prepareSignupPage();
+        prepareSignupPage("confirmation");
         return view("confirmation");
     }
 
@@ -452,7 +455,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Path("/edit")
     @Produces(MediaType.TEXT_HTML)
     public Viewable getAccountDetailsView() {
-        prepareSignupPage();
+        prepareSignupPage("edit");
         prepareAccountEditPage();
         return view("edit");
     }
@@ -734,7 +737,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                 "dm4.core.default","dm4.workspaces.workspace");
     }
 
-    private void prepareSignupPage() {
+    private void prepareSignupPage(String templateName) {
         if (activeModuleConfiguration != null) {
             ChildTopics configuration = activeModuleConfiguration.getChildTopics();
             viewData("title", configuration.getTopic(CONFIG_WEBAPP_TITLE).getSimpleValue().toString());
@@ -759,6 +762,12 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("create_account", "Create account");
             viewData("log_in", "log in");
             viewData("or_label", "or");
+            // Generics
+            String username = acService.getUsername();
+            viewData("authenticated", (username != null));
+            viewData("username", username);
+            viewData("template", templateName);
+            viewData("hostUrl", DM4_HOST_URL);
         } else {
             log.warning("Could not load module configuration of sign-up plugin during page preparation!");
         }
@@ -810,6 +819,21 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                 }
             }
         }
+    }
+
+    @Override
+    public void reinitTemplateEngine() {
+        super.initTemplateEngine();
+    }
+
+    @Override
+    public void addTemplateResolverBundle(Bundle bundle) {
+        super.addTemplateResourceBundle(bundle);
+    }
+
+    @Override
+    public void removeTemplateResolverBundle(Bundle bundle) {
+        super.removeTemplateResourceBundle(bundle);
     }
 
 }
