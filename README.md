@@ -82,6 +82,16 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 
 ## Version history
 
+**1.4** 11 Jul 2016
+
+New features and changes:
+
+* Extended dialogs to manage passwort reset and login
+* Introduces password reset functionality via Email
+* Added migration moved config topic to 'Administration'
+* Configuration can thus only be loaded during 'init' hook or by 'admin'
+* Compatible with DeepaMehta 4.8
+
 **1.3**, UPCOMING, 2016
 
 Changes:
@@ -121,5 +131,5 @@ Note: This plugin is not compatible with previous installations of the dm4-sign-
 - feature complete
 
 -------------------------------
-Author: Malte Reißig, 2013-2015
+Author: Malte Reißig, 2013-2016
 
