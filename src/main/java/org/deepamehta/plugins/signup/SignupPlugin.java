@@ -447,8 +447,8 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Path("/token-info")
     @Produces(MediaType.TEXT_HTML)
     public Viewable getConfirmationInfoView() {
-        prepareSignupPage("confirmation");
-        return view("confirmation");
+        prepareSignupPage("account-confirmation");
+        return view("account-confirmation");
     }
 
     @GET
@@ -607,7 +607,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             log.info("The confirmation mails token request URL should be:"
                 + "\n" + url + "sign-up/confirm/" + key);
             // Localize "sentence" structure for german, maybe via Formatter
-            String mailSubject = rb.getString("mail_confirmation_subject") + webAppTitle;
+            String mailSubject = rb.getString("mail_confirmation_subject") + " - " + webAppTitle;
             if (DM4_ACCOUNTS_ENABLED) {
                 sendSystemMail(mailSubject,
                     rb.getString("mail_hello") + " " + username + ",\n\n"
