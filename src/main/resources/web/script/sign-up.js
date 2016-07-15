@@ -137,11 +137,11 @@
                     renderWarning("This username is already taken.")
                     disableSignupForm()
                     inputInvalidated = true
-                    handler(false)
+                    if (handler) handler(false)
                 } else {
                     enableSignupForm()
                     renderWarning(EMPTY_STRING)
-                    handler(true)
+                    if (handler) handler(true)
                 }
             }
             xhr.open("GET", "/sign-up/check/" + userInput, true) // Asynchronous request
@@ -160,11 +160,11 @@
                     renderWarning("This E-Mail address is already registered.")
                     disableSignupForm()
                     inputInvalidated = true
-                    handler(false)
+                    if (handler) handler(false)
                 } else {
                     enableSignupForm()
                     renderWarning(EMPTY_STRING)
-                    handler(true)
+                    if (handler) handler(true)
                 }
             }
             xhr.open("GET", "/sign-up/check/mailbox/" + mailBox, true) // Asynchronous request
