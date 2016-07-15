@@ -455,9 +455,9 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Path("/edit")
     @Produces(MediaType.TEXT_HTML)
     public Viewable getAccountDetailsView() {
-        prepareSignupPage("edit");
+        prepareSignupPage("account-edit");
         prepareAccountEditPage();
-        return view("edit");
+        return view("account-edit");
     }
 
     @Override
