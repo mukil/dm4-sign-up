@@ -4,7 +4,7 @@
 
     <head>
         <meta charset="utf-8"></meta>
-        <title th:text="'Sign up - ' + ${title}">Sign up</title>
+        <title th:text="${signup_title} + ' - ' + ${title}">Sign up</title>
         <link rel="stylesheet" th:href="${css_path}" type="text/css" />
         <script type="text/javascript" src="/de.deepamehta.accesscontrol/script/vendor/sha256.js"></script>
         <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
@@ -15,7 +15,7 @@
         <div class="top-menu" th:include="fragments/navigation :: top (publisher=${is_publisher})"></div>
 
         <div id="page-header">
-            <a th:href="${home_url}" title="Launch DeepaMehta 4 Webclient" th:title="${title}">
+            <a th:href="${home_url}" title="Launch Web Application" th:title="${title}">
                 <img th:src="${logo_path}" src="/org.deepamehta.sign-up/images/deepamehta-logo.png" class="webapp-logo"
                     th:title="${title} + ' Logo'" th:alt="${title} + ' Logo'" width="160" /><br/>
                 <span class="project-title" th:title="'Click to Launch ' + ${title}" th:text="${title}">DeepaMehta Webclient</span>
@@ -26,34 +26,34 @@
             <form name="aggreement">
                 <input id="toscheck" type="checkbox" onclick="javascript:checkAgreements()" class="tos-check"></input>
                 <label for="toscheck" th:text="${tos_label}">I agree with the projects Terms of use.</label>
-                <a href="javascript:showLabsTermsText()" title="Read Details">Read more</a>
+                <a href="javascript:showLabsTermsText()" title="Read Details" th:text="${read_more}">Read more</a>
                 <br/>
                 <div id="account-info" th:utext="${tos_details}"></div>
                 <input id="privateinfo" type="checkbox" onclick="javascript:checkAgreements()" class="private-info-check"></input>
                 <label for="privateinfo" th:text="${pd_label}">I understand that any private information I give to this site may be made publicly available.</label>
-                <a href="javascript:showLabsPrivateText()" title="Read Details">Read more</a><br/>
+                <a href="javascript:showLabsPrivateText()" title="Read Details" th:text="${read_more}">Read more</a><br/>
                 <div id="private-info" th:utext="${pd_details}">
                 </div>
             </form>
         </div>
 
         <div id="sign-up-view" class="dialog-body">
-            <h2>Sign up</h2>
+            <h2 th:text="${signup_title}">Sign up</h2>
             <form class="sign-up-form" action="javascript:voidFunction();" onsubmit="javascript:createAccount();">
                 <!-- label for="username">Username</label-->
-                <input id="username" type="text" name="username" placeholder="Username"
+                <input id="username" type="text" name="username" th:placeholder="${label_username}"
                        onchange="checkUserNameAvailability()" class="sign-up username" />
                 <!-- label for="pass-one">Password</label-->
-                <input type="password" id="pass-one" name="pass-one" placeholder="Password"
+                <input type="password" id="pass-one" name="pass-one" th:placeholder="${label_password}"
                        onchange="checkPassword()" class="sign-up password" />
                 <!-- label for="pass-two">Password (Repeat)</label-->
-                <input type="password" id="pass-two" name="pass-two" placeholder="Password (Repeat)"
+                <input type="password" id="pass-two" name="pass-two" th:placeholder="${label_password_repeat}"
                        onchange="comparePasswords()" class="sign-up password" />
                 <!-- label for="mailbox">Mailbox</label-->
-                <input type="text" id="mailbox" name="mailbox" placeholder="Email Address"
+                <input type="text" id="mailbox" name="mailbox" th:placeholder="${label_email}"
                        onchange="checkMailboxAvailability()" onblur="checkMailboxAvailability()" class="sign-up mailbox" />
                 <div id="message-view"><span id="message"></span></div>
-                <input type="submit" id="create" th:value="${create_account}" class="sign-up ok" /><span th:text="${or_label}">or</span> <a href="/sign-up/login" th:text="${log_in}">log in</a>.
+                <input type="submit" id="create" th:value="${create_account}" class="sign-up ok" /><span th:text="${or_label}">or</span> <a href="/sign-up/login" th:text="${log_in_small}">log in</a>.
             </form>
         </div>
 

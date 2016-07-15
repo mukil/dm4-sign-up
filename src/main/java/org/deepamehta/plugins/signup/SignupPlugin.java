@@ -759,9 +759,16 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("custom_workspace_details", configuration.getTopic(CONFIG_API_DETAILS).getSimpleValue().toString());
             viewData("custom_workspace_uri", configuration.getTopic(CONFIG_API_WORKSPACE_URI).getSimpleValue().toString());
             viewData("status", "created");
-            viewData("create_account", "Create account");
-            viewData("log_in", "log in");
-            viewData("or_label", "or");
+            // labels used in template
+            viewData("signup_title", rb.getString("signup_title"));
+            viewData("create_account", rb.getString("create_account"));
+            viewData("log_in_small", rb.getString("log_in_small"));
+            viewData("or_label", rb.getString("or_label"));
+            viewData("label_username", rb.getString("label_username"));
+            viewData("label_email", rb.getString("label_email"));
+            viewData("label_password", rb.getString("label_password"));
+            viewData("label_password_repeat", rb.getString("label_password_repeat"));
+            viewData("read_more", rb.getString("read_more"));
             // Generics
             String username = acService.getUsername();
             viewData("authenticated", (username != null));
