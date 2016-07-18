@@ -81,7 +81,7 @@ public class Migration10 extends Migration {
         wsService.assignToWorkspace(apiEnabled.getRelatingAssociation(), administrationWsId);
         wsService.assignToWorkspace(apiWsURI, administrationWsId);
         wsService.assignToWorkspace(apiWsURI.getRelatingAssociation(), administrationWsId);
-        // 2 Delete Type <-> System Assignment
+        // 2 Delete Child Topic Type "System" Workspace Assignment
         TopicType tokenConfirmationType = dm4.getTopicType("org.deepamehta.signup.config_email_confirmation");
         List<Association> tokenConfirmationTypeAssignments = tokenConfirmationType.getAssociations();
         for (Association assoc : tokenConfirmationTypeAssignments) {
@@ -90,7 +90,7 @@ public class Migration10 extends Migration {
                 assoc.delete();
             }
         }
-        // 3 Move Plugin <-> Standard Configuration Association to "Administration"
+        // 3 Create Plugin <-> Standard Configuration Association to "Administration"
         Topic pluginTopic = dm4.getTopicByUri("org.deepamehta.sign-up");
         List<Association> configs = pluginTopic.getAssociations();
         for (Association assoc : configs) {
