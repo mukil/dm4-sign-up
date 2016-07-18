@@ -336,7 +336,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             return getFailureView();
         }
         log.log(Level.INFO, "Account succesfully created for username: {0}", username);
-        viewData("username", username);
         viewData("message", rb.getString("account_created"));
         if (!DM4_ACCOUNTS_ENABLED) {
             log.log(Level.INFO, "> Account activation by an administrator remains PENDING ");
@@ -424,6 +423,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Produces(MediaType.TEXT_HTML)
     public Viewable getAccountCreationOKView(@PathParam("username") String username) {
         prepareSignupPage("ok");
+        viewData("requested_username", username);
         return view("ok");
     }
 
@@ -615,10 +615,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                         + url + "sign-up/confirm/" + key + "\n\n" + rb.getString("mail_ciao"), mailbox);
             } else {
                 sendSystemMail(mailSubject,
-                    "Hi " + username + ",\n\nplease click the following link to proceed with the sign-up process.\n"
+                    rb.getString("mail_hello") + " " + username + ",\n\n"
+                        + rb.getString("mail_confirmation_proceed_1")+"\n"
                         + url + "sign-up/confirm/" + key
-                        + "\n\n" + "You'll receive another mail once your account is activated by an " +
-                        "administrator. This may need 1 or 2 days."
+                        + "\n\n" + rb.getString("mail_confirmation_proceed_2")
                         + "\n\n" + rb.getString("mail_ciao"), mailbox);
             }
         } catch (MalformedURLException ex) {
@@ -633,9 +633,9 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             URL url = new URL(DM4_HOST_URL);
             log.info("The password reset mails token request URL should be:"
                 + "\n" + url + "sign-up/password-reset/" + key);
-            sendSystemMail("Password Reset " + webAppTitle,
-                "Hi " + username + ",\n\nplease click the following link to enter a new password for your account.\n"
-                    + url + "sign-up/password-reset/" + key + "\n\nCheers!", mailbox);
+            sendSystemMail(rb.getString("mail_pw_reset_subject") + " " + webAppTitle,
+                rb.getString("mail_hello") + " " + username + ",\n\n"+rb.getString("mail_pw_reset_body")+"\n"
+                    + url + "sign-up/password-reset/" + key + "\n\n" + rb.getString("mail_cheers"), mailbox);
         } catch (MalformedURLException ex) {
             throw new RuntimeException(ex);
         }
@@ -651,7 +651,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                         "\nA user has registered.\n\nUsername: " + username + "\nEmail: " + mailbox, adminMailbox);
         } else {
             log.info("ADMIN: No \"Admin Mailbox\" configured: A new user account (" + username + ") was created but" +
-                    " no notification sent (to sys-admin).");
+                    " no notification could be sent.");
         }
     }
 
@@ -769,6 +769,17 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("label_password", rb.getString("label_password"));
             viewData("label_password_repeat", rb.getString("label_password_repeat"));
             viewData("read_more", rb.getString("read_more"));
+            // complete page
+            viewData("created_page_title", rb.getString("page_account_created_title"));
+            viewData("created_page_body_1", rb.getString("page_account_created_body_1"));
+            viewData("created_page_body_2", rb.getString("page_account_created_body_2"));
+            viewData("created_page_body_3", rb.getString("page_account_created_body_3"));
+            viewData("created_page_body_4", rb.getString("page_account_created_body_4"));
+            // mail confirmation page
+            viewData("requested_page_title", rb.getString("page_account_requested_title"));
+            viewData("requested_page_1", rb.getString("page_account_requested_1"));
+            viewData("requested_page_2", rb.getString("page_account_requested_2"));
+            viewData("requested_page_3", rb.getString("page_account_requested_3"));
             // Generics
             String username = acService.getUsername();
             viewData("authenticated", (username != null));

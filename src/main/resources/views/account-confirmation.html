@@ -21,12 +21,12 @@
         </div>
         
         <div id="receipt-view" class="dialog-body">
-            <h2>You've got mail</h2>
+            <h2 th:text="${requested_page_title}">You've got mail</h2>
             <p>
-                We sent you an Email for confirmation.<br/><br/>
-                Please click on the link you find in the Email within the next 60 minutes.<br/>
+                <span th:text="${requested_page_1}">We sent you an Email for confirmation.</span><br/><br/>
+                <span th:text="${requested_page_2}">Please click on the link you find in the Email within the next 60 minutes.</span><br/>
             </p>
-            <p>
+            <p th:text="${requested_page_3}">
                 Thank you and have a nice day!
             </p>
             <!-- p>
