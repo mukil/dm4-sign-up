@@ -35,7 +35,7 @@
                 <!-- label for="password">Password</label-->
                 <input type="password" id="password" name="password" placeholder="Password" class="log-in password" />
                 <div id="message-view"><span id="message"></span></div>
-                <input type="submit" value="Ok" class="log-in ok" /> or <a href="/sign-up/">create an account</a>.
+                <input type="submit" th:value="${login}" class="log-in ok" />&nbsp;<span th:text="${or_label}">or</span> <a href="/sign-up/" th:text="${create_account}" >create an account</a>.
                 <p class="password-reset">Forgot your password?<br/><a href="/sign-up/request-password">Password reset</a></p>
             </form>
         </div>

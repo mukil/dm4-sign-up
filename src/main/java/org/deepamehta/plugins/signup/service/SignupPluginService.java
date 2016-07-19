@@ -42,6 +42,8 @@ public interface SignupPluginService {
      */
     Viewable handleSignupRequest(String username, String password, String mailbox);
 
+    boolean isValidEmailAddress(String value);
+
     /** Send notification email to system administrator mailbox configured in current \"Sign-up Configuration\" topic.*/
     void sendSystemMailboxNotification(String subject, String message);
 

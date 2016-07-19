@@ -28,7 +28,7 @@
             </a>
         </div>
         <div class="logout dialog-body">
-            <div id="message-view"><span id="message"></span></div>
+            <div id="message-view">Logged in as <span th:text="${username}" id="message"></span></div>
             <form class="logout-form" action="javascript:doLogout()">
                 <input type="submit" value="Logout" class="ok" />
             </form>

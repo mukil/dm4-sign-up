@@ -32,6 +32,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -481,6 +482,22 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         }*/
     }
 
+    @Override
+    public boolean isValidEmailAddress(String value) {
+        if (value == null) return false;
+        boolean result = true;
+        try {
+            InternetAddress emailAddr = new InternetAddress(value);
+            String[] tokens = value.split("@");
+            if (tokens.length != 2 || (tokens[0].isEmpty() || tokens[1].isEmpty())) {
+                result = false;
+            }
+        } catch (AddressException ex) {
+            result = false;
+        }
+        return result;
+    }
+
     // --- Private Helpers --- //
 
     private void createUserValidationToken(String username, String password, String mailbox) {
@@ -763,6 +780,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("signup_title", rb.getString("signup_title"));
             viewData("create_account", rb.getString("create_account"));
             viewData("log_in_small", rb.getString("log_in_small"));
+            viewData("login", rb.getString("login"));
             viewData("or_label", rb.getString("or_label"));
             viewData("label_username", rb.getString("label_username"));
             viewData("label_email", rb.getString("label_email"));
