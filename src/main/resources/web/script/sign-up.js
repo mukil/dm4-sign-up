@@ -180,6 +180,7 @@
             return null
         }
         enableSignupForm()
+        renderWarning(EMPTY_STRING)
         return OK_STRING
     }
 
@@ -203,8 +204,8 @@
             disableSignupForm()
             return null
         }
-        renderWarning(EMPTY_STRING)
         enableSignupForm()
+        renderWarning(EMPTY_STRING)
         checkPassword()
         return OK_STRING
     }

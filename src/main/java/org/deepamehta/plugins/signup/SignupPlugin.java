@@ -225,24 +225,24 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             String username, email;
             JSONObject input = pwToken.get(token);
             // 3) Update the user account credentials OR present an error message.
-            viewData("status", "updated");
             viewData("token", token);
             if (input != null && input.getLong("expiration") > new Date().getTime()) {
                 username = input.getString("username");
                 email = input.getString("mailbox");
                 log.info("Handling password reset request for Email: \"" + email);
+                viewData("requested_username", username);
+                viewData("password_requested_title", rb.getString("password_requested_title"));
                 prepareSignupPage("password-reset");
                 return view("password-reset");
             } else {
                 log.warning("Sorry the link to reset the password for ... has expired.");
                 viewData("message", rb.getString("reset_link_expired"));
-                viewData("status", "updated");
-                return getFailureView();
+                return getFailureView("updated");
             }
         } catch (JSONException ex) {
             log.severe("Sorry, an error occured during retriving your token. Please try again. " + ex.getMessage());
             viewData("message", rb.getString("reset_link_error"));
-            return getFailureView();
+            return getFailureView("updated");
         }
     }
 
@@ -251,7 +251,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Transactional
     public Viewable processPasswordUpdateRequest(@PathParam("token") String token, @PathParam("password") String password) {
         log.info("Processing Password Update Request Token... ");
-        viewData("status", "updated");
         try {
             JSONObject entry = pwToken.get(token);
             if (entry != null) {
@@ -266,12 +265,12 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     return view("password-ok");
             } else {
                 viewData("message", rb.getString("reset_password_error"));
-                return getFailureView();
+                return getFailureView("updated");
             }
         } catch (JSONException ex) {
             Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
             viewData("message", rb.getString("reset_password_error"));
-            return getFailureView();
+            return getFailureView("updated");
         }
     }
 
@@ -302,7 +301,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         } catch (URISyntaxException e) {
             log.log(Level.SEVERE, "Could not build response URI while handling sign-up request", e);
         }
-        return getFailureView();
+        return getFailureView("created");
     }
 
     @GET
@@ -312,7 +311,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         if (!token.containsKey(key)) {
             viewData("username", null);
             viewData("message", rb.getString("link_invalid"));
-            return getFailureView();
+            return getFailureView("created");
         }
         // 2) Process available token and remove it from stack
         String username;
@@ -327,14 +326,14 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             } else {
                 viewData("username", null);
                 viewData("message", rb.getString("link_expired"));
-                return getFailureView();
+                return getFailureView("created");
             }
         } catch (JSONException ex) {
             Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
             viewData("message", rb.getString("internal_error"));
             log.log(Level.SEVERE, "Account creation failed due to {0} caused by {1}",
                 new Object[]{ex.getMessage(), ex.getCause().toString()});
-            return getFailureView();
+            return getFailureView("created");
         }
         log.log(Level.INFO, "Account succesfully created for username: {0}", username);
         viewData("message", rb.getString("account_created"));
@@ -439,8 +438,16 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @GET
     @Path("/error")
     @Produces(MediaType.TEXT_HTML)
-    public Viewable getFailureView() {
+    public Viewable getFailureView(String status) {
+        viewData("account_failure_message", rb.getString("account_failure_message"));
         prepareSignupPage("failure");
+        if (status != null) {
+            if (status.equals("created")) {
+                viewData("status_label", rb.getString("status_label_created"));
+            } else if (status.equals("updated")) {
+                viewData("status_label", rb.getString("status_label_updated"));
+            }
+        }
         return view("failure");
     }
 
@@ -650,7 +657,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             URL url = new URL(DM4_HOST_URL);
             log.info("The password reset mails token request URL should be:"
                 + "\n" + url + "sign-up/password-reset/" + key);
-            sendSystemMail(rb.getString("mail_pw_reset_subject") + " " + webAppTitle,
+            sendSystemMail(rb.getString("mail_pw_reset_title") + " " + webAppTitle,
                 rb.getString("mail_hello") + " " + username + ",\n\n"+rb.getString("mail_pw_reset_body")+"\n"
                     + url + "sign-up/password-reset/" + key + "\n\n" + rb.getString("mail_cheers"), mailbox);
         } catch (MalformedURLException ex) {
@@ -775,7 +782,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("custom_workspace_description", configuration.getTopic(CONFIG_API_DESCRIPTION).getSimpleValue().toString());
             viewData("custom_workspace_details", configuration.getTopic(CONFIG_API_DETAILS).getSimpleValue().toString());
             viewData("custom_workspace_uri", configuration.getTopic(CONFIG_API_WORKSPACE_URI).getSimpleValue().toString());
-            viewData("status", "created");
             // labels used in template
             viewData("signup_title", rb.getString("signup_title"));
             viewData("create_account", rb.getString("create_account"));
