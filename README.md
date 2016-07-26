@@ -3,27 +3,30 @@
 
 This plugin introduces a configurable registration process for DeepaMehta 4 _User Accounts_.
 
+Most, if not all, user facing message are translatable by now, a Java ResourceBundle provided. A german language version of this bundle can be build from source after setting the language option to `de` using the `plugin.properties` file.
+
 This plugin adds:
-*    A `Sign-up`-link next to the `Login`-button in the DeepaMehta 4 Webclient
-*    A `Sign-up Configuration` topic associated to the `DeepaMehta 4 Sign up` Plugin
+*   A `Sign-up`-link next to the `Login`-button in the DeepaMehta 4 Webclient
+*   A `Sign-up Configuration` topic associated to the `DeepaMehta 4 Sign up` Plugin
      (part of the "System" workspace and thus editable by all members of it)
 
 The special features of the **registration dialog** is comprised of:
-*    Username existence check
-*    Email existence check
-*    Simple GUI-Notification mechanism
-*    Minimal CSS Definition
+*   Username existence check
+*   Email existence check
+*   Simple GUI-Notification mechanism
+*   Minimal CSS Definition
 
 The special features of the **login dialog** is comprised of:
-*    Simple GUI-Notification mechanism
-*    Automatic redirect
-*    Minimal CSS Definition
+*   Simple GUI-Notification mechanism
+*   Automatic redirect
+*   Minimal CSS Definition
 
 The **special logic** of this plugin is comprised of:
-*    Optionally: Configure a sign-up process with an Email based confirmation workflow
-*    Optionally: Sends confirmation mail with token to the users registering Email address
-*    Optionally: Sends notification to admin after a new user account was sucessfully created
-*    Optionally: If `new_accounts_are_enabled=true`, an account activation notice is sent
+*   Optionally: Configure a sign-up process with an Email based confirmation workflow<br/>
+    Sends confirmation mail with token to the users registering Email address<br/>
+    Allows for the password reset functionality to take place also via an Email based confirmation workflow
+*   Optionally: Sends notification to admin after a new user account was sucessfully created
+*   Optionally: If `new_accounts_are_enabled=true`, an account activation notice is sent
 
 **Note:** If `Email Confirmation Required` is set to _true_ the confirmation tokens the system sends out are **not persisted** and get lost after a bundle/system restart. Once a token was send out the link containing it is valid for sixty minutes.
 
@@ -68,6 +71,7 @@ parameters:
 *    furthermore, an additional custom workspace setting is available<br/>
      (_API Enabled_, _API Description_, _API Details_, _API Workspace URI_), this allows to configure a second, opt-in style, workspace membership for which user can make a membership request on the new `/sign-up/edit` page
 *    the home page url (redirecting after log-out) and the start page url (redirecting after login) are new options and come with respective configurable messages/labels which are displayed by the UI when redirecting
+*    and some more options by now...
 
 A configuration topic is associated with the "Plugin" topic representing this plugin upon installation and can be altered by user `admin`. Setting input fields to an empty value means deactivating the features who depend on this configuration value it.
 
