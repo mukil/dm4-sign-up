@@ -28,9 +28,10 @@
             </a>
         </div>
         <div class="logout dialog-body">
-            <div id="message-view">Logged in as <span th:text="${username}" id="message"></span></div>
+            <div id="message-view">
+                <span th:text="${logged_in_as}">Logged in as</span>&nbsp;<span th:text="${username}" id="message"></span></div>
             <form class="logout-form" action="javascript:doLogout()">
-                <input type="submit" value="Logout" class="ok" />
+                <input type="submit" th:value="${logout}" class="ok" />
             </form>
         </div>
 

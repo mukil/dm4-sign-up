@@ -782,6 +782,8 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("log_in_small", rb.getString("log_in_small"));
             viewData("login", rb.getString("login"));
             viewData("or_label", rb.getString("or_label"));
+            viewData("logout", rb.getString("logout"));
+            viewData("logged_in_as", rb.getString("logged_in_as"));
             viewData("label_username", rb.getString("label_username"));
             viewData("label_email", rb.getString("label_email"));
             viewData("label_password", rb.getString("label_password"));
