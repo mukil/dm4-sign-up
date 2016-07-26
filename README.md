@@ -75,12 +75,23 @@ A configuration topic is associated with the "Plugin" topic representing this pl
 
 GPL v3 - https://www.gnu.org/licenses/gpl.html
 
-### TODOs
+TODO: 
 
-- Internationalization of all button labels
 - Switch plugin configuration to the new dm4-config facility
 
 ## Version history
+
+**1.5** UPCOMING
+
+* Nearly completely translatable (HTML dialogs and Emails) using Javas ResourceBundles mechanism
+* Introduced a new plugin.property `org.deepamehta.sign-up.language=en` with support for building this plugin with the values `de` and `fr`
+* Added "German" translation to the most important user facing dialogs
+* Added a "Passwort reset" feature (thanks to the DM 4.8.1 release)
+* Including (empty by default) navigation HTML fragment which other plugins can override
+  (and thus use to inject their own navigation HTML fragment into the sign-up templates)
+* Requires the upcoming dm4-thymeleaf version 0.6
+* Fixes sign-up form for users of MSIE
+* Compatible with DeepaMehta 4.8.1
 
 **1.4** 11 Jul 2016
 
