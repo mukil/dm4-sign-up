@@ -17,6 +17,7 @@ import de.deepamehta.core.storage.spi.DeepaMehtaTransaction;
 import de.deepamehta.accesscontrol.AccessControlService;
 import de.deepamehta.thymeleaf.ThymeleafPlugin;
 import de.deepamehta.workspaces.WorkspacesService;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,6 +28,7 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -118,7 +120,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Override
     public void init() {
         initTemplateEngine();
-        rb = ResourceBundle.getBundle("SignupMessages", Locale.GERMAN);
+        loadPluginLanguageProperty();
         reloadAssociatedSignupConfiguration();
     }
 
@@ -743,6 +745,39 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     }
 
     /**
+     * Loads the ""org.deepamehta.sign-up.language" value from the plugin.properties file. Currently "de" and "fr"
+     * are supported next to "en", which is the dfeault.
+     *
+     * @see init()
+     */
+    private void loadPluginLanguageProperty() {
+        String signupPropertyLanguageValue = null;
+        try {
+            Properties allProperties = new Properties();
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            allProperties.load(getStaticResource("/plugin.properties"));
+            signupPropertyLanguageValue = allProperties.getProperty("org.deepamehta.sign-up.language");
+            if (signupPropertyLanguageValue == null) {
+                log.info("Sign-up Plugin Language \"" + signupPropertyLanguageValue + "\" sets labels to ENGLISH");
+                rb = ResourceBundle.getBundle("SignupMessages");
+            }
+            if (signupPropertyLanguageValue.equals("de") || signupPropertyLanguageValue.equals("DE")) {
+                log.info("Sign-up Plugin Language \"" + signupPropertyLanguageValue + "\" sets labels to GERMAN");
+                rb = ResourceBundle.getBundle("SignupMessages", Locale.GERMAN);
+            } else if (signupPropertyLanguageValue.equals("fr") || signupPropertyLanguageValue.equals("FR")) {
+                log.info("Sign-up Plugin Language \"" + signupPropertyLanguageValue + "\" sets labels to FRENCH");
+                rb = ResourceBundle.getBundle("SignupMessages", Locale.FRENCH);
+            } else {
+                log.info("Sign-up Plugin Language \"" + signupPropertyLanguageValue + "\" sets labels to ENGLISH");
+                rb = ResourceBundle.getBundle("SignupMessages");
+            }
+        } catch (IOException ex) {
+            log.warning("Could not find Sign-up language Property " + signupPropertyLanguageValue + " - DEFAULTING");
+            rb = ResourceBundle.getBundle("SignupMessages");
+        }
+    }
+
+    /**
      * The sign-up configuration object is loaded once when this bundle/plugin
      * is initialized by the framework and as soon as one configuration was
      * edited.
@@ -785,6 +820,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             // labels used in template
             viewData("signup_title", rb.getString("signup_title"));
             viewData("create_account", rb.getString("create_account"));
+            viewData("login_title", rb.getString("login_title"));
             viewData("log_in_small", rb.getString("log_in_small"));
             viewData("login", rb.getString("login"));
             viewData("or_label", rb.getString("or_label"));
