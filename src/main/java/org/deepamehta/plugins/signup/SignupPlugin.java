@@ -787,6 +787,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("label_password", rb.getString("label_password"));
             viewData("label_password_repeat", rb.getString("label_password_repeat"));
             viewData("read_more", rb.getString("read_more"));
+            viewData("label_forgot_password", rb.getString("forgot_password"));
+            viewData("label_reset_password", rb.getString("reset_password"));
+            viewData("info_reset_password", rb.getString("reset_password_hint"));
+            viewData("password_reset_ok_message", rb.getString("password_reset_success_1"));
             // complete page
             viewData("created_page_title", rb.getString("page_account_created_title"));
             viewData("created_page_body_1", rb.getString("page_account_created_body_1"));

@@ -36,15 +36,16 @@
                 <input type="password" id="password" name="password" placeholder="Password" class="log-in password" />
                 <div id="message-view"><span id="message"></span></div>
                 <input type="submit" th:value="${login}" class="log-in ok" />&nbsp;<span th:text="${or_label}">or</span> <a href="/sign-up/" th:text="${create_account}" >create an account</a>.
-                <p class="password-reset">Forgot your password?<br/><a href="/sign-up/request-password">Password reset</a></p>
+                <p class="password-reset">
+                    <span th:text="${label_forgot_password}">Forgot your password?</span><br/>
+                    <a href="/sign-up/request-password" th:text="${label_reset_password}">Password reset</a>
+                </p>
             </form>
         </div>
 
         <div id="page-footer" th:utext="${footer}"></div>
 
-        <!-- div class="stats">ka:2, wtui:3, mydm:6 
             <img src="//stats.infokitchen.net/piwik.php?idsite=2&amp;rec=1&amp;action_name=login" style="border:0" alt="" />
-        </div-->
 
     </body>
 
