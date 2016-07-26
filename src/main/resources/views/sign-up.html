@@ -41,28 +41,28 @@
             <h2 th:text="${signup_title}">Sign up</h2>
             <form class="sign-up-form" action="javascript:voidFunction();" onsubmit="javascript:createAccount();">
                 <!-- label for="username">Username</label-->
-                <input id="username" type="text" name="username" th:placeholder="${label_username}"
+                <input id="username" type="text" name="username" th:placeholder="${label_username}" title="Username"
                        onchange="checkUserNameAvailability()" class="sign-up username" />
                 <!-- label for="pass-one">Password</label-->
-                <input type="password" id="pass-one" name="pass-one" th:placeholder="${label_password}"
+                <input type="password" id="pass-one" name="pass-one" th:placeholder="${label_password}" title="Password"
                        onchange="checkPassword()" class="sign-up password" />
                 <!-- label for="pass-two">Password (Repeat)</label-->
-                <input type="password" id="pass-two" name="pass-two" th:placeholder="${label_password_repeat}"
+                <input type="password" id="pass-two" name="pass-two" th:placeholder="${label_password_repeat}" title="Password (Repeat)"
                        onchange="comparePasswords()" class="sign-up password" />
                 <!-- label for="mailbox">Mailbox</label-->
-                <input type="text" id="mailbox" name="mailbox" th:placeholder="${label_email}"
+                <input type="text" id="mailbox" name="mailbox" th:placeholder="${label_email}" title="Email Address"
                        onchange="checkMailboxAvailability()" onblur="checkMailboxAvailability()" class="sign-up mailbox" />
                 <div id="message-view"><span id="message"></span></div>
-                <input type="submit" id="create" th:value="${create_account}" class="sign-up ok" />&nbsp;<span th:text="${or_label}">or</span> <a href="/sign-up/login" th:text="${log_in_small}">log in</a>.
+                <input type="submit" id="create" th:value="${create_account}" title="Create Account" class="sign-up ok" />&nbsp;<span th:text="${or_label}">or</span> <a href="/sign-up/login" th:text="${log_in_small}" title="log in">log in</a>.
             </form>
         </div>
 
         <div id="page-footer" th:utext="${footer}">
         </div>
 
-        <!-- div class="stats">ka:2, wtui:3, mydm:6 
-            <img src="//stats.infokitchen.net/piwik.php?idsite=2&amp;rec=1&amp;action_name=signup" style="border:0" alt="" />
-        </div> -->
+        <div class="stats"><!-- ka:2, wtui:3, mydm:6 -->
+            <img src="//stats.infokitchen.net/piwik.php?idsite=2&amp;rec=1&amp;action_name=register" style="border:0" alt="" />
+        </div>
 
     </body>
 

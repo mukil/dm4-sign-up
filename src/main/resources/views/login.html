@@ -31,21 +31,23 @@
             <h2 th:text="${login_title}">Log in</h2>
             <form class="log-in-form" action="javascript:voidFunction();" onsubmit="javascript:doLogin()">
                 <!-- label for="username">Username</label-->
-                <input id="username" type="text" name="username" placeholder="Username" class="log-in username" />
+                <input id="username" type="text" name="username" th:placeholder="${label_username}" title="Username" class="log-in username" />
                 <!-- label for="password">Password</label-->
-                <input type="password" id="password" name="password" placeholder="Password" class="log-in password" />
+                <input type="password" id="password" name="password" th:placeholder="${label_password}" title="Password" class="log-in password" />
                 <div id="message-view"><span id="message"></span></div>
                 <input type="submit" th:value="${login}" class="log-in ok" />&nbsp;<span th:text="${or_label}">or</span> <a href="/sign-up/" th:text="${create_account}" >create an account</a>.
                 <p class="password-reset">
-                    <span th:text="${label_forgot_password}">Forgot your password?</span><br/>
-                    <a href="/sign-up/request-password" th:text="${label_reset_password}">Password reset</a>
+                    <span th:text="${label_forgot_password}" title="Forgot your password?">Forgot your password?</span><br/>
+                    <a href="/sign-up/request-password" title="Reset password" th:text="${label_reset_password}">Password reset</a>
                 </p>
             </form>
         </div>
 
         <div id="page-footer" th:utext="${footer}"></div>
 
+        <div class="stats"><!-- ka:2, wtui:3, mydm:6 -->
             <img src="//stats.infokitchen.net/piwik.php?idsite=2&amp;rec=1&amp;action_name=login" style="border:0" alt="" />
+        </div>
 
     </body>
 
