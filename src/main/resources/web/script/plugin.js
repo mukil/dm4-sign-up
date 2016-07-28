@@ -9,8 +9,8 @@ dm4c.add_plugin('org.deepamehta.sign-up', function() {
         $(document).on("dialogopen", function(event, ui) {
             var $login_message = $("#login-message", event.target)
             if ($login_message.length > 0) {
-                $('<span class="password-reset">Forgot your password?<br/>'
-                    + '<a href="/sign-up/request-password">Password reset</a></span>')
+                $('<span class="password-reset">'
+                    + '<a href="/sign-up/request-password">Forgot password?</a></span>')
                     .insertAfter($('.ui-dialog #login-message'))
             }
         })
