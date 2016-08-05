@@ -85,32 +85,28 @@ TODO:
 
 ## Version history
 
-**1.5** UPCOMING
+**1.5** -- Aug 05, 2016
 
-* Nearly completely translatable (HTML dialogs and Emails) using Javas ResourceBundles mechanism
-* Introduced a new plugin.property `org.deepamehta.sign-up.language=en` with support for building this plugin with the values `de` and `fr`
+* Translatable (HTML dialogs and Emails) using Javas ResourceBundles mechanism (almost complete)
+* Introduced a new plugin.property `org.deepamehta.sign-up.language=en` with support for<br/>
+  building this plugin in `de` and `fr` language (additionally to the default `en`)
 * Added "German" translation to the most important user facing dialogs
-* Added a "Passwort reset" feature (thanks to the DM 4.8.1 release)
 * Including (empty by default) navigation HTML fragment which other plugins can override
   (and thus use to inject their own navigation HTML fragment into the sign-up templates)
-* Requires the upcoming dm4-thymeleaf version 0.6
+* Requires the upcoming dm4-thymeleaf version 0.6.1
 * Fixes sign-up form for users of MSIE
 * Compatible with DeepaMehta 4.8.1
 
-**1.4** 11 Jul 2016
+**1.4** -- Jul 11, 2016
 
-New features and changes:
-
+New features and changes:<br/>
 * Extended dialogs to manage passwort reset and login
 * Introduces password reset functionality via Email
 * Added migration moved config topic to 'Administration'
 * Configuration can thus only be loaded during 'init' hook or by 'admin'
 * Compatible with DeepaMehta 4.8
 
-**1.3**, UPCOMING, 2016
-
-Changes:
-
+Additional Changes:<br/>
 - New Configuration options in particular as required by dm4-kiezatlas-website:<br/>
   Displaying Logout functionality if the user is currently logged-in and visits the login page<br/>
   Added two custom workspace membership features: 1) is set up via a simple _Association_ between the Workspace and the Sign-up Configuraton topic and the other 2) is modelled as a _Note_ relating requests for an additional workspace membership (which works for _private_ or _confidential_ workspaces)<br/>
@@ -119,12 +115,11 @@ Changes:
 - Signed up mailboxes are for now stored in _admins_ _Private Workspace_ workspace<br/>
 - Providing a OSGi mail notification service for other plugins to send mails to the mailbox configured in _System Recipient Mailbox_
 
-Fixes:
-
+Fixes:<br/>
 - Bug in client side form validation leading to a possible registration when the username is already taken
 
 
-**1.1**, Nov 23, 2015
+**1.1** -- Nov 23, 2015
 
 - "Email Confirmation Required" is now a new configuration option:<br/>
   If `.. Required`, confirmation mails are send out including a token<br/>
@@ -139,7 +134,7 @@ Fixes:
 
 Note: This plugin is not compatible with previous installations of the dm4-sign-up module.
 
-**1.0.0**, Dec 25, 2014
+**1.0.0** -- Dec 25, 2014
 
 - configurable by end-users
 - compatible with 4.4
