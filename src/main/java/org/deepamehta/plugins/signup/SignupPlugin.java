@@ -440,15 +440,17 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @GET
     @Path("/error")
     @Produces(MediaType.TEXT_HTML)
-    public Viewable getFailureView(String status) {
+    public Viewable getFailureView() {
         viewData("account_failure_message", rb.getString("account_failure_message"));
         prepareSignupPage("failure");
-        if (status != null) {
-            if (status.equals("created")) {
-                viewData("status_label", rb.getString("status_label_created"));
-            } else if (status.equals("updated")) {
-                viewData("status_label", rb.getString("status_label_updated"));
-            }
+        return getFailureView(null);
+    }
+
+    private Viewable getFailureView(String status) {
+        if (status != null && status.equals("created")) {
+            viewData("status_label", rb.getString("status_label_created"));
+        } else {
+            viewData("status_label", rb.getString("status_label_updated"));
         }
         return view("failure");
     }
