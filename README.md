@@ -1,9 +1,9 @@
 
 # DeepaMehta 4 Sign-up
 
-This plugin introduces a configurable registration process for DeepaMehta 4 _User Accounts_.
+This plugin introduces a configurable user registration process for DeepaMehta 4 _User Accounts_.
 
-Most, if not all, user facing message are translatable by now, a Java ResourceBundle provided. A german language version of this bundle can be build from source after setting the language option to `de` using the `plugin.properties` file.
+Most (if not all) user facing message are translatable by now. A german language version of this bundle can be build from source after setting the language option to `de` using the `plugin.properties` file.
 
 This plugin adds:
 *   A `Sign-up`-link next to the `Login`-button in the DeepaMehta 4 Webclient
@@ -37,7 +37,7 @@ https://github.com/jri/deepamehta
 
 To be able to install this module you first and additionally have to install the following DeepaMehta 4 Plugins.
 
-*    `dm47-webactivator-0.4.6`-Bundle - Build from [sources](https://github.com/jri/dm4-webactivator)
+*    `dm48-thymeleaf-0.6.1`-Bundle - Build from [sources](https://github.com/jri/dm4-thymeleaf)
 
 **Operations:** For the plugins mailbox validation process to run you must install this plugin with deepamehta4 on a web server with a 
 `postfix` -> `Internet Site` like mail send functionality.
@@ -46,8 +46,8 @@ To be able to install this module you first and additionally have to install the
 
 You can find the latest stable version of this plugin bundled for download at [http://download.deepamehta.de/nightly/](http://download.deepamehta.de/nightly/).
 
-As mentioned above, you currently need to download and install the aditonally required `dm47-webactivator-0.4
-.6`-Bundle, too.
+As mentioned above, you currently need to download and install the aditonally required `dm48-thymeleaf-0.6
+.1`-Bundle, too.
 
 After downloading the two bundle-files, place them in the `bundles` folder of your DeepaMehta installation and restart 
 DeepaMehta 4.
@@ -78,10 +78,6 @@ A configuration topic is associated with the "Plugin" topic representing this pl
 ## Licensed under the GPL License 3.0
 
 GPL v3 - https://www.gnu.org/licenses/gpl.html
-
-TODO: 
-
-- Switch plugin configuration to the new dm4-config facility
 
 ## Version history
 
