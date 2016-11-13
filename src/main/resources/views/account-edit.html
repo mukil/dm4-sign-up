@@ -36,14 +36,17 @@
                 <input id="username" disabled="true" type="text" th:value="${username}" name="username" class="custom-ws-up username" />
                 <!-- Adapt Mailbox -->
                 <input type="text" disabled="true" id="mailbox" name="mailbox" th:value="${email}" class="sign-up mailbox" />
-                <!--div id="message-view"><span id="message"></span></div>
-                <input type="submit" id="update" value="Save" disabled="true" class="sign-up ok" /-->
+                <div id="message-view"><span id="message"></span></div>
+                <!--input type="submit" id="update" value="Save" disabled="true" class="sign-up ok" /-->
             </form>
             <div th:if="${!#strings.isEmpty(link)}">
                 <p>
                     <a class="button" th:href="${link}">Please log in first</a>
                 </p>
             </div>
+            <form th:if="${logged_in}" class="logout-form" action="javascript:doLogout()">
+                <input type="submit" th:value="${logout}" class="ok sign-up" />
+            </form>
         </div>
 
         <div th:if="${custom_workspace_enabled} and ${logged_in}" id="custom-ws-text" class="dialog-body">

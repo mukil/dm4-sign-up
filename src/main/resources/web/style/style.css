@@ -47,7 +47,7 @@ body.sign-up label {
 
 .sign-up #page-header {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 4em;
 }
 
 .sign-up #page-header a {
@@ -84,6 +84,7 @@ body.sign-up label {
     font-size: 2.5em;
     font-weight: bold;
     color: #a9a9a9;
+    line-height: 1.5em;
 }
 
 .sign-up #page-footer .plus {
@@ -142,6 +143,7 @@ body.sign-up label {
     max-width: 640px;
     margin-left: auto;
     margin-right: auto;
+    line-height: 1.5em;
 }
 
 .sign-up #sign-up-view {
