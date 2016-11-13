@@ -87,6 +87,7 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 * Extends translatable hints for sign-up and login dialog, added german languaged messages
 * Fixes some typos in user dialogs and the header style on the account-edit template
 * New "API Usage" option now translatable and basically working (see "/sign-up/edit")
+* Some general improvements
 
 **1.5** -- Aug 05, 2016
 

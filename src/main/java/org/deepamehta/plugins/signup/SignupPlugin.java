@@ -930,6 +930,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("requested_page_3", rb.getString("page_account_requested_3"));
             // Generics
             String username = acService.getUsername();
+            // ### Todo: isAdministrator based on workspace membership for account creations w/out confirmation mails
             viewData("authenticated", (username != null));
             viewData("username", username);
             viewData("template", templateName);

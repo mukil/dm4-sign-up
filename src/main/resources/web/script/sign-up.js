@@ -29,8 +29,7 @@
         xhr.onload = function(e) {
             if (xhr.response === "") {
                 renderFriendlyMessage(signupConfig.appLoggingOutHint)
-                // could/should utilize // signupConfig.appHomePageURL // here
-                window.document.location.reload()
+                window.document.location.assign(signupConfig.appHomePageURL)
             } else {
                 renderWarning(xhr.response)
             }

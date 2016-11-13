@@ -24,12 +24,14 @@
         <div class="top-menu" th:include="fragments/navigation :: top (publisher=${is_publisher})"></div>
 
         <div id="page-header">
+            <!-- Make Page Title fully translatable -->
             <span class="project-title" th:text="'Your Account on ' + ${title}">Your Account</span>
         </div>
 
         <p>&nbsp;</p>
 
         <div class="dialog-body">
+            <!-- Make this header translatable -->
             <h2>Infos associated with your username</h2>
             <form class="account-edit-form" action="javascript:voidFunction();" onsubmit="javascript:saveAccountEdits()">
                 <!--label for="username">Username</label-->
@@ -41,6 +43,7 @@
             </form>
             <div th:if="${!#strings.isEmpty(link)}">
                 <p>
+                    <!-- Make this button translatable -->
                     <a class="button" th:href="${link}">Please log in first</a>
                 </p>
             </div>
