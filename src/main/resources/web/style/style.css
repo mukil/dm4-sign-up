@@ -225,6 +225,10 @@ body.sign-up label {
     color: rgba(39, 99, 140, 1.0);
 }
 
+.sign-up .warning {
+    color: rgba(198, 0, 0, 1.0);
+}
+
 .logout-page .logout {
     text-align: center;
 }

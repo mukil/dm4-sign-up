@@ -8,8 +8,8 @@ import org.osgi.framework.Bundle;
  *
  * @name dm4-sign-up
  * @website https://github.com/mukil/dm4-sign-up
- * @version 1.1-SNAPSHOT
- * @author <a href="mailto:malte@mikromedia.de">Malte Reissig</a>;
+ * @version 1.5.1
+ * @author Malte Rei&szlig;
  */
 
 public interface SignupPluginService {
@@ -45,8 +45,6 @@ public interface SignupPluginService {
     boolean isValidEmailAddress(String value);
 
     boolean isMailboxTaken(String value);
-
-    boolean isUsernameTaken(String value);
 
     /** Send notification email to system administrator mailbox configured in current \"Sign-up Configuration\" topic.*/
     void sendSystemMailboxNotification(String subject, String message);

@@ -81,6 +81,13 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 
 ## Version history
 
+**1.5.1** -- Nov 13, 2016
+
+* Fixes critical error (typo introduced during translations) in password-reset template
+* Extends translatable hints for sign-up and login dialog, added german languaged messages
+* Fixes some typos in user dialogs and the header style on the account-edit template
+* New "API Usage" option now translatable and basically working (see "/sign-up/edit")
+
 **1.5** -- Aug 05, 2016
 
 * Translatable (HTML dialogs and Emails) using Javas ResourceBundles mechanism (almost complete)

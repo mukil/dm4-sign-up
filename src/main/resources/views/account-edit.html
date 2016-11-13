@@ -50,16 +50,26 @@
         </div>
 
         <div th:if="${custom_workspace_enabled} and ${logged_in}" id="custom-ws-text" class="dialog-body">
-            <h2>Aktivierung der API Option</h2>
-            <p>To make use of the Kiezatlas Data in your website or platform you can connect to our API with a client.<br/>
-               To do so you just need to understand and agree to our <i>Terms of service</i> for the API and tick the following box.</p>
+            <h2 th:text="${api_option_title}">Aktivierung der API Option</h2>
+            <p th:utext="${api_option_descr}">
+                To be able to use our API access please take your time and read the special <i>Terms of service</i> for the API.
+                If you've understood the following terms of service please confirm through checking the following box.
+            </p>
             <form name="custom-aggreement" action="javascript:voidFunction();">
-                <input id="custom-ws-check" type="checkbox" onclick="javascript:doCheckCustomWorkspaceAggrement()" class="tos-check"></input>
+                <input id="custom-ws-check" type="checkbox" th:checked="${api_workspace_member}"
+                       onclick="javascript:doCheckCustomWorkspaceAggrement()" class="tos-check"></input>
                 <label for="custom-ws-check" th:utext="${custom_workspace_description}">I also agree with the custom workspace <i>Terms of use</i>.</label>
                 <a href="javascript:showCustomWorkspaceTermsText()" title="Read Details">Read more</a><br/>
                 <div id="custom-ws-info" th:utext="${custom_workspace_details}"></div>
                 <div id="message-view"><span id="message"></span></div>
             </form>
+            <p th:utext="${api_option_revoke}"></p>
+            <p th:if="${!#strings.isEmpty(api_email_contact)}">
+                <span th:text="${api_contact_revoke}"></span> <a href="'mailto:' + ${api_email_contact}" th:text="${api_email_contact}"></a>
+            </p>
+            <p th:if="${#strings.isEmpty(api_email_contact)}" class="warning">
+                Notice: Please configure the option "System Recipient Mailbox" in your current <em>Sign-up Plugin Configuration</em>.
+            </p>
         </div>
 
         <div id="page-footer" th:utext="${footer}">

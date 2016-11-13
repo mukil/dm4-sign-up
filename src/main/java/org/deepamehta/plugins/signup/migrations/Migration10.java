@@ -103,6 +103,7 @@ public class Migration10 extends Migration {
         // 4 Move Topic "Api Membership Request Helper Note" to "Administration"
         Topic apiMembershipNote = dm4.getTopicByUri("org.deepamehta.signup.api_membership_requests");
         wsService.assignToWorkspace(apiMembershipNote, administrationWsId);
+        // 5 Move all email address into "administration" workspace
         logger.info("###### Migrate all users Email Addresses to \"Administration\" Workspace");
         List<Topic> emails = dm4.getTopicsByType("dm4.contacts.email_address");
         for (Topic email : emails) {
