@@ -44,6 +44,10 @@ public interface SignupPluginService {
 
     boolean isValidEmailAddress(String value);
 
+    boolean isMailboxTaken(String value);
+
+    boolean isUsernameTaken(String value);
+
     /** Send notification email to system administrator mailbox configured in current \"Sign-up Configuration\" topic.*/
     void sendSystemMailboxNotification(String subject, String message);
 

@@ -386,6 +386,33 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         }
     }
 
+    @Override
+    public void postUpdateTopic(Topic topic, TopicModel tm, TopicModel tm1) {
+        if (topic.getTypeUri().equals(SIGN_UP_CONFIG_TYPE_URI)) {
+            reloadAssociatedSignupConfiguration();
+        } else if (topic.getTypeUri().equals(CONFIG_TOPIC_ACCOUNT_ENABLED)) {
+            // Account status
+            boolean status = Boolean.parseBoolean(topic.getSimpleValue().toString());
+            // Account involved
+            Topic username = topic.getRelatedTopic("dm4.config.configuration", null,
+                    null, "dm4.accesscontrol.username");
+            // Perform notification
+            if (status && !DM4_ACCOUNTS_ENABLED) { // Enabled=true && new_accounts_are_enabled=false
+                log.info("Sign-up Notification: User Account \"" + username.getSimpleValue()+"\" is now ENABLED!");
+                //
+                String webAppTitle = activeModuleConfiguration.getChildTopics().getTopic(CONFIG_WEBAPP_TITLE)
+                        .getSimpleValue().toString();
+                Topic mailbox = username.getRelatedTopic(USER_MAILBOX_EDGE_TYPE, null, null, MAILBOX_TYPE_URI);
+                if (mailbox != null) { // for accounts created via sign-up plugin this will always evaluate to true
+                    String mailboxValue = mailbox.getSimpleValue().toString();
+                    sendSystemMail("Your account on " + webAppTitle + " is now active",
+                            rb.getString("mail_hello") + " " + username.getSimpleValue() + ",\n\nyour account on " + DM4_HOST_URL + " is now " +
+                                    "active.\n\n" + rb.getString("mail_ciao"), mailboxValue);
+                    log.info("Send system notification mail to " + mailboxValue + " - The account is now active!");
+                }
+            }
+        }
+    }
 
     // --- Sign-up Plugin Routes --- //
 
@@ -484,11 +511,19 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Override
     public void sendUserMailboxNotification(String mailbox, String subject, String message) {
         sendSystemMail(subject, message, mailbox);
-        /** if (dm4.getAccessControl().emailAddressExists(mailbox)) { // is a mailbox of a user
-            sendSystemMail(subject, message, mailbox);
-        } else {
-            log.warning("Did not send notification mail to System Mailbox - User with Mailbox ("+mailbox+") not known");
-        }*/
+    }
+
+    @Override
+    public boolean isUsernameTaken(String username) {
+        String value = username.trim();
+        Topic userNameTopic = acService.getUsernameTopic(value);
+        return (userNameTopic != null);
+    }
+
+    @Override
+    public boolean isMailboxTaken(String email) {
+        String value = email.toLowerCase().trim();
+        return dm4.getAccessControl().emailAddressExists(value);
     }
 
     @Override
@@ -652,7 +687,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         }
     }
 
-    /** ### Untested */
     private void sendPasswordResetMail(String key, String username, String mailbox) {
         try {
             String webAppTitle = activeModuleConfiguration.getChildTopics().getString(CONFIG_WEBAPP_TITLE);
@@ -729,17 +763,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         }
     }
 
-    private boolean isUsernameTaken(String username) {
-        String value = username.trim();
-        Topic userNameTopic = acService.getUsernameTopic(value);
-        return (userNameTopic != null);
-    }
-
-    private boolean isMailboxTaken(String email) {
-        String value = email.toLowerCase().trim();
-        return dm4.getAccessControl().emailAddressExists(value);
-    }
-
     private Association getDefaultAssocation(long topic1, long topic2) {
         return dm4.getAssociation("dm4.core.association",  topic1, topic2, "dm4.core.default", "dm4.core.default");
     }
@@ -809,14 +832,23 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("pd_label", configuration.getTopic(CONFIG_PD_LABEL).getSimpleValue().toString());
             viewData("pd_details", configuration.getTopic(CONFIG_PD_DETAILS).getSimpleValue().toString());
             viewData("footer", configuration.getTopic(CONFIG_PAGES_FOOTER).getSimpleValue().toString());
-            viewData("start_url", configuration.getTopic(CONFIG_START_PAGE_URL).getSimpleValue().toString());
-            viewData("home_url", configuration.getTopic(CONFIG_HOME_PAGE_URL).getSimpleValue().toString());
-            viewData("loading_app_hint", configuration.getTopic(CONFIG_LOADING_HINT).getSimpleValue().toString());
-            viewData("logging_out_hint", configuration.getTopic(CONFIG_LOGGING_OUT_HINT).getSimpleValue().toString());
             viewData("custom_workspace_enabled", configuration.getBoolean(CONFIG_API_ENABLED));
             viewData("custom_workspace_description", configuration.getTopic(CONFIG_API_DESCRIPTION).getSimpleValue().toString());
             viewData("custom_workspace_details", configuration.getTopic(CONFIG_API_DETAILS).getSimpleValue().toString());
             viewData("custom_workspace_uri", configuration.getTopic(CONFIG_API_WORKSPACE_URI).getSimpleValue().toString());
+            // values used on login and registration dialogs
+            viewData("start_url", configuration.getTopic(CONFIG_START_PAGE_URL).getSimpleValue().toString());
+            viewData("home_url", configuration.getTopic(CONFIG_HOME_PAGE_URL).getSimpleValue().toString());
+            viewData("loading_app_hint", configuration.getTopic(CONFIG_LOADING_HINT).getSimpleValue().toString());
+            viewData("logging_out_hint", configuration.getTopic(CONFIG_LOGGING_OUT_HINT).getSimpleValue().toString());
+            // messages used on login and registration dialogs
+            viewData("password_length_hint", rb.getString("password_length_hint"));
+            viewData("password_match_hint", rb.getString("password_match_hint"));
+            viewData("check_terms_hint", rb.getString("check_terms_hint"));
+            viewData("username_invalid_hint", rb.getString("username_invalid_hint"));
+            viewData("username_taken_hint", rb.getString("username_taken_hint"));
+            viewData("email_invalid_hint", rb.getString("email_taken_hint"));
+            viewData("not_authorized_message", rb.getString("not_authorized_message"));
             // labels used in template
             viewData("signup_title", rb.getString("signup_title"));
             viewData("create_account", rb.getString("create_account"));
@@ -875,33 +907,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("username", "Not logged in");
             viewData("email", "Not logged in");
             viewData("link", "/sign-up/login");
-        }
-    }
-
-    public void postUpdateTopic(Topic topic, TopicModel tm, TopicModel tm1) {
-        if (topic.getTypeUri().equals(SIGN_UP_CONFIG_TYPE_URI)) {
-            reloadAssociatedSignupConfiguration();
-        } else if (topic.getTypeUri().equals(CONFIG_TOPIC_ACCOUNT_ENABLED)) {
-            // Account status
-            boolean status = Boolean.parseBoolean(topic.getSimpleValue().toString());
-            // Account involved
-            Topic username = topic.getRelatedTopic("dm4.config.configuration", null,
-                    null, "dm4.accesscontrol.username");
-            // Perform notification
-            if (status && !DM4_ACCOUNTS_ENABLED) { // Enabled=true && new_accounts_are_enabled=false
-                log.info("Sign-up Notification: User Account \"" + username.getSimpleValue()+"\" is now ENABLED!");
-                //
-                String webAppTitle = activeModuleConfiguration.getChildTopics().getTopic(CONFIG_WEBAPP_TITLE)
-                        .getSimpleValue().toString();
-                Topic mailbox = username.getRelatedTopic(USER_MAILBOX_EDGE_TYPE, null, null, MAILBOX_TYPE_URI);
-                if (mailbox != null) { // for accounts created via sign-up plugin this will always evaluate to true
-                    String mailboxValue = mailbox.getSimpleValue().toString();
-                    sendSystemMail("Your account on " + webAppTitle + " is now active",
-                            rb.getString("mail_hello") + " " + username.getSimpleValue() + ",\n\nyour account on " + DM4_HOST_URL + " is now " +
-                                    "active.\n\n" + rb.getString("mail_ciao"), mailboxValue);
-                    log.info("Send system notification mail to " + mailboxValue + " - The account is now active!");
-                }
-            }
         }
     }
 

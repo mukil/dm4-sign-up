@@ -10,7 +10,15 @@
         "appLoadingMessage" : "Loading Webclient",
         "appLoggingOutHint" : "Logging out...",
         "appStartPageURL"   : "/",
-        "appHomePageURL"    : "/"
+        "appHomePageURL"    : "/",
+        "passwordLength"    : "Your password must be at least 8 characters long.",
+        "passwordMatch"     : "Your passwords do not match.",
+        "checkTerms"        : "First, please check our terms and conditions.",
+        "usernameInvalid"   : "This username would be invalid.",
+        "usernameTaken"     : "This username is already taken.",
+        "emailInvalid"      : "This E-Mail Address would be invalid.",
+        "emailTaken"        : "This E-Mail address is already registered.",
+        "notAuthorized"     : "You're not authorized. Sorry."
     }
 
 
@@ -49,7 +57,7 @@
                     renderFriendlyMessage(signupConfig.appLoadingMessage)
                     redirectToStartPageURL()
                 } else {
-                    renderWarning(xhr.response)
+                    renderWarning(signupConfig.notAuthorized)
                 }
             }
             xhr.open("POST", "/accesscontrol/login", false)
@@ -118,7 +126,7 @@
         var usernameInput = document.getElementById("username") // fixme: maybe its better to acces the form element
         var userInput = usernameInput.value
         if (userInput.length <= 1) {
-            renderWarning("This username would be invalid.")
+            renderWarning(signupConfig.usernameInvalid)
             disableSignupForm()
             return false
         }
@@ -134,7 +142,7 @@
             xhr.onload = function(e) {
                 var response = JSON.parse(xhr.response)
                 if (!response.isAvailable) {
-                    renderWarning("This username is already taken.")
+                    renderWarning(signupConfig.usernameTaken)
                     disableSignupForm()
                     inputInvalidated = true
                     if (handler) handler(false)
@@ -157,7 +165,7 @@
             xhr.onload = function(e) {
                 var response = JSON.parse(xhr.response)
                 if (!response.isAvailable) {
-                    renderWarning("This E-Mail address is already registered.")
+                    renderWarning(signupConfig.emailTaken)
                     disableSignupForm()
                     inputInvalidated = true
                     if (handler) handler(false)
@@ -175,7 +183,7 @@
     function checkPassword() {
         var passwordField = document.getElementById("pass-one") // fixme: maybe its better to acces the form element
         if (passwordField.value.length <=7) {
-            renderWarning("Your password must be at least 8 characters long.")
+            renderWarning(signupConfig.passwordLength)
             disableSignupForm()
             return null
         }
@@ -187,7 +195,7 @@
     function checkMailbox() {
         var mailboxField = document.getElementById("mailbox") // fixme: maybe its better to acces the form element
         if (mailboxField.value.indexOf("@") === -1 || mailboxField.value.indexOf(".") === -1) {
-            renderWarning("This E-Mail Address would be invalid.")
+            renderWarning(signupConfig.emailInvalid)
             disableSignupForm()
             return null
         }
@@ -200,7 +208,7 @@
         var passwordFieldTwo = document.getElementById("pass-one") // fixme: maybe its better to acces the form element
         var passwordFieldOne = document.getElementById("pass-two") // fixme: maybe its better to acces the form element
         if (passwordFieldOne.value !== passwordFieldTwo.value) {
-            renderWarning("Your passwords do not match.")
+            renderWarning(signupConfig.passwordMatch)
             disableSignupForm()
             return null
         }
@@ -219,7 +227,7 @@
             enableSignupForm()
             return OK_STRING
         }
-        renderWarning("First, please check our terms and conditions.")
+        renderWarning(signupConfig.checkTerms)
         disableSignupForm()
         return null
     }
