@@ -841,7 +841,8 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("check_terms_hint", rb.getString("check_terms_hint"));
             viewData("username_invalid_hint", rb.getString("username_invalid_hint"));
             viewData("username_taken_hint", rb.getString("username_taken_hint"));
-            viewData("email_invalid_hint", rb.getString("email_taken_hint"));
+            viewData("email_invalid_hint", rb.getString("email_invalid_hint"));
+            viewData("email_taken_hint", rb.getString("email_taken_hint"));
             viewData("not_authorized_message", rb.getString("not_authorized_message"));
             // labels used in template
             viewData("signup_title", rb.getString("signup_title"));

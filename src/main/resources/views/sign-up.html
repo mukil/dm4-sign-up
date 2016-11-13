@@ -8,6 +8,20 @@
         <link rel="stylesheet" th:href="${css_path}" type="text/css" />
         <script type="text/javascript" src="/de.deepamehta.accesscontrol/script/vendor/sha256.js"></script>
         <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
+        <script th:inline="javascript">
+        /*<![CDATA[*/
+            signupConfig.appLoadingMessage = /*[[${loading_app_hint}]]*/ 'Loading Webclient';
+            signupConfig.appStartPageURL = /*[[${start_url}]]*/ '/';
+            signupConfig.passwordLength = /*[[${password_length_hint}]]*/ "Your password must be at least 8 characters long.";
+            signupConfig.passwordMatch = /*[[${password_match_hint}]]*/ "Your passwords do not match.";
+            signupConfig.checkTerms = /*[[${check_terms_hint}]]*/ "First, please check our terms and conditions.";
+            signupConfig.usernameInvalid = /*[[${username_invalid_hint}]]*/ "This username would be invalid.";
+            signupConfig.usernameTaken = /*[[${username_taken_hint}]]*/ "This username is already taken.";
+            signupConfig.emailInvalid = /*[[${email_invalid_hint}]]*/ "This Email Address would be invalid.";
+            signupConfig.emailTaken = /*[[${email_taken_hint}]]*/ "This E-Mail address is already registered.";
+            signupConfig.notAuthorized = /*[[${not_authorized_message}]]*/ "You're not authorized. Sorry.";
+        /*]]>*/
+        </script>
     </head>
 
     <body class="sign-up-page sign-up">
@@ -42,16 +56,16 @@
             <form class="sign-up-form" action="javascript:voidFunction();" onsubmit="javascript:createAccount();">
                 <!-- label for="username">Username</label-->
                 <input id="username" type="text" name="username" th:placeholder="${label_username}" title="Username"
-                       onchange="checkUserNameAvailability()" class="sign-up username" />
+                       onblur="checkUserNameAvailability()" class="sign-up username" />
                 <!-- label for="pass-one">Password</label-->
                 <input type="password" id="pass-one" name="pass-one" th:placeholder="${label_password}" title="Password"
-                       onchange="checkPassword()" class="sign-up password" />
+                       onblur="checkPassword()" class="sign-up password" />
                 <!-- label for="pass-two">Password (Repeat)</label-->
                 <input type="password" id="pass-two" name="pass-two" th:placeholder="${label_password_repeat}" title="Password (Repeat)"
-                       onchange="comparePasswords()" class="sign-up password" />
+                       onblur="comparePasswords()" class="sign-up password" />
                 <!-- label for="mailbox">Mailbox</label-->
                 <input type="text" id="mailbox" name="mailbox" th:placeholder="${label_email}" title="Email Address"
-                       onchange="checkMailboxAvailability()" onblur="checkMailboxAvailability()" class="sign-up mailbox" />
+                       onblur="checkMailboxAvailability()" class="sign-up mailbox" />
                 <div id="message-view"><span id="message"></span></div>
                 <input type="submit" id="create" th:value="${create_account}" title="Create Account" class="sign-up ok" />&nbsp;<span th:text="${or_label}">or</span> <a href="/sign-up/login" th:text="${log_in_small}" title="log in">log in</a>.
             </form>

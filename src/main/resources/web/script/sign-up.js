@@ -163,7 +163,7 @@
         if (mailBox) {
             xhr = new XMLHttpRequest()
             xhr.onload = function(e) {
-                var response = JSON.parse(xhr.response)
+                var response = JSON.parse(xhr.responseText)
                 if (!response.isAvailable) {
                     renderWarning(signupConfig.emailTaken)
                     disableSignupForm()
