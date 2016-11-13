@@ -51,19 +51,11 @@ import org.osgi.framework.Bundle;
 
 /**
  * This plugin enables anonymous users to create themselves a user account in DeepaMehta 4
- * through an Email based confirmation workflow and thus it critically depends on a postfix
- * like "internet" setup on "localhost".
- *
- * Routes registerd by this plugin are:
- * "/sign-up"				signup-form (registration dialog)
- * "/sign-up/login"			login-form (frontpage, alternate logind dialog)
- * "/sign-up/ok"			info-page after sucessfull account creation
- * "/sign-up/error"			info-page after failure (no account creation)
- * "/sign-up/token-info"	info-page notifying about confirmation mail
- *
+ * through an Email based confirmation workflow and thus it critically depends on a e.g. postfix
+ * like "internet" installation for "localhost".
  * @name dm4-sign-up
  * @website https://github.com/mukil/dm4-sign-up
- * @version 1.1-SNAPSHOT
+ * @version 1.5.1-SNAPSHOT
  * @author <a href="mailto:malte@mikromedia.de">Malte Reissig</a>;
  */
 @Path("/sign-up")
@@ -467,15 +459,17 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @GET
     @Path("/error")
     @Produces(MediaType.TEXT_HTML)
-    public Viewable getFailureView(String status) {
+    public Viewable getFailureView() {
         viewData("account_failure_message", rb.getString("account_failure_message"));
         prepareSignupPage("failure");
-        if (status != null) {
-            if (status.equals("created")) {
-                viewData("status_label", rb.getString("status_label_created"));
-            } else if (status.equals("updated")) {
-                viewData("status_label", rb.getString("status_label_updated"));
-            }
+        return getFailureView(null);
+    }
+
+    private Viewable getFailureView(String status) {
+        if (status != null && status.equals("created")) {
+            viewData("status_label", rb.getString("status_label_created"));
+        } else {
+            viewData("status_label", rb.getString("status_label_updated"));
         }
         return view("failure");
     }
