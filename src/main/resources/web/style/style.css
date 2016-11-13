@@ -128,7 +128,7 @@ body.sign-up label {
 }
 
 .sign-up #log-in-view {
-    max-width: 300px;
+    max-width: 320px;
 }
 
 .reset-page #sign-up-view p {
@@ -231,10 +231,6 @@ body.sign-up label {
 
 .logout-page .logout {
     text-align: center;
-}
-
-.logout-page #message {
-    margin-left: 15px;
 }
 
 /** Webclient specific styles */

@@ -562,17 +562,20 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     }
 
     private boolean isApiWorkspaceMember() {
-        Topic usernameTopic = acService.getUsernameTopic(acService.getUsername());
-        String apiWorkspaceUri = activeModuleConfiguration.getChildTopics().getString(CONFIG_API_WORKSPACE_URI);
-        if (usernameTopic != null && !apiWorkspaceUri.isEmpty() && !apiWorkspaceUri.equals("undefined")) {
-            Topic apiWorkspace = dm4.getAccessControl().getWorkspace(apiWorkspaceUri);
-            if (apiWorkspace != null) {
-                return acService.isMember(usernameTopic.getSimpleValue().toString(), apiWorkspace.getId());
+        String username = acService.getUsername();
+        if (username != null) {
+            Topic usernameTopic = acService.getUsernameTopic();
+            String apiWorkspaceUri = activeModuleConfiguration.getChildTopics().getString(CONFIG_API_WORKSPACE_URI);
+            if (!apiWorkspaceUri.isEmpty() && !apiWorkspaceUri.equals("undefined")) {
+                Topic apiWorkspace = dm4.getAccessControl().getWorkspace(apiWorkspaceUri);
+                if (apiWorkspace != null) {
+                    return acService.isMember(usernameTopic.getSimpleValue().toString(), apiWorkspace.getId());
+                }
+            } else {
+                Topic apiMembershipRequestNote = dm4.getTopicByUri("org.deepamehta.signup.api_membership_requests");
+                Association requestRelation = getDefaultAssociation(usernameTopic.getId(), apiMembershipRequestNote.getId());
+                if (requestRelation != null) return true;
             }
-        } else {
-            Topic apiMembershipRequestNote = dm4.getTopicByUri("org.deepamehta.signup.api_membership_requests");
-            Association requestRelation = getDefaultAssociation(usernameTopic.getId(), apiMembershipRequestNote.getId());
-            if (requestRelation != null) return true;
         }
         return false;
     }
