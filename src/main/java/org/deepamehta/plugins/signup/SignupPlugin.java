@@ -51,9 +51,8 @@ import org.osgi.framework.Bundle;
 
 /**
  * This plugin enables anonymous users to create themselves a user account in DeepaMehta 4
- * through an Email based confirmation workflow and thus it critically depends on a e.g. postfix
+ * through an (optional) Email based confirmation workflow and thus it critically depends on a e.g. postfix
  * like "internet" installation for "localhost". Source code available at: https://github.com/mukil/dm4-sign-up
- * @name dm4-sign-up
  * @version 1.5.1
  * @author Malte Rei&szlig;
 **/
@@ -881,7 +880,9 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("custom_workspace_uri", configuration.getTopic(CONFIG_API_WORKSPACE_URI).getSimpleValue().toString());
             // values used on login and registration dialogs
             viewData("start_url", configuration.getTopic(CONFIG_START_PAGE_URL).getSimpleValue().toString());
+            viewData("visit_start_url", rb.getString("visit_start_url"));
             viewData("home_url", configuration.getTopic(CONFIG_HOME_PAGE_URL).getSimpleValue().toString());
+            viewData("visit_home_url", rb.getString("visit_home_url"));
             viewData("loading_app_hint", configuration.getTopic(CONFIG_LOADING_HINT).getSimpleValue().toString());
             viewData("logging_out_hint", configuration.getTopic(CONFIG_LOGGING_OUT_HINT).getSimpleValue().toString());
             // messages used on login and registration dialogs
@@ -911,6 +912,12 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("label_reset_password", rb.getString("reset_password"));
             viewData("info_reset_password", rb.getString("reset_password_hint"));
             viewData("password_reset_ok_message", rb.getString("password_reset_success_1"));
+            //
+            viewData("your_account_title", rb.getString("your_account_title"));
+            viewData("your_account_heading", rb.getString("your_account_heading"));
+            viewData("your_account_username_label", rb.getString("your_account_username_label"));
+            viewData("your_account_email_label", rb.getString("your_account_email_label"));
+            //
             viewData("api_option_title", rb.getString("api_option_title"));
             viewData("api_option_descr", rb.getString("api_option_descr"));
             viewData("api_option_revoke", rb.getString("api_option_revoke"));

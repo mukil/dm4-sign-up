@@ -5,9 +5,8 @@ import com.sun.jersey.api.view.Viewable;
 import org.osgi.framework.Bundle;
 
 /**
- *
- * @name dm4-sign-up
- * @website https://github.com/mukil/dm4-sign-up
+ * A plugin service to check username or mailbox availability and to send
+ * out system or user mailbox notifications.
  * @version 1.5.1
  * @author Malte Rei&szlig;
  */

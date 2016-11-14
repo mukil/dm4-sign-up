@@ -24,46 +24,50 @@
         <div class="top-menu" th:include="fragments/navigation :: top (publisher=${is_publisher})"></div>
 
         <div id="page-header">
-            <!-- Make Page Title fully translatable -->
-            <span class="project-title" th:text="'Your Account on ' + ${title}">Your Account</span>
+            <span class="project-title" th:text="${your_account_title}">Your Account</span>
         </div>
 
         <p>&nbsp;</p>
 
         <div class="dialog-body">
-            <!-- Make this header translatable -->
-            <h2>Infos associated with your username</h2>
-            <form class="account-edit-form" action="javascript:voidFunction();" onsubmit="javascript:saveAccountEdits()">
-                <!--label for="username">Username</label-->
-                <input id="username" disabled="true" type="text" th:value="${username}" name="username" class="custom-ws-up username" />
-                <!-- Adapt Mailbox -->
-                <input type="text" disabled="true" id="mailbox" name="mailbox" th:value="${email}" class="sign-up mailbox" />
-                <div id="message-view"><span id="message"></span></div>
-                <!--input type="submit" id="update" value="Save" disabled="true" class="sign-up ok" /-->
-            </form>
+            <h2 th:text="${your_account_heading}">Infos associated with your username</h2>
+            <div>
+                <div class="label">Username</div>
+                <div th:text="${username}" class="value username" />
+                <div class="label">Email Address</div>
+                <div th:text="${email}" class="value email" />
+            </div>
             <div th:if="${!#strings.isEmpty(link)}">
-                <p>
-                    <!-- Make this button translatable -->
-                    <a class="button" th:href="${link}">Please log in first</a>
-                </p>
+                <form th:if="${!logged_in}" method="GET" class="login-form" action="/sign-up/login">
+                    <input type="submit" th:value="${login}" class="ok sign-up" />
+                </form>
             </div>
             <form th:if="${logged_in}" class="logout-form" action="javascript:doLogout()">
                 <input type="submit" th:value="${logout}" class="ok sign-up" />
             </form>
+            <form th:if="${logged_in}" class="launch-form" method="GET" th:action="${start_url}">
+                <input type="submit" th:value="${visit_start_url}" class="ok sign-up" />
+            </form>
+            <form th:if="${logged_in}" class="launch-form" method="GET" th:action="${home_url}">
+                <input type="submit" th:value="${visit_home_url}" class="ok sign-up" />
+            </form>
         </div>
 
-        <div th:if="${custom_workspace_enabled} and ${logged_in}" id="custom-ws-text" class="dialog-body">
+        <div th:if="${custom_workspace_enabled} and ${logged_in}" id="api-workspace" class="dialog-body">
             <h2 th:text="${api_option_title}">Aktivierung der API Option</h2>
             <p th:utext="${api_option_descr}">
                 To be able to use our API access please take your time and read the special <i>Terms of service</i> for the API.
                 If you've understood the following terms of service please confirm through checking the following box.
             </p>
             <form name="custom-aggreement" action="javascript:voidFunction();">
-                <input id="custom-ws-check" type="checkbox" th:checked="${api_workspace_member}"
-                       onclick="javascript:doCheckCustomWorkspaceAggrement()" class="tos-check"></input>
-                <label for="custom-ws-check" th:utext="${custom_workspace_description}">I also agree with the custom workspace <i>Terms of use</i>.</label>
+                <input id="api-check" type="checkbox" th:checked="${api_workspace_member}"
+                        onclick="javascript:doCheckCustomWorkspaceAggrement()" class="tos-check"
+                        title="Yes, i accept the special terms of service for this membership"/>
+                <label for="api-check" th:utext="${custom_workspace_description}" title="Yes, i accept the special terms of service for this membership">
+                    I also agree with the custom workspace <i>Terms of use</i>.
+                </label>
                 <a href="javascript:showCustomWorkspaceTermsText()" title="Read Details">Read more</a><br/>
-                <div id="custom-ws-info" th:utext="${custom_workspace_details}"></div>
+                <div id="api-info" th:utext="${custom_workspace_details}"></div>
                 <div id="message-view"><span id="message"></span></div>
             </form>
             <p th:utext="${api_option_revoke}"></p>

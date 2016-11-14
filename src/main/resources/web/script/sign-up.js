@@ -263,7 +263,7 @@
     }
 
     function showCustomWorkspaceTermsText() {
-        var textArea = document.getElementById('custom-ws-info')
+        var textArea = document.getElementById('api-info')
             textArea.setAttribute("style", "display: block;")
     }
 

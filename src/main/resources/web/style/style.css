@@ -11,11 +11,19 @@ body.sign-up a {
     margin: 0px;
 }
 
-body.sign-up p,
-body.sign-up label {
+body.sign-up p {
     margin-left: 5px;
     color: #a9a9a9;
     padding-left: 5px;
+}
+
+.sign-up label,
+.sign-up .label {
+    color: #a9a9a9;
+}
+
+.sign-up .value {
+    margin-bottom: 15px
 }
 
 .sign-up p.password-reset {
@@ -24,23 +32,23 @@ body.sign-up label {
 }
 
 .sign-up #account-info,
-.sign-up #custom-ws-info,
+.sign-up #api-info,
 .sign-up #private-info {
     display: none;
 }
 
-.sign-up #pre-text {
+.sign-up #preamble {
     width: 400px;
     margin-top: 20px;
 }
 
-.sign-up #custom-ws-text label p {
+.sign-up #api-workspace label p {
     display: inline-block;
     margin: 0px;
     margin-right: 15px;
 }
 
-.sign-up #custom-ws-text p {
+.sign-up #api-workspace p {
     margin-left: 0px;
     padding-left: 0px;
 }
@@ -65,13 +73,9 @@ body.sign-up label {
     position: relative;
 }
 
-.sign-up #pre-text a,
+.sign-up #preamble a,
 .sign-up #page-footer a {
     text-decoration: none;
-}
-
-.sign-up #pre-text input {
-    margin-top: 10px;
 }
 
 .sign-up #page-header img.webapp-logo {
@@ -136,9 +140,14 @@ body.sign-up label {
     padding: 0px;
 }
 
+.sign-up.account-page #page-header {
+   background-color: rgb(237, 236, 236);
+}
+
+.sign-up.account-page #page-header,
 .sign-up .dialog-body,
-.sign-up #pre-text,
-.sign-up #custom-ws-text,
+.sign-up #preamble,
+.sign-up #api-workspace,
 .sign-up #account-view {
     max-width: 640px;
     margin-left: auto;
