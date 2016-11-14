@@ -55,25 +55,15 @@ DeepaMehta 4.
 ## Plugin Configuration
 
 The central topic for configuring the sign-up dialog for your DeepaMehta 4 installation is of type `Sign-up 
-Configuration`. Editing this topic via your dm4-webclient allows you to interactively control/adapt the following 
-parameters:
+Configuration`. Editing this topic via your dm4-webclient allows you to interactively control/adapt many options.
 
-*    all text-messages, hyperlinks, titles, logo, css, read more url of the login and sign-up pages
-*    the terms of service and privacy policy (including checkbox labels) used in the sign-up form
-*    the page footer (HTML) of all pages
-*    the path to a custom image file as logo
-*    the path to a custom CSS file replacing the default style
-*    the mailbox emails are sent from
-*    the administrators mailbox where the system sends notifications to
-*    the flag `Email Confirmation Required` is there to decide whether to involve Emails at all
-*    the workspace a user becomes automatically member of when signing up is now configurable<br/>
-     this is simply reflected in _Association_ between the sign-up configuration topic and the workspace, meaning if there is such an assocation members will automatically get a membership to this workspace (if it is not _Confidential_ or _Private_)
-*    furthermore, an additional custom workspace setting is available<br/>
-     (_API Enabled_, _API Description_, _API Details_, _API Workspace URI_), this allows to configure a second, opt-in style, workspace membership for which user can make a membership request on the new `/sign-up/edit` page
-*    the home page url (redirecting after log-out) and the start page url (redirecting after login) are new options and come with respective configurable messages/labels which are displayed by the UI when redirecting
-*    and some more options by now...
+Setting a configuration option to an empty value usually means deactivating the features depending on it.
 
-A configuration topic is associated with the "Plugin" topic representing this plugin upon installation and can be altered by user `admin`. Setting input fields to an empty value means deactivating the features who depend on this configuration value it.
+The currently active sign-up configuration is associated with the "Plugin" topic representing this plugin ("DeepaMehta 4 Sign up"). It can be altered by members of the `Administration` workspace.
+
+### Setup Custom Workspace Assignment
+
+There is currently just one special configuration option. To setup a workspace which self-registering users should automatically join (become members of) you need to associate that very workspace topic with your active sign-up configuration. Here comes the pitfall: To take this "custom workspace assignment" into effect you must either restart the platform or press "Edit" on your sign-up configuration topic once. In both cases the configuration is reloaded and therewith comes into immediate effect (see [#1](https://github.com/mukil/dm4-sign-up/issues/1)).
 
 ## Licensed under the GPL License 3.0
 
@@ -87,7 +77,7 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 * Extends translatable hints for sign-up and login dialog, added german languaged messages
 * Fixes some typos in user dialogs and the header style on the account-edit template
 * New "API Usage" option now translatable and basically working (see "/sign-up/edit")
-* Some general improvements
+* Some general (but minor) improvements
 
 **1.5** -- Aug 05, 2016
 
