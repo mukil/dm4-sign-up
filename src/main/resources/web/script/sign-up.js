@@ -290,11 +290,13 @@
     function renderFriendlyMessage(message) {
         var textNode = document.createTextNode(message)
         var messageElement = document.getElementById('message-view')
-        while(messageElement.hasChildNodes()) {
-            // looping over lastChild thx to http://stackoverflow.com/questions/5402525/remove-all-child-nodes
-            messageElement.removeChild(messageElement.lastChild);
+        if (messageElement !== null) {
+            while(messageElement.hasChildNodes()) {
+                // looping over lastChild thx to http://stackoverflow.com/questions/5402525/remove-all-child-nodes
+                messageElement.removeChild(messageElement.lastChild);
+            }
+            messageElement.appendChild(textNode)
         }
-        messageElement.appendChild(textNode)
     }
 
     function disableSignupForm() {
