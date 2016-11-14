@@ -71,12 +71,13 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 
 ## Version history
 
-**1.5.1** -- Nov 13, 2016
+**1.5.1** -- Nov 14, 2016
 
 * Fixes critical error (typo introduced during translations) in password-reset template
 * Extends translatable hints for sign-up and login dialog, added german languaged messages
 * Fixes some typos in user dialogs and the header style on the account-edit template
 * New "API Usage" option now translatable and basically working (see "/sign-up/edit")
+* Adds migration to move the "API Membership Request" topic into "System" workspace
 * Some general (but minor) improvements
 
 **1.5** -- Aug 05, 2016
