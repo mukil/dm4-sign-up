@@ -268,12 +268,12 @@
     }
 
     function showLabsPrivateText() {
-        var textArea = document.getElementById('private-info')
+        var textArea = document.getElementById('private-details')
             textArea.setAttribute("style", "display: block;")
     }
 
     function showLabsTermsText() {
-        var textArea = document.getElementById('account-info')
+        var textArea = document.getElementById('tos-details')
             textArea.setAttribute("style", "display: block;")
     }
 

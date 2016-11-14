@@ -31,9 +31,13 @@ body.sign-up p {
     margin: 0px;
 }
 
-.sign-up #account-info,
-.sign-up #api-info,
-.sign-up #private-info {
+.sign-up #preamble form .part {
+    margin-bottom: 20px;
+}
+
+.sign-up #tos-details,
+.sign-up #private-details,
+.sign-up #api-info {
     display: none;
 }
 
