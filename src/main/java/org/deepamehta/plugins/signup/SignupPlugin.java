@@ -526,7 +526,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             try {
                 sendSystemMail(subject, message, recipient);
             } catch (Exception ex) {
-                log.warning("There seems to be an issue with your mail (SMTP) setup,"
+                log.severe("There seems to be an issue with your mail (SMTP) setup,"
                         + "we FAILED sending out a notification mail to the \"System Mailbox\", caused by: " +  ex.getMessage());
             }
         } else {
@@ -539,7 +539,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         try {
             sendSystemMail(subject, message, mailbox);
         } catch (Exception ex) {
-            log.warning("There seems to be an issue with your mail (SMTP) setup,"
+            log.severe("There seems to be an issue with your mail (SMTP) setup,"
                     + "we FAILED sending out a notification mail to User \""+mailbox+"\", caused by: " +  ex.getMessage());
         }
     }
@@ -555,7 +555,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         if (value == null) return false;
         boolean result = true;
         try {
-            InternetAddress emailAddr = new InternetAddress(value);
+            new InternetAddress(value);
             String[] tokens = value.split("@");
             if (tokens.length != 2 || (tokens[0].isEmpty() || tokens[1].isEmpty())) {
                 result = false;
@@ -760,7 +760,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                             + "\n\n" + rb.getString("mail_ciao"), mailbox);
                 }
             } catch (Exception ex) {
-                log.warning("There seems to be an issue with your mail (SMTP) setup,"
+                log.severe("There seems to be an issue with your mail (SMTP) setup,"
                         + "we FAILED sending out the \"Email Confirmation\" mail, caused by: " +  ex.getMessage());
             }
         } catch (MalformedURLException ex) {
@@ -779,7 +779,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     rb.getString("mail_hello") + " " + username + ",\n\n"+rb.getString("mail_pw_reset_body")+"\n"
                         + url + "sign-up/password-reset/" + key + "\n\n" + rb.getString("mail_cheers"), mailbox);
             } catch (Exception ex) {
-                log.warning("There seems to be an issue with your mail (SMTP) setup,"
+                log.severe("There seems to be an issue with your mail (SMTP) setup,"
                         + "we FAILED sending out the \"Password Reset\" mail, caused by: " +  ex.getMessage());
             }
         } catch (MalformedURLException ex) {
@@ -797,7 +797,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                 sendSystemMail("Account registration on " + webAppTitle,
                         "\nA user has registered.\n\nUsername: " + username + "\nEmail: " + mailbox, adminMailbox);
             } catch (Exception ex) {
-                log.warning("There seems to be an issue with your mail (SMTP) setup,"
+                log.severe("There seems to be an issue with your mail (SMTP) setup,"
                         + "we FAILED notifying the \"system mailbox\" about account creation, caused by: " +  ex.getMessage());
             }
         } else {
@@ -996,7 +996,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("template", templateName);
             viewData("hostUrl", DM4_HOST_URL);
         } else {
-            log.warning("Could not load module configuration of sign-up plugin during page preparation!");
+            log.severe("Could not load module configuration of sign-up plugin during page preparation!");
         }
     }
 
