@@ -69,8 +69,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     public static final String CONFIG_TOPIC_ACCOUNT_ENABLED = "dm4.accesscontrol.login_enabled";
 
     // --- Sign-up related type URIs (Configuration, Template Data) --- //
-    private final String SIGN_UP_PLUGIN_TOPIC_URI   = "org.deepamehta.sign-up";
-    private final String USER_MAILBOX_EDGE_TYPE     = "org.deepamehta.signup.user_mailbox";
     private final String SIGN_UP_CONFIG_TYPE_URI    = "org.deepamehta.signup.configuration";
     private final String CONFIG_PROJECT_TITLE       = "org.deepamehta.signup.config_project_title";
     private final String CONFIG_WEBAPP_TITLE        = "org.deepamehta.signup.config_webapp_title";
@@ -94,6 +92,8 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     private final String CONFIG_API_DETAILS         = "org.deepamehta.signup.config_api_details";
     private final String CONFIG_API_WORKSPACE_URI   = "org.deepamehta.signup.config_api_workspace_uri";
 
+    private final String USER_MAILBOX_EDGE_TYPE     = "org.deepamehta.signup.user_mailbox";
+    private final String SIGN_UP_PLUGIN_TOPIC_URI   = "org.deepamehta.sign-up";
 
     private Topic activeModuleConfiguration = null;
     private Topic customWorkspaceAssignmentTopic = null;
@@ -272,33 +272,37 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     }
 
     @GET
-    @Path("/handle/{username}/{pass-one}/{mailbox}")
-    public Viewable handleSignupRequest(@PathParam("username") String username,
-            @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox) throws WebApplicationException {
+    @Path("/handle/{username}/{pass-one}/{mailbox}/{skipConfirmation}")
+    public Viewable handleSignupRequest(@PathParam("username") String username, @PathParam("pass-one") String password,
+            @PathParam("mailbox") String mailbox, @PathParam("skipConfirmation") boolean skipConfirmation)
+            throws WebApplicationException {
         try {
             if (activeModuleConfiguration.getChildTopics().getBoolean(CONFIG_EMAIL_CONFIRMATION)) {
-                log.info("Sign-up Configuration: Email based confirmation workflow active, send out confirmation mail.");
-                createUserValidationToken(username, password, mailbox);
-                // redirect user to a "token-info" page
-                throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/token-info")).build());
+                if (skipConfirmation && isAdministrationWorkspaceMember()) {
+                    log.info("Sign-up Configuration: Email based confirmation workflow active, Administrator skipping confirmation mail.");
+                    createSimpleUserAccount(username, password, mailbox);
+                    handleAccountCreatedRedirect(username);
+                } else {
+                    log.info("Sign-up Configuration: Email based confirmation workflow active, send out confirmation mail.");
+                    createUserValidationToken(username, password, mailbox);
+                    // redirect user to a "token-info" page
+                    throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/token-info")).build());
+                }
             } else {
                 createSimpleUserAccount(username, password, mailbox);
-                if (DM4_ACCOUNTS_ENABLED) {
-                    log.info("Sign-up Configuration: Email based confirmation workflow inactive."
-                        + "The new account is ENABLED.");
-                    // redirecting user to the "your account is now active" page
-                    throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/"+username+"/ok")).build());
-                } else {
-                    log.info("Sign-up Configuration: Email based confirmation workflow inactive but new user account " +
-                            "created is DISABLED.");
-                    // redirecting to page displaying "your account was created but needs to be activated"
-                    throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/pending")).build());
-                }
+                handleAccountCreatedRedirect(username);
             }
         } catch (URISyntaxException e) {
             log.log(Level.SEVERE, "Could not build response URI while handling sign-up request", e);
         }
         return getFailureView("created");
+    }
+
+    @GET
+    @Path("/handle/{username}/{pass-one}/{mailbox}")
+    public Viewable handleSignupRequest(@PathParam("username") String username,
+            @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox) throws WebApplicationException {
+        return handleSignupRequest(username, password, mailbox, false);
     }
 
     @GET
@@ -434,7 +438,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Viewable getSignupFormView() {
-        if (acService.getUsername() != null) {
+        if (acService.getUsername() != null && !isAdministrationWorkspaceMember()) {
             prepareSignupPage("logout");
             return view("logout");
         }
@@ -519,7 +523,12 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         if (activeModuleConfiguration.getChildTopics().getTopicOrNull(CONFIG_ADMIN_MAILBOX) != null && // 4.8 migration
             !activeModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX).isEmpty()) {
             String recipient = activeModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX);
-            sendSystemMail(subject, message, recipient);
+            try {
+                sendSystemMail(subject, message, recipient);
+            } catch (Exception ex) {
+                log.warning("There seems to be an issue with your mail (SMTP) setup,"
+                        + "we FAILED sending out a notification mail to the \"System Mailbox\", caused by: " +  ex.getMessage());
+            }
         } else {
             log.info("Did not send notification mail to System Mailbox - Admin Mailbox Empty");
         }
@@ -527,7 +536,12 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     @Override
     public void sendUserMailboxNotification(String mailbox, String subject, String message) {
-        sendSystemMail(subject, message, mailbox);
+        try {
+            sendSystemMail(subject, message, mailbox);
+        } catch (Exception ex) {
+            log.warning("There seems to be an issue with your mail (SMTP) setup,"
+                    + "we FAILED sending out a notification mail to User \""+mailbox+"\", caused by: " +  ex.getMessage());
+        }
     }
 
     @Override
@@ -554,23 +568,47 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     // --- Private Helpers --- //
 
+    private void handleAccountCreatedRedirect(String username) throws URISyntaxException {
+        if (DM4_ACCOUNTS_ENABLED) {
+            log.info("DeepaMehta 4 Setting: The new account is now ENABLED, redirecting to OK page.");
+            // redirecting user to the "your account is now active" page
+            throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/"+username+"/ok")).build());
+        } else {
+            log.info("DeepaMehta 4 Setting: The new account is now DISABLED, redirecting to PENDING page.");
+            // redirecting to page displaying "your account was created but needs to be activated"
+            throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/pending")).build());
+        }
+    }
+
     private boolean isUsernameTaken(String username) {
         String value = username.trim();
         Topic userNameTopic = acService.getUsernameTopic(value);
         return (userNameTopic != null);
     }
 
+    private boolean isAdministrationWorkspaceMember() {
+        String username = acService.getUsername();
+        if (username != null) {
+            long administrationWorkspaceId = dm4.getAccessControl().getAdministrationWorkspaceId();
+            if (acService.isMember(username, administrationWorkspaceId)
+                || acService.getWorkspaceOwner(administrationWorkspaceId).equals(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean isApiWorkspaceMember() {
         String username = acService.getUsername();
         if (username != null) {
-            Topic usernameTopic = acService.getUsernameTopic();
             String apiWorkspaceUri = activeModuleConfiguration.getChildTopics().getString(CONFIG_API_WORKSPACE_URI);
             if (!apiWorkspaceUri.isEmpty() && !apiWorkspaceUri.equals("undefined")) {
                 Topic apiWorkspace = dm4.getAccessControl().getWorkspace(apiWorkspaceUri);
                 if (apiWorkspace != null) {
-                    return acService.isMember(usernameTopic.getSimpleValue().toString(), apiWorkspace.getId());
+                    return acService.isMember(username, apiWorkspace.getId());
                 }
             } else {
+                Topic usernameTopic = acService.getUsernameTopic();
                 Topic apiMembershipRequestNote = dm4.getTopicByUri("org.deepamehta.signup.api_membership_requests");
                 Association requestRelation = getDefaultAssociation(usernameTopic.getId(), apiMembershipRequestNote.getId());
                 if (requestRelation != null) return true;
@@ -707,18 +745,23 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                 + "\n" + url + "sign-up/confirm/" + key);
             // Localize "sentence" structure for german, maybe via Formatter
             String mailSubject = rb.getString("mail_confirmation_subject") + " - " + webAppTitle;
-            if (DM4_ACCOUNTS_ENABLED) {
-                sendSystemMail(mailSubject,
-                    rb.getString("mail_hello") + " " + username + ",\n\n"
-                        +rb.getString("mail_confirmation_active_body")+"\n"
-                        + url + "sign-up/confirm/" + key + "\n\n" + rb.getString("mail_ciao"), mailbox);
-            } else {
-                sendSystemMail(mailSubject,
-                    rb.getString("mail_hello") + " " + username + ",\n\n"
-                        + rb.getString("mail_confirmation_proceed_1")+"\n"
-                        + url + "sign-up/confirm/" + key
-                        + "\n\n" + rb.getString("mail_confirmation_proceed_2")
-                        + "\n\n" + rb.getString("mail_ciao"), mailbox);
+            try {
+                if (DM4_ACCOUNTS_ENABLED) {
+                    sendSystemMail(mailSubject,
+                        rb.getString("mail_hello") + " " + username + ",\n\n"
+                            +rb.getString("mail_confirmation_active_body")+"\n"
+                            + url + "sign-up/confirm/" + key + "\n\n" + rb.getString("mail_ciao"), mailbox);
+                } else {
+                    sendSystemMail(mailSubject,
+                        rb.getString("mail_hello") + " " + username + ",\n\n"
+                            + rb.getString("mail_confirmation_proceed_1")+"\n"
+                            + url + "sign-up/confirm/" + key
+                            + "\n\n" + rb.getString("mail_confirmation_proceed_2")
+                            + "\n\n" + rb.getString("mail_ciao"), mailbox);
+                }
+            } catch (Exception ex) {
+                log.warning("There seems to be an issue with your mail (SMTP) setup,"
+                        + "we FAILED sending out the \"Email Confirmation\" mail, caused by: " +  ex.getMessage());
             }
         } catch (MalformedURLException ex) {
             throw new RuntimeException(ex);
@@ -731,9 +774,14 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             URL url = new URL(DM4_HOST_URL);
             log.info("The password reset mails token request URL should be:"
                 + "\n" + url + "sign-up/password-reset/" + key);
-            sendSystemMail(rb.getString("mail_pw_reset_title") + " " + webAppTitle,
-                rb.getString("mail_hello") + " " + username + ",\n\n"+rb.getString("mail_pw_reset_body")+"\n"
-                    + url + "sign-up/password-reset/" + key + "\n\n" + rb.getString("mail_cheers"), mailbox);
+            try {
+                sendSystemMail(rb.getString("mail_pw_reset_title") + " " + webAppTitle,
+                    rb.getString("mail_hello") + " " + username + ",\n\n"+rb.getString("mail_pw_reset_body")+"\n"
+                        + url + "sign-up/password-reset/" + key + "\n\n" + rb.getString("mail_cheers"), mailbox);
+            } catch (Exception ex) {
+                log.warning("There seems to be an issue with your mail (SMTP) setup,"
+                        + "we FAILED sending out the \"Password Reset\" mail, caused by: " +  ex.getMessage());
+            }
         } catch (MalformedURLException ex) {
             throw new RuntimeException(ex);
         }
@@ -745,8 +793,13 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         if (activeModuleConfiguration.getChildTopics().getTopicOrNull(CONFIG_ADMIN_MAILBOX) != null &&
             !activeModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX).isEmpty()) {
             String adminMailbox = activeModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX);
+            try {
                 sendSystemMail("Account registration on " + webAppTitle,
                         "\nA user has registered.\n\nUsername: " + username + "\nEmail: " + mailbox, adminMailbox);
+            } catch (Exception ex) {
+                log.warning("There seems to be an issue with your mail (SMTP) setup,"
+                        + "we FAILED notifying the \"system mailbox\" about account creation, caused by: " +  ex.getMessage());
+            }
         } else {
             log.info("ADMIN: No \"Admin Mailbox\" configured: A new user account (" + username + ") was created but" +
                     " no notification could be sent.");
@@ -937,7 +990,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("requested_page_3", rb.getString("page_account_requested_3"));
             // Generics
             String username = acService.getUsername();
-            // ### Todo: isAdministrator based on workspace membership for account creations w/out confirmation mails
+            viewData("administration_workspace_member", isAdministrationWorkspaceMember());
             viewData("authenticated", (username != null));
             viewData("username", username);
             viewData("template", templateName);
@@ -950,8 +1003,13 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     private void prepareAccountEditPage() {
         String username = acService.getUsername();
         if (username != null) {
-            // Make use of the new privilged getEmailAddress call for users to see their own
-            String eMailAddressValue = dm4.getAccessControl().getEmailAddress(username);
+            // Make use of the new privileged getEmailAddress call for users to see their own
+            String eMailAddressValue = "None";
+            try {
+                eMailAddressValue = dm4.getAccessControl().getEmailAddress(username);
+            } catch (Exception e) {
+                log.warning("Username has no Email Address topic related via \""+USER_MAILBOX_EDGE_TYPE+"\"");
+            }
             viewData("logged_in", true);
             viewData("username", username);
             viewData("email", eMailAddressValue);

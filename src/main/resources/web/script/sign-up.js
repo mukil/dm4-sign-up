@@ -97,10 +97,16 @@
         function doCreateRequest() {
             var usernameVal = encodeURIComponent(document.getElementById("username").value)
             var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
+            var skipConfirmation = document.getElementById("skip-confirmation").value
+            if (skipConfirmation === "on") {
+                skipConfirmation = "/true"
+            } else {
+                skipConfirmation = ""
+            }
             var passwordVal = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
             // employing the w3school way to go to GET the sign-up resource
             window.document.location.assign("//" +  window.location.host + "/sign-up/handle/" + usernameVal + "/"
-               + passwordVal +"/" + mailbox)
+               + passwordVal +"/" + mailbox + skipConfirmation)
         }
         // any of these should prevent submission of form
         if (!isValidUsername()) return false
