@@ -17,6 +17,8 @@ import de.deepamehta.core.storage.spi.DeepaMehtaTransaction;
 import de.deepamehta.accesscontrol.AccessControlService;
 import de.deepamehta.thymeleaf.ThymeleafPlugin;
 import de.deepamehta.workspaces.WorkspacesService;
+import de.mikromedia.sendgrid.SendgridService;
+import de.mikromedia.sendgrid.util.SendgridMail;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -104,6 +106,8 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     private AccessControlService acService;
     @Inject
     private WorkspacesService wsService; // Used in migrations
+    @Inject
+    private SendgridService sendgrid; // Used in migrations
 
     @Context
     UriInfo uri;
@@ -386,14 +390,14 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                         mf.newTopicRoleModel(apiMembershipRequestNote.getId(), "dm4.core.default")));
                 dm4.getAccessControl().assignToWorkspace(apiRequest, dm4.getAccessControl().getSystemWorkspaceId());
                 log.info("Request for new custom API Workspace Membership by user \"" + usernameTopic.getSimpleValue().toString() + "\"");
-                sendSystemMailboxNotification("API Usage Requested", "\nHi admin,\n\n"
+                sendSystemMailboxNotification("API Usage Requested", "<br/>Hi admin,<br/><br/>"
                     + usernameTopic.getSimpleValue().toString() + " accepted the Terms of Service for API Usage."
-                            + "\n\nJust wanted to let you know.\nCheers!");
+                            + "<br/><br/>Just wanted to let you know.<br/>Cheers!");
             } else {
                 log.info("Revoke Request for API Workspace Membership by user \"" + usernameTopic.getSimpleValue().toString() + "\"");
-                sendSystemMailboxNotification("API Usage Revoked", "\nHi admin,\n\n"
+                sendSystemMailboxNotification("API Usage Revoked", "<br/>Hi admin,<br/><br/>"
                     + usernameTopic.getSimpleValue().toString() + " just revoked his/her acceptance to your Terms of Service for API-Usage."
-                            + "\n\nJust wanted to let you know.\nCheers!");
+                            + "<br/><br/>Just wanted to let you know.<br/>Cheers!");
                 // 2.1) fails in all cases where user has no write access to the workspace the association was created in
                 // dm4.deleteAssociation(requestRelation.getId());
                 // For now: API Usage Membership must be revoked per Email but personally and confirmed by the administrator
@@ -425,8 +429,9 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                 if (mailbox != null) { // for accounts created via sign-up plugin this will always evaluate to true
                     String mailboxValue = mailbox.getSimpleValue().toString();
                     sendSystemMail("Your account on " + webAppTitle + " is now active",
-                            rb.getString("mail_hello") + " " + username.getSimpleValue() + ",\n\nyour account on " + DM4_HOST_URL + " is now " +
-                                    "active.\n\n" + rb.getString("mail_ciao"), mailboxValue);
+                            rb.getString("mail_hello") + " " + username.getSimpleValue()
+                                    + ",<br/><br/>your account on <a href=\"" + DM4_HOST_URL + "\">" + webAppTitle + "</a> is now " +
+                                    "active.<br/><br/>" + rb.getString("mail_ciao"), mailboxValue);
                     log.info("Send system notification mail to " + mailboxValue + " - The account is now active!");
                 }
             }
@@ -746,18 +751,18 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             // Localize "sentence" structure for german, maybe via Formatter
             String mailSubject = rb.getString("mail_confirmation_subject") + " - " + webAppTitle;
             try {
+                String linkHref = "<a href=\"" + url + "sign-up/confirm/" + key + "\">Kiezatlas Nutzerzugang best&auml;tigen</a>";
                 if (DM4_ACCOUNTS_ENABLED) {
                     sendSystemMail(mailSubject,
-                        rb.getString("mail_hello") + " " + username + ",\n\n"
-                            +rb.getString("mail_confirmation_active_body")+"\n"
-                            + url + "sign-up/confirm/" + key + "\n\n" + rb.getString("mail_ciao"), mailbox);
+                        rb.getString("mail_hello") + " " + username + ",<br/><br/>"
+                            +rb.getString("mail_confirmation_active_body")+"<br/><br/>"
+                            + linkHref + "<br/><br/>" + rb.getString("mail_ciao"), mailbox);
                 } else {
                     sendSystemMail(mailSubject,
-                        rb.getString("mail_hello") + " " + username + ",\n\n"
-                            + rb.getString("mail_confirmation_proceed_1")+"\n"
-                            + url + "sign-up/confirm/" + key
-                            + "\n\n" + rb.getString("mail_confirmation_proceed_2")
-                            + "\n\n" + rb.getString("mail_ciao"), mailbox);
+                        rb.getString("mail_hello") + " " + username + ",<br/><br/>"
+                            + rb.getString("mail_confirmation_proceed_1")+"<br/>"
+                            + linkHref + "<br/><br/>" + rb.getString("mail_confirmation_proceed_2")
+                            + "<br/><br/>" + rb.getString("mail_ciao"), mailbox);
                 }
             } catch (Exception ex) {
                 log.severe("There seems to be an issue with your mail (SMTP) setup,"
@@ -774,10 +779,11 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             URL url = new URL(DM4_HOST_URL);
             log.info("The password reset mails token request URL should be:"
                 + "\n" + url + "sign-up/password-reset/" + key);
+            String href = url + "sign-up/password-reset/" + key;
             try {
                 sendSystemMail(rb.getString("mail_pw_reset_title") + " " + webAppTitle,
-                    rb.getString("mail_hello") + " " + username + ",\n\n"+rb.getString("mail_pw_reset_body")+"\n"
-                        + url + "sign-up/password-reset/" + key + "\n\n" + rb.getString("mail_cheers"), mailbox);
+                    rb.getString("mail_hello") + " " + username + ",<br/><br/>"+rb.getString("mail_pw_reset_body")+"<br/>"
+                        + "<a href=\""+href+"\">" + href + "</a><br/><br/>" + rb.getString("mail_cheers"), mailbox);
             } catch (Exception ex) {
                 log.severe("There seems to be an issue with your mail (SMTP) setup,"
                         + "we FAILED sending out the \"Password Reset\" mail, caused by: " +  ex.getMessage());
@@ -795,7 +801,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             String adminMailbox = activeModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX);
             try {
                 sendSystemMail("Account registration on " + webAppTitle,
-                        "\nA user has registered.\n\nUsername: " + username + "\nEmail: " + mailbox, adminMailbox);
+                        "<br/>A user has registered.<br/><br/>Username: " + username + "<br/>Email: " + mailbox, adminMailbox);
             } catch (Exception ex) {
                 log.severe("There seems to be an issue with your mail (SMTP) setup,"
                         + "we FAILED notifying the \"system mailbox\" about account creation, caused by: " +  ex.getMessage());
@@ -810,41 +816,14 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
      *
      * @param subject       String Subject text for the message.
      * @param message       String Text content of the message.
-     * @param recipient     String of Email Address message is sent to **must not** be NULL.
+     * @param recipientValue     String of Email Address message is sent to **must not** be NULL.
      */
-    private void sendSystemMail(String subject, String message, String recipient) {
-        // Hot Fix: Classloader issue we have in OSGi since using Pax web
-        Thread.currentThread().setContextClassLoader(SignupPlugin.class.getClassLoader());
-        log.info("BeforeSend: Set classloader to " + Thread.currentThread().getContextClassLoader().toString());
-        HtmlEmail email = new HtmlEmail();
-        email.setDebug(true); // => System.out.println(SMTP communication);
-        email.setHostName("localhost"); // ### use getBaseUri() from HTTP Context?
+    private void sendSystemMail(String subject, String message, String recipientValue) {
         try {
-            // ..) Set Senders of Mail
             String projectName = activeModuleConfiguration.getChildTopics().getString(CONFIG_PROJECT_TITLE);
             String sender = activeModuleConfiguration.getChildTopics().getString(CONFIG_FROM_MAILBOX);
-            email.setFrom(sender.trim(), projectName.trim());
-            // ..) Set Subject of Mail
-            email.setSubject(subject);
-            // ..) Set Message Body and append the Host URL
-            message += "\n\n" + DM4_HOST_URL + "\n\n";
-            email.setTextMsg(message);
-            // ..) Set recipient of notification mail
-            String recipientValue = recipient.trim();
-            log.info("Loaded current configuration topic, sending notification mail to " + recipientValue);
-            Collection<InternetAddress> recipients = new ArrayList<InternetAddress>();
-            if (recipientValue.contains(";")) {
-                // ..) Many Recipients
-                for (String recipientPart : recipientValue.split(";")) {
-                    recipients.add(new InternetAddress(recipientPart.trim()));
-                }
-            } else {
-                // ..) A Single Recipient
-                recipients.add(new InternetAddress(recipientValue));
-            }
-            email.setTo(recipients);
-            email.send();
-            log.info("Mail was SUCCESSFULLY sent to " + email.getToAddresses() + " mail addresses");
+            sendgrid.doEmailRecipientAs(sender, projectName, subject, message, recipientValue);
+            log.info("Mail was SUCCESSFULLY sent to \"" + recipientValue + "\"");
         } catch (Exception ex) {
             throw new RuntimeException("Sending notification mail FAILED", ex);
         } finally {

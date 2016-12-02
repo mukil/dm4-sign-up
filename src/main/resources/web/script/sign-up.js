@@ -97,11 +97,10 @@
         function doCreateRequest() {
             var usernameVal = encodeURIComponent(document.getElementById("username").value)
             var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
-            var skipConfirmation = document.getElementById("skip-confirmation").value
-            if (skipConfirmation === "on") {
+            var skipField = document.getElementById("skip-confirmation")
+            var skipConfirmation = ""
+            if (skipField && skipField.value === "on") {
                 skipConfirmation = "/true"
-            } else {
-                skipConfirmation = ""
             }
             var passwordVal = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
             // employing the w3school way to go to GET the sign-up resource
