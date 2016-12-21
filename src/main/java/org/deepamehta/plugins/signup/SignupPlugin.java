@@ -353,42 +353,14 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         Topic apiMembershipRequestNote = dm4.getTopicByUri("org.deepamehta.signup.api_membership_requests");
         if (apiMembershipRequestNote != null && acService.getUsername() != null) {
             Topic usernameTopic = acService.getUsernameTopic(acService.getUsername());
-            String apiWorkspaceUri = activeModuleConfiguration.getChildTopics().getString(CONFIG_API_WORKSPACE_URI);
             // 1) Try to manage workspace membership directly (success depends on ACL and the SharingMode of the configured workspace)
-            if (!apiWorkspaceUri.isEmpty() && !apiWorkspaceUri.equals("undefined")) { // do not rely or use this option in production
-                Topic apiWorkspace = dm4.getAccessControl().getWorkspace(apiWorkspaceUri);
-                if (apiWorkspace != null) {
-                    log.info("Request for new custom API Workspace Membership by user \""
-                            + usernameTopic.getSimpleValue().toString() + "\"");
-                    // Attempt to create a Workspace membership for this Assocation/Relation
-                    acService.createMembership(usernameTopic.getSimpleValue().toString(), apiWorkspace.getId());
-                } else {
-                    log.info("Revoke Request for API Workspace Membership by user \"" + usernameTopic.getSimpleValue().toString() + "\"");
-                    if (acService.isMember(usernameTopic.getSimpleValue().toString(), apiWorkspace.getId())) {
-                        Association assoc = getMembershipAssociation(usernameTopic.getId(), apiWorkspace.getId());
-                        dm4.deleteAssociation(assoc.getId());
-                    } else {
-                        log.info("Skipped Revoke Request for non-existent API Workspace Membership for \""
-                                + usernameTopic.getSimpleValue().toString() + "\"");
-                    }
-                }
-            } else {
-                log.info("No API Workspace Configured: You must enter the URI of a programmatically created workspace topic"
-                    + " into your current \"Signup Configuration\".");
-            }
+            createApiWorkspaceMembership(usernameTopic); // might fail silently
             // 2) Store API Membership Request in a Note (residing in the "System" workspace) association
             Association requestRelation = getDefaultAssociation(usernameTopic.getId(), apiMembershipRequestNote.getId());
             if (requestRelation == null) {
                 // ### Fixme: For the moment it depends on (your web application, more specifically) the workspace cookie
                 // set (at the requesting client) which workspace this assoc will be assigned to
-                Association apiRequest = dm4.createAssociation(mf.newAssociationModel("dm4.core.association",
-                        mf.newTopicRoleModel(usernameTopic.getId(), "dm4.core.default"),
-                        mf.newTopicRoleModel(apiMembershipRequestNote.getId(), "dm4.core.default")));
-                dm4.getAccessControl().assignToWorkspace(apiRequest, dm4.getAccessControl().getSystemWorkspaceId());
-                log.info("Request for new custom API Workspace Membership by user \"" + usernameTopic.getSimpleValue().toString() + "\"");
-                sendSystemMailboxNotification("API Usage Requested", "<br/>Hi admin,<br/><br/>"
-                    + usernameTopic.getSimpleValue().toString() + " accepted the Terms of Service for API Usage."
-                            + "<br/><br/>Just wanted to let you know.<br/>Cheers!");
+                createApiMembershipRequestNoteAssociation(usernameTopic, apiMembershipRequestNote);
             } else {
                 log.info("Revoke Request for API Workspace Membership by user \"" + usernameTopic.getSimpleValue().toString() + "\"");
                 sendSystemMailboxNotification("API Usage Revoked", "<br/>Hi admin,<br/><br/>"
@@ -711,6 +683,42 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             throw new RuntimeException("Creating simple user account FAILED!", e);
         } finally {
             tx.finish();
+        }
+    }
+
+    private void createApiMembershipRequestNoteAssociation(Topic usernameTopic, Topic membershipNote) {
+        Association apiRequest = dm4.createAssociation(mf.newAssociationModel("dm4.core.association",
+                mf.newTopicRoleModel(usernameTopic.getId(), "dm4.core.default"),
+                mf.newTopicRoleModel(membershipNote.getId(), "dm4.core.default")));
+        dm4.getAccessControl().assignToWorkspace(apiRequest, dm4.getAccessControl().getSystemWorkspaceId());
+        log.info("Request for new custom API Workspace Membership by user \"" + usernameTopic.getSimpleValue().toString() + "\"");
+        sendSystemMailboxNotification("API Usage Requested", "<br/>Hi admin,<br/><br/>"
+            + usernameTopic.getSimpleValue().toString() + " accepted the Terms of Service for API Usage."
+                    + "<br/><br/>Just wanted to let you know.<br/>Cheers!");
+    }
+
+    private void createApiWorkspaceMembership(Topic usernameTopic) {
+        String apiWorkspaceUri = activeModuleConfiguration.getChildTopics().getString(CONFIG_API_WORKSPACE_URI);
+        if (!apiWorkspaceUri.isEmpty() && !apiWorkspaceUri.equals("undefined")) { // do not rely or use this option in production
+            Topic apiWorkspace = dm4.getAccessControl().getWorkspace(apiWorkspaceUri);
+            if (apiWorkspace != null) {
+                log.info("Request for new custom API Workspace Membership by user \""
+                        + usernameTopic.getSimpleValue().toString() + "\"");
+                // Attempt to create a Workspace membership for this Assocation/Relation
+                acService.createMembership(usernameTopic.getSimpleValue().toString(), apiWorkspace.getId());
+            } else {
+                log.info("Revoke Request for API Workspace Membership by user \"" + usernameTopic.getSimpleValue().toString() + "\"");
+                if (acService.isMember(usernameTopic.getSimpleValue().toString(), apiWorkspace.getId())) {
+                    Association assoc = getMembershipAssociation(usernameTopic.getId(), apiWorkspace.getId());
+                    dm4.deleteAssociation(assoc.getId());
+                } else {
+                    log.info("Skipped Revoke Request for non-existent API Workspace Membership for \""
+                            + usernameTopic.getSimpleValue().toString() + "\"");
+                }
+            }
+        } else {
+            log.info("No API Workspace Configured: You must enter the URI of a programmatically created workspace topic"
+                + " into your current \"Signup Configuration\".");
         }
     }
 
