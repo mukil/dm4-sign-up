@@ -10,13 +10,13 @@ This plugin adds:
 *   A `Sign-up Configuration` topic associated to the `DeepaMehta 4 Sign up` Plugin
      (part of the "System" workspace and thus editable by all members of it)
 
-The special features of the **registration dialog** is comprised of:
+The special features of the **registration ui** is comprised of:
 *   Username existence check
 *   Email existence check
 *   Simple GUI-Notification mechanism
 *   Minimal CSS Definition
 
-The special features of the **login dialog** is comprised of:
+The special features of the **login ui** is comprised of:
 *   Simple GUI-Notification mechanism
 *   Automatic redirect
 *   Minimal CSS Definition
@@ -25,8 +25,9 @@ The **special logic** of this plugin is comprised of:
 *   Optionally: Configure a sign-up process with an Email based confirmation workflow<br/>
     Sends confirmation mail with token to the users registering Email address<br/>
     Allows for the password reset functionality to take place also via an Email based confirmation workflow
-*   Optionally: Sends notification to admin after a new user account was sucessfully created
+*   Optionally: Send notifications to system administrator after a new user account was sucessfully created
 *   Optionally: If `new_accounts_are_enabled=true`, an account activation notice is sent
+*   Optionally: If the email based confirmation workflow is used a "Passwort reset" workflow is available
 
 **Note:** If `Email Confirmation Required` is set to _true_ the confirmation tokens the system sends out are **not persisted** and get lost after a bundle/system restart. Once a token was send out the link containing it is valid for sixty minutes.
 
@@ -70,6 +71,10 @@ There is currently just one special configuration option. To setup a workspace w
 GPL v3 - https://www.gnu.org/licenses/gpl.html
 
 ## Version history
+
+**1.5.2** -- Dec 21, 2016
+
+* 
 
 **1.5.1** -- Nov 14, 2016
 
