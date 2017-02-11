@@ -23,6 +23,8 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -818,16 +820,43 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     /**
      *
-     * @param subject           String Subject text for the message.
-     * @param message           String Text content of the message.
-     * @param recipientValue    String of Email Address message is sent to **must not** be NULL.
+     * @param subject       String Subject text for the message.
+     * @param message       String Text content of the message.
+     * @param recipient     String of Email Address message is sent to **must not** be NULL.
      */
-    private void sendSystemMail(String subject, String message, String recipientValue) {
+    private void sendSystemMail(String subject, String message, String recipient) {
+        // Hot Fix: Classloader issue we have in OSGi since using Pax web
+        Thread.currentThread().setContextClassLoader(SignupPlugin.class.getClassLoader());
+        log.info("BeforeSend: Set classloader to " + Thread.currentThread().getContextClassLoader().toString());
+        HtmlEmail email = new HtmlEmail();
+        email.setDebug(true); // => System.out.println(SMTP communication);
+        email.setHostName("localhost"); // ### use getBaseUri() from HTTP Context?
         try {
+            // ..) Set Senders of Mail
             String projectName = activeModuleConfiguration.getChildTopics().getString(CONFIG_PROJECT_TITLE);
             String sender = activeModuleConfiguration.getChildTopics().getString(CONFIG_FROM_MAILBOX);
-            sendgrid.doEmailRecipientAs(sender, projectName, subject, message, recipientValue);
-            log.info("Mail was SUCCESSFULLY sent to \"" + recipientValue + "\"");
+            email.setFrom(sender.trim(), projectName.trim());
+            // ..) Set Subject of Mail
+            email.setSubject(subject);
+            // ..) Set Message Body and append the Host URL
+            message += "\n\n" + DM4_HOST_URL + "\n\n";
+            email.setTextMsg(message);
+            // ..) Set recipient of notification mail
+            String recipientValue = recipient.trim();
+            log.info("Loaded current configuration topic, sending notification mail to " + recipientValue);
+            Collection<InternetAddress> recipients = new ArrayList<InternetAddress>();
+            if (recipientValue.contains(";")) {
+                // ..) Many Recipients
+                for (String recipientPart : recipientValue.split(";")) {
+                    recipients.add(new InternetAddress(recipientPart.trim()));
+                }
+            } else {
+                // ..) A Single Recipient
+                recipients.add(new InternetAddress(recipientValue));
+            }
+            email.setTo(recipients);
+            email.send();
+            log.info("Mail was SUCCESSFULLY sent to " + email.getToAddresses() + " mail addresses");
         } catch (Exception ex) {
             throw new RuntimeException("Sending notification mail FAILED", ex);
         } finally {
