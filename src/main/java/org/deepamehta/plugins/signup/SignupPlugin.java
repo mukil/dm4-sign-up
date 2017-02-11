@@ -818,9 +818,9 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     /**
      *
-     * @param subject       String Subject text for the message.
-     * @param message       String Text content of the message.
-     * @param recipientValue     String of Email Address message is sent to **must not** be NULL.
+     * @param subject           String Subject text for the message.
+     * @param message           String Text content of the message.
+     * @param recipientValue    String of Email Address message is sent to **must not** be NULL.
      */
     private void sendSystemMail(String subject, String message, String recipientValue) {
         try {
