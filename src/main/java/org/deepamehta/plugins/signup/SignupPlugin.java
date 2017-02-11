@@ -17,7 +17,6 @@ import de.deepamehta.core.storage.spi.DeepaMehtaTransaction;
 import de.deepamehta.accesscontrol.AccessControlService;
 import de.deepamehta.thymeleaf.ThymeleafPlugin;
 import de.deepamehta.workspaces.WorkspacesService;
-import de.mikromedia.sendgrid.SendgridService;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -43,6 +42,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import org.apache.commons.mail.HtmlEmail;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -104,8 +104,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     private AccessControlService acService;
     @Inject
     private WorkspacesService wsService; // Used in migrations
-    @Inject
-    private SendgridService sendgrid; // Used in migrations
 
     @Context
     UriInfo uri;
