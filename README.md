@@ -75,7 +75,9 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 * Allows members of the _Administration_ workspace to create accounts w/out confirmation mails
   (even if email based confirmation workflow is ON)
 * Acccount creation does not fail because confirmation workflow active but SMTP unavailable
-* Improved logging if confirmation workflow active but SMTP unavailalbe
+* Improved logging if confirmation workflow active but SMTP unavailable
+* Fixes missing stylesheet on confirmation failure page (e.g. when link expired)
+* Clarified resource bundle loading & slightly extended translations
 
 **1.5.1** -- Nov 14, 2016
 

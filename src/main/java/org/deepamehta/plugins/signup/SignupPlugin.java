@@ -94,6 +94,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     private final String USER_MAILBOX_EDGE_TYPE     = "org.deepamehta.signup.user_mailbox";
     private final String SIGN_UP_PLUGIN_TOPIC_URI   = "org.deepamehta.sign-up";
+    private final String SIGN_UP_LANGUAGE_PROPERTY  = "org.deepamehta.sign-up.language";
 
     private Topic activeModuleConfiguration = null;
     private Topic customWorkspaceAssignmentTopic = null;
@@ -885,26 +886,21 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         String signupPropertyLanguageValue = null;
         try {
             Properties allProperties = new Properties();
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
             allProperties.load(getStaticResource("/plugin.properties"));
-            signupPropertyLanguageValue = allProperties.getProperty("org.deepamehta.sign-up.language");
-            if (signupPropertyLanguageValue == null) {
-                log.info("Sign-up Plugin Language \"" + signupPropertyLanguageValue + "\" sets labels to ENGLISH");
-                rb = ResourceBundle.getBundle("SignupMessages");
-            }
-            if (signupPropertyLanguageValue.equals("de") || signupPropertyLanguageValue.equals("DE")) {
+            signupPropertyLanguageValue = allProperties.getProperty(SIGN_UP_LANGUAGE_PROPERTY);
+            if (signupPropertyLanguageValue == null || signupPropertyLanguageValue.toLowerCase().equals("en")) {
+                log.info("Sign-up Plugin Language option sets labels to ENGLISH");
+                rb = ResourceBundle.getBundle("SignupMessages", Locale.ENGLISH);
+            } else if (signupPropertyLanguageValue.toLowerCase().equals("de")) {
                 log.info("Sign-up Plugin Language \"" + signupPropertyLanguageValue + "\" sets labels to GERMAN");
                 rb = ResourceBundle.getBundle("SignupMessages", Locale.GERMAN);
-            } else if (signupPropertyLanguageValue.equals("fr") || signupPropertyLanguageValue.equals("FR")) {
+            } else if (signupPropertyLanguageValue.toLowerCase().equals("fr")) {
                 log.info("Sign-up Plugin Language \"" + signupPropertyLanguageValue + "\" sets labels to FRENCH");
                 rb = ResourceBundle.getBundle("SignupMessages", Locale.FRENCH);
-            } else {
-                log.info("Sign-up Plugin Language \"" + signupPropertyLanguageValue + "\" sets labels to ENGLISH");
-                rb = ResourceBundle.getBundle("SignupMessages");
             }
         } catch (IOException ex) {
-            log.warning("Could not find Sign-up language Property " + signupPropertyLanguageValue + " - DEFAULTING");
-            rb = ResourceBundle.getBundle("SignupMessages");
+            log.warning("Could not find Sign-up plugin properties - use default resource bundle for labels");
+            rb = ResourceBundle.getBundle("SignupMessages", Locale.ENGLISH);
         }
     }
 
