@@ -12,8 +12,17 @@
         /*<![CDATA[*/
             signupConfig.appLoadingMessage = /*[[${loading_app_hint}]]*/ 'Loading Webclient';
             signupConfig.appStartPageURL = /*[[${start_url}]]*/ '/';
+            signupConfig.passwordLength = /*[[${password_length_hint}]]*/ "Your password must be at least 8 characters long.";
+            signupConfig.passwordMatch = /*[[${password_match_hint}]]*/ "Your passwords do not match.";
+            signupConfig.checkTerms = /*[[${check_terms_hint}]]*/ "First, please check our terms and conditions.";
+            signupConfig.usernameInvalid = /*[[${username_invalid_hint}]]*/ "This username would be invalid.";
+            signupConfig.usernameTaken = /*[[${username_taken_hint}]]*/ "This username is already taken.";
+            signupConfig.emailInvalid = /*[[${email_invalid_hint}]]*/ "This Email Address would be invalid.";
+            signupConfig.emailTaken = /*[[${email_taken_hint}]]*/ "This E-Mail address is already registered.";
+            signupConfig.notAuthorized = /*[[${not_authorized_message}]]*/ "You're not authorized. Sorry.";
         /*]]>*/
         </script>
+        <meta th:replace="fragments/tracker" />
     </head>
 
     <body class="log-in-page sign-up">
@@ -31,11 +40,11 @@
             <h2 th:text="${login_title}">Log in</h2>
             <form class="log-in-form" action="javascript:voidFunction();" onsubmit="javascript:doLogin()">
                 <!-- label for="username">Username</label-->
-                <input id="username" type="text" name="username" th:placeholder="${label_username}" title="Username" class="log-in username" />
+                <input id="username" type="text" name="username" th:placeholder="${label_username}" title="Username" class="log-in sign-up username" />
                 <!-- label for="password">Password</label-->
-                <input type="password" id="password" name="password" th:placeholder="${label_password}" title="Password" class="log-in password" />
+                <input type="password" id="password" name="password" th:placeholder="${label_password}" title="Password" class="log-in sign-up password" />
                 <div id="message-view"><span id="message"></span></div>
-                <input type="submit" th:value="${login}" class="log-in ok" />&nbsp;<span th:text="${or_label}">or</span> <a href="/sign-up/" th:text="${create_account}" >create an account</a>.
+                <input type="submit" th:value="${login}" class="log-in sign-up ok" />&nbsp;<span th:text="${or_label}">or</span> <a href="/sign-up/" th:text="${create_account}" >create account</a>.
                 <p class="password-reset">
                     <span th:text="${label_forgot_password}" title="Forgot your password?">Forgot your password?</span><br/>
                     <a href="/sign-up/request-password" title="Reset password" th:text="${label_reset_password}">Password reset</a>
@@ -44,10 +53,6 @@
         </div>
 
         <div id="page-footer" th:utext="${footer}"></div>
-
-        <div class="stats"><!-- ka:2, wtui:3, mydm:6 -->
-            <img src="//stats.infokitchen.net/piwik.php?idsite=2&amp;rec=1&amp;action_name=login" style="border:0" alt="" />
-        </div>
 
     </body>
 

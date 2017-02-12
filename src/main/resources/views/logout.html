@@ -14,6 +14,7 @@
             signupConfig.appHomePageURL = /*[[${home_url}]]*/ '/';
         /*]]>*/
         </script>
+        <meta th:replace="fragments/tracker" />
     </head>
 
     <body class="logout-page sign-up">
@@ -31,7 +32,7 @@
             <div id="message-view">
                 <span th:text="${logged_in_as}">Logged in as</span>&nbsp;<span th:text="${username}" id="message"></span></div>
             <form class="logout-form" action="javascript:doLogout()">
-                <input type="submit" th:value="${logout}" class="ok" />
+                <input type="submit" th:value="${logout}" class="ok sign-up" />
             </form>
         </div>
 

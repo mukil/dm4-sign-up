@@ -4,7 +4,7 @@
 
     <head>
         <meta charset="utf-8"></meta>
-        <title th:text="'Edit Subscription - ' + ${title}">Account Details</title>
+        <title th:text="'Edit Account - ' + ${title}">Account Details</title>
         <link rel="stylesheet"  th:href="${css_path}" type="text/css" />
         <script type="text/javascript" src="/de.deepamehta.accesscontrol/script/vendor/sha256.js"></script>
         <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
@@ -17,6 +17,7 @@
             signupConfig.appStartPageURL = /*[[${start_url}]]*/ '/';
         /*]]>*/
         </script>
+        <meta th:replace="fragments/tracker" />
     </head>
 
     <body class="account-page sign-up">
@@ -24,46 +25,60 @@
         <div class="top-menu" th:include="fragments/navigation :: top (publisher=${is_publisher})"></div>
 
         <div id="page-header">
-            <span class="project-title" th:text="'Your Account on ' + ${title}">Your Account</span>
+            <span class="project-title" th:text="${your_account_title}">Your Account</span>
         </div>
-
-        <p>&nbsp;</p>
 
         <div class="dialog-body">
-            <h2>Infos associated with your username</h2>
-            <form class="account-edit-form" action="javascript:voidFunction();" onsubmit="javascript:saveAccountEdits()">
-                <!--label for="username">Username</label-->
-                <input id="username" disabled="true" type="text" th:value="${username}" name="username" class="custom-ws-up username" />
-                <!-- Adapt Mailbox -->
-                <input type="text" disabled="true" id="mailbox" name="mailbox" th:value="${email}" class="sign-up mailbox" />
-                <!--div id="message-view"><span id="message"></span></div>
-                <input type="submit" id="update" value="Save" disabled="true" class="sign-up ok" /-->
-            </form>
-            <div th:if="${!#strings.isEmpty(link)}">
-                <p>
-                    <a class="button" th:href="${link}">Please log in first</a>
-                </p>
+            <h2 th:text="${your_account_heading}">Infos associated with your username</h2>
+            <div>
+                <div class="label">Username</div>
+                <div th:text="${username}" class="value username" />
+                <div class="label">Email Address</div>
+                <div th:text="${email}" class="value email" />
             </div>
+            <div th:if="${!#strings.isEmpty(link)}">
+                <form th:if="${!logged_in}" method="GET" class="login-form" action="/sign-up/login">
+                    <input type="submit" th:value="${login}" class="ok sign-up" />
+                </form>
+            </div>
+            <form th:if="${logged_in}" class="logout-form" action="javascript:doLogout()">
+                <input type="submit" th:value="${logout}" class="ok sign-up" />
+            </form>
+            <form th:if="${logged_in}" class="launch-form" method="GET" th:action="${start_url}">
+                <input type="submit" th:value="${visit_start_url}" class="ok sign-up" />
+            </form>
+            <form th:if="${logged_in}" class="launch-form" method="GET" th:action="${home_url}">
+                <input type="submit" th:value="${visit_home_url}" class="ok sign-up" />
+            </form>
         </div>
 
-        <div th:if="${custom_workspace_enabled} and ${logged_in}" id="custom-ws-text" class="dialog-body">
-            <h2>Aktivierung der API Option</h2>
-            <p>To make use of the Kiezatlas Data in your website or platform you can connect to our API with a client.<br/>
-               To do so you just need to understand and agree to our <i>Terms of service</i> for the API and tick the following box.</p>
+        <div th:if="${custom_workspace_enabled} and ${logged_in}" id="api-workspace" class="dialog-body">
+            <h2 th:text="${api_option_title}">Aktivierung der API Option</h2>
+            <p th:utext="${api_option_descr}">
+                To be able to use our API access please take your time and read the special <i>Terms of service</i> for the API.
+                If you've understood the following terms of service please confirm through checking the following box.
+            </p>
             <form name="custom-aggreement" action="javascript:voidFunction();">
-                <input id="custom-ws-check" type="checkbox" onclick="javascript:doCheckCustomWorkspaceAggrement()" class="tos-check"></input>
-                <label for="custom-ws-check" th:utext="${custom_workspace_description}">I also agree with the custom workspace <i>Terms of use</i>.</label>
+                <input id="api-check" type="checkbox" th:checked="${api_workspace_member}"
+                        onclick="javascript:doCheckCustomWorkspaceAggrement()" class="tos-check"
+                        title="Yes, i accept the special terms of service for this membership"/>
+                <label for="api-check" th:utext="${custom_workspace_description}" title="Yes, i accept the special terms of service for this membership">
+                    I also agree with the custom workspace <i>Terms of use</i>.
+                </label>
                 <a href="javascript:showCustomWorkspaceTermsText()" title="Read Details">Read more</a><br/>
-                <div id="custom-ws-info" th:utext="${custom_workspace_details}"></div>
+                <div id="api-info" th:utext="${custom_workspace_details}"></div>
                 <div id="message-view"><span id="message"></span></div>
             </form>
+            <p th:utext="${api_option_revoke}"></p>
+            <p th:if="${!#strings.isEmpty(api_email_contact)}">
+                <span th:text="${api_contact_revoke}"></span> <a href="'mailto:' + ${api_email_contact}" th:text="${api_email_contact}"></a>
+            </p>
+            <p th:if="${#strings.isEmpty(api_email_contact)}" class="warning">
+                Notice: Please configure the option "System Recipient Mailbox" in your current <em>Sign-up Plugin Configuration</em>.
+            </p>
         </div>
 
         <div id="page-footer" th:utext="${footer}">
-        </div>
-
-        <div class="stats">
-            <img src="//stats.infokitchen.net/piwik.php?idsite=2&amp;rec=1&amp;action_name=signup" style="border:0" alt="" />
         </div>
 
     </body>

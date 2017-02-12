@@ -10,7 +10,15 @@
         "appLoadingMessage" : "Loading Webclient",
         "appLoggingOutHint" : "Logging out...",
         "appStartPageURL"   : "/",
-        "appHomePageURL"    : "/"
+        "appHomePageURL"    : "/",
+        "passwordLength"    : "Your password must be at least 8 characters long.",
+        "passwordMatch"     : "Your passwords do not match.",
+        "checkTerms"        : "First, please check our terms and conditions.",
+        "usernameInvalid"   : "This username would be invalid.",
+        "usernameTaken"     : "This username is already taken.",
+        "emailInvalid"      : "This E-Mail Address would be invalid.",
+        "emailTaken"        : "This E-Mail address is already registered.",
+        "notAuthorized"     : "You're not authorized. Sorry."
     }
 
 
@@ -21,8 +29,7 @@
         xhr.onload = function(e) {
             if (xhr.response === "") {
                 renderFriendlyMessage(signupConfig.appLoggingOutHint)
-                // could/should utilize // signupConfig.appHomePageURL // here
-                window.document.location.reload()
+                window.document.location.assign(signupConfig.appHomePageURL)
             } else {
                 renderWarning(xhr.response)
             }
@@ -49,7 +56,7 @@
                     renderFriendlyMessage(signupConfig.appLoadingMessage)
                     redirectToStartPageURL()
                 } else {
-                    renderWarning(xhr.response)
+                    renderWarning(signupConfig.notAuthorized)
                 }
             }
             xhr.open("POST", "/accesscontrol/login", false)
@@ -90,10 +97,16 @@
         function doCreateRequest() {
             var usernameVal = encodeURIComponent(document.getElementById("username").value)
             var mailbox = encodeURIComponent(document.getElementById("mailbox").value)
+            var skipConfirmation = document.getElementById("skip-confirmation").value
+            if (skipConfirmation === "on") {
+                skipConfirmation = "/true"
+            } else {
+                skipConfirmation = ""
+            }
             var passwordVal = encodeURIComponent('-SHA256-' + SHA256(document.getElementById("pass-one").value))
             // employing the w3school way to go to GET the sign-up resource
             window.document.location.assign("//" +  window.location.host + "/sign-up/handle/" + usernameVal + "/"
-               + passwordVal +"/" + mailbox)
+               + passwordVal +"/" + mailbox + skipConfirmation)
         }
         // any of these should prevent submission of form
         if (!isValidUsername()) return false
@@ -118,7 +131,7 @@
         var usernameInput = document.getElementById("username") // fixme: maybe its better to acces the form element
         var userInput = usernameInput.value
         if (userInput.length <= 1) {
-            renderWarning("This username would be invalid.")
+            renderWarning(signupConfig.usernameInvalid)
             disableSignupForm()
             return false
         }
@@ -134,7 +147,7 @@
             xhr.onload = function(e) {
                 var response = JSON.parse(xhr.response)
                 if (!response.isAvailable) {
-                    renderWarning("This username is already taken.")
+                    renderWarning(signupConfig.usernameTaken)
                     disableSignupForm()
                     inputInvalidated = true
                     if (handler) handler(false)
@@ -155,9 +168,9 @@
         if (mailBox) {
             xhr = new XMLHttpRequest()
             xhr.onload = function(e) {
-                var response = JSON.parse(xhr.response)
+                var response = JSON.parse(xhr.responseText)
                 if (!response.isAvailable) {
-                    renderWarning("This E-Mail address is already registered.")
+                    renderWarning(signupConfig.emailTaken)
                     disableSignupForm()
                     inputInvalidated = true
                     if (handler) handler(false)
@@ -175,7 +188,7 @@
     function checkPassword() {
         var passwordField = document.getElementById("pass-one") // fixme: maybe its better to acces the form element
         if (passwordField.value.length <=7) {
-            renderWarning("Your password must be at least 8 characters long.")
+            renderWarning(signupConfig.passwordLength)
             disableSignupForm()
             return null
         }
@@ -187,7 +200,7 @@
     function checkMailbox() {
         var mailboxField = document.getElementById("mailbox") // fixme: maybe its better to acces the form element
         if (mailboxField.value.indexOf("@") === -1 || mailboxField.value.indexOf(".") === -1) {
-            renderWarning("This E-Mail Address would be invalid.")
+            renderWarning(signupConfig.emailInvalid)
             disableSignupForm()
             return null
         }
@@ -200,7 +213,7 @@
         var passwordFieldTwo = document.getElementById("pass-one") // fixme: maybe its better to acces the form element
         var passwordFieldOne = document.getElementById("pass-two") // fixme: maybe its better to acces the form element
         if (passwordFieldOne.value !== passwordFieldTwo.value) {
-            renderWarning("Your passwords do not match.")
+            renderWarning(signupConfig.passwordMatch)
             disableSignupForm()
             return null
         }
@@ -219,7 +232,7 @@
             enableSignupForm()
             return OK_STRING
         }
-        renderWarning("First, please check our terms and conditions.")
+        renderWarning(signupConfig.checkTerms)
         disableSignupForm()
         return null
     }
@@ -256,17 +269,17 @@
     }
 
     function showCustomWorkspaceTermsText() {
-        var textArea = document.getElementById('custom-ws-info')
+        var textArea = document.getElementById('api-info')
             textArea.setAttribute("style", "display: block;")
     }
 
     function showLabsPrivateText() {
-        var textArea = document.getElementById('private-info')
+        var textArea = document.getElementById('private-details')
             textArea.setAttribute("style", "display: block;")
     }
 
     function showLabsTermsText() {
-        var textArea = document.getElementById('account-info')
+        var textArea = document.getElementById('tos-details')
             textArea.setAttribute("style", "display: block;")
     }
 
@@ -283,11 +296,13 @@
     function renderFriendlyMessage(message) {
         var textNode = document.createTextNode(message)
         var messageElement = document.getElementById('message-view')
-        while(messageElement.hasChildNodes()) {
-            // looping over lastChild thx to http://stackoverflow.com/questions/5402525/remove-all-child-nodes
-            messageElement.removeChild(messageElement.lastChild);
+        if (messageElement !== null) {
+            while(messageElement.hasChildNodes()) {
+                // looping over lastChild thx to http://stackoverflow.com/questions/5402525/remove-all-child-nodes
+                messageElement.removeChild(messageElement.lastChild);
+            }
+            messageElement.appendChild(textNode)
         }
-        messageElement.appendChild(textNode)
     }
 
     function disableSignupForm() {

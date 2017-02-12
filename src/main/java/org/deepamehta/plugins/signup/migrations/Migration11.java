@@ -9,7 +9,7 @@ import de.deepamehta.workspaces.WorkspacesService;
 import java.util.logging.Logger;
 
 /**
- * Assign four left over Sign-up Plugin Configuration topic childs to "Administraiton" workspace.
+ * Assign four left over Sign-up Plugin Configuration topic childs to "Administration" workspace.
  */
 public class Migration11 extends Migration {
 
