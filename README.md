@@ -72,9 +72,12 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 
 ## Version history
 
-**1.5.2** -- Dec 21, 2016
+**1.5.2** -- Feb 12, 2017
 
-* 
+* Allows members of the _Administration_ workspace to create accounts w/out confirmation mails
+  (even if email based confirmation workflow is ON)
+* Acccount creation does not fail because confirmation workflow active but SMTP unavailable
+* Improved logging if confirmation workflow active but SMTP unavailalbe
 
 **1.5.1** -- Nov 14, 2016
 

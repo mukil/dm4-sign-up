@@ -1000,6 +1000,8 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("requested_page_3", rb.getString("page_account_requested_3"));
             // Generics
             String username = acService.getUsername();
+            // ### viewData("administration_workspace_member", isAdministrationWorkspaceMember());
+            viewData("skip_confirmation_mail_label", rb.getString("admin_skip_email_confirmation_mail"));
             viewData("administration_workspace_member", isAdministrationWorkspaceMember());
             viewData("authenticated", (username != null));
             viewData("username", username);

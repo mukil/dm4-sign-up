@@ -73,9 +73,13 @@
                 <div th:if="${administration_workspace_member}">
                     <input id="skip-confirmation" name="skip-confirmation" type="checkbox"
                            title="Skip the confirmation process"/>
-                    <label for="skip-confirmation">Do not send confirmation mail (i know what i am doing).</label>
+                    <label for="skip-confirmation" th:text="${skip_confirmation_mail_label}">
+                        Do not send confirmation mail (i know what i am doing).
+                    </label>
                 </div>
-                <input type="submit" id="create" th:value="${create_account}" title="Create Account" class="sign-up ok" />&nbsp;<span th:text="${or_label}">or</span> <a href="/sign-up/login" th:text="${log_in_small}" title="log in">log in</a>.
+                <input type="submit" id="create" th:value="${create_account}" title="Create Account" class="sign-up ok" />
+                &nbsp;
+                <span th:text="${or_label}">or</span> <a href="/sign-up/login" th:text="${log_in_small}" title="log in">log in</a>.
             </form>
         </div>
 
