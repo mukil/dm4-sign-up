@@ -71,8 +71,15 @@ GPL v3 - https://www.gnu.org/licenses/gpl.html
 
 ## Version history
 
-**1.5.1** -- Nov 14, 2016
+**1.5.2** -- Feb 12, 2017
 
+* Allows members of the _Administration_ workspace to create accounts w/out confirmation mails
+  (even if email based confirmation workflow is ON)
+* Acccount creation does not fail because confirmation workflow active but SMTP unavailable
+* Improved logging if confirmation workflow active but SMTP unavailalbe
+
+**1.5.1** -- Nov 14, 2016
+I
 * Fixes critical error (typo introduced during translations) in password-reset template
 * Extends translatable hints for sign-up and login dialog, added german languaged messages
 * Fixes some typos in user dialogs and the header style on the account-edit template
