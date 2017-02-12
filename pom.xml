@@ -7,7 +7,7 @@
     <name>DeepaMehta 4 Sign up</name>
     <groupId>org.deepamehta</groupId>
     <artifactId>dm48-sign-up</artifactId>
-    <version>1.5.2-SNAPSHOT</version>
+    <version>1.5.2</version>
     <packaging>bundle</packaging>
 
     <parent>
