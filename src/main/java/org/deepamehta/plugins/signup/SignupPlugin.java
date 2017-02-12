@@ -460,8 +460,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Path("/error")
     @Produces(MediaType.TEXT_HTML)
     public Viewable getFailureView() {
-        viewData("account_failure_message", rb.getString("account_failure_message"));
-        prepareSignupPage("failure");
         return getFailureView(null);
     }
 
@@ -471,6 +469,11 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         } else {
             viewData("status_label", rb.getString("status_label_updated"));
         }
+        viewData("account_failure_message", rb.getString("account_failure_message"));
+        viewData("please_try_1", rb.getString("please_try_1"));
+        viewData("please_try_2", rb.getString("please_try_2"));
+        viewData("please_try_3", rb.getString("please_try_3"));
+        prepareSignupPage("failure");
         return view("failure");
     }
 

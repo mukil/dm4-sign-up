@@ -45,26 +45,24 @@ To be able to install this module you first and additionally have to install the
 
 ## Download & Installation
 
-You can find the latest stable version of this plugin bundled for download at [http://download.deepamehta.de/nightly/](http://download.deepamehta.de/nightly/).
+You can find the latest stable version of this plugin bundled for download at [http://download.deepamehta.de/](http://download.deepamehta.de/).
 
 As mentioned above, you currently need to download and install the aditonally required `dm48-thymeleaf-0.6
 .1`-Bundle, too.
 
-After downloading the two bundle-files, place them in the `bundles` folder of your DeepaMehta installation and restart 
-DeepaMehta 4.
+After downloading the two bundle-files, place them in the `bundle-deploy` folder of your DeepaMehta installation and restart DeepaMehta 4.
 
 ## Plugin Configuration
 
-The central topic for configuring the sign-up dialog for your DeepaMehta 4 installation is of type `Sign-up 
-Configuration`. Editing this topic via your dm4-webclient allows you to interactively control/adapt many options.
+The central topic for configuring the sign-up dialog for your DeepaMehta 4 installation is of type `Sign-up Configuration`. Editing this topic via your dm4-webclient allows you to interactively control/adapt many options.
 
 Setting a configuration option to an empty value usually means deactivating the features depending on it.
 
-The currently active sign-up configuration is associated with the "Plugin" topic representing this plugin ("DeepaMehta 4 Sign up"). It can be altered by members of the `Administration` workspace.
+The sign-up configuration is associated with the "Plugin" topic representing this plugin ("DeepaMehta 4 Sign up"). It can be edited by all members of the `Administration` workspace.
 
 ### Setup Custom Workspace Assignment
 
-There is currently just one special configuration option. To setup a workspace which self-registering users should automatically join (become members of) you need to associate that very workspace topic with your active sign-up configuration. Here comes the pitfall: To take this "custom workspace assignment" into effect you must either restart the platform or press "Edit" on your sign-up configuration topic once. In both cases the configuration is reloaded and therewith comes into immediate effect (see [#1](https://github.com/mukil/dm4-sign-up/issues/1)).
+There is currently just one special configuration option. To setup a workspace which self-registering users should automatically join (become members of) you need to associate that very workspace topic with your active sign-up configuration. And here comes the pitfall: To take this "custom workspace assignment" into effect you must either restart the platform or press "Edit" on your sign-up configuration topic once (in both cases the configuration is reloaded and therewith comes into immediate effect, see [#1](https://github.com/mukil/dm4-sign-up/issues/1)).
 
 ## Licensed under the GPL License 3.0
 
