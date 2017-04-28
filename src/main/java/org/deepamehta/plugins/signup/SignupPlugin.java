@@ -199,7 +199,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             boolean emailExists = dm4.getAccessControl().emailAddressExists(emailAddressValue);
             if (emailExists) {
                 log.info("Email based password reset workflow do'able, sending out passwort reset mail.");
-                createPasswordResetToken(emailAddressValue);
+                sendPasswordResetToken(emailAddressValue);
                 return Response.temporaryRedirect(new URI("/sign-up/token-info")).build();
             } else {
                 log.info("Email based password reset workflow not do'able, Email Addresses does not exist.");
@@ -275,8 +275,8 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @GET
     @Path("/handle/{username}/{pass-one}/{mailbox}/{skipConfirmation}")
     public Viewable handleSignupRequest(@PathParam("username") String username, @PathParam("pass-one") String password,
-            @PathParam("mailbox") String mailbox, @PathParam("skipConfirmation") boolean skipConfirmation)
-            throws WebApplicationException {
+                                        @PathParam("mailbox") String mailbox,
+                                        @PathParam("skipConfirmation") boolean skipConfirmation) {
         try {
             if (activeModuleConfiguration.getChildTopics().getBoolean(CONFIG_EMAIL_CONFIRMATION)) {
                 if (skipConfirmation && isAdministrationWorkspaceMember()) {
@@ -285,7 +285,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     handleAccountCreatedRedirect(username);
                 } else {
                     log.info("Sign-up Configuration: Email based confirmation workflow active, send out confirmation mail.");
-                    createUserValidationToken(username, password, mailbox);
+                    sendUserValidationToken(username, password, mailbox);
                     // redirect user to a "token-info" page
                     throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/token-info")).build());
                 }
@@ -302,7 +302,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @GET
     @Path("/handle/{username}/{pass-one}/{mailbox}")
     public Viewable handleSignupRequest(@PathParam("username") String username,
-            @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox) throws WebApplicationException {
+            @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox) {
         return handleSignupRequest(username, password, mailbox, false);
     }
 
@@ -522,121 +522,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     }
 
     @Override
-    public boolean isMailboxTaken(String email) {
-        String value = email.toLowerCase().trim();
-        return dm4.getAccessControl().emailAddressExists(value);
-    }
-
-    @Override
-    public boolean isValidEmailAddress(String value) {
-        if (value == null) return false;
-        boolean result = true;
-        try {
-            new InternetAddress(value);
-            String[] tokens = value.split("@");
-            if (tokens.length != 2 || (tokens[0].isEmpty() || tokens[1].isEmpty())) {
-                result = false;
-            }
-        } catch (AddressException ex) {
-            result = false;
-        }
-        return result;
-    }
-
-    // --- Private Helpers --- //
-
-    private void handleAccountCreatedRedirect(String username) throws URISyntaxException {
-        if (DM4_ACCOUNTS_ENABLED) {
-            log.info("DeepaMehta 4 Setting: The new account is now ENABLED, redirecting to OK page.");
-            // redirecting user to the "your account is now active" page
-            throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/"+username+"/ok")).build());
-        } else {
-            log.info("DeepaMehta 4 Setting: The new account is now DISABLED, redirecting to PENDING page.");
-            // redirecting to page displaying "your account was created but needs to be activated"
-            throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/pending")).build());
-        }
-    }
-
-    private boolean isUsernameTaken(String username) {
-        String value = username.trim();
-        Topic userNameTopic = acService.getUsernameTopic(value);
-        return (userNameTopic != null);
-    }
-
-    private boolean isAdministrationWorkspaceMember() {
-        String username = acService.getUsername();
-        if (username != null) {
-            long administrationWorkspaceId = dm4.getAccessControl().getAdministrationWorkspaceId();
-            if (acService.isMember(username, administrationWorkspaceId)
-                || acService.getWorkspaceOwner(administrationWorkspaceId).equals(username)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private boolean isApiWorkspaceMember() {
-        String username = acService.getUsername();
-        if (username != null) {
-            String apiWorkspaceUri = activeModuleConfiguration.getChildTopics().getString(CONFIG_API_WORKSPACE_URI);
-            if (!apiWorkspaceUri.isEmpty() && !apiWorkspaceUri.equals("undefined")) {
-                Topic apiWorkspace = dm4.getAccessControl().getWorkspace(apiWorkspaceUri);
-                if (apiWorkspace != null) {
-                    return acService.isMember(username, apiWorkspace.getId());
-                }
-            } else {
-                Topic usernameTopic = acService.getUsernameTopic();
-                Topic apiMembershipRequestNote = dm4.getTopicByUri("org.deepamehta.signup.api_membership_requests");
-                Association requestRelation = getDefaultAssociation(usernameTopic.getId(), apiMembershipRequestNote.getId());
-                if (requestRelation != null) return true;
-            }
-        }
-        return false;
-    }
-
-    private void createUserValidationToken(String username, String password, String mailbox) {
-        try {
-            String key = UUID.randomUUID().toString();
-            long valid = new Date().getTime() + 3600000; // Token is valid fo 60 min
-            JSONObject value = new JSONObject()
-                    .put("username", username.trim())
-                    .put("mailbox", mailbox.trim())
-                    .put("password", password)
-                    .put("expiration", valid);
-            token.put(key, value);
-            log.log(Level.INFO, "Set up key {0} for {1} sending confirmation mail valid till {3}",
-                    new Object[]{key, mailbox, new Date(valid).toString()});
-            // ### TODO: if sending confirmation mail fails users should know about that and
-            // get to see the "failure" screen next (with a proper message)
-            sendConfirmationMail(key, username, mailbox.trim());
-        } catch (JSONException ex) {
-            Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private void createPasswordResetToken(String mailbox) {
-        String username = dm4.getAccessControl().getUsername(mailbox);
-        try {
-            String key = UUID.randomUUID().toString();
-            long valid = new Date().getTime() + 3600000; // Token is valid fo 60 min
-            JSONObject value = new JSONObject()
-                    .put("username", username.trim())
-                    .put("mailbox", mailbox.trim())
-                    .put("expiration", valid);
-            pwToken.put(key, value);
-            log.log(Level.INFO, "Set up pwToken {0} for {1} send passwort reset mail valid till {3}",
-                    new Object[]{key, mailbox, new Date(valid).toString()});
-            // ### TODO: if sending confirmation mail fails, users should know about that and
-            // get to see the "failure" screen next (with a proper message)
-            sendPasswordResetMail(key, username, mailbox.trim());
-        } catch (JSONException ex) {
-            Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private String createSimpleUserAccount(String username, String password, String mailbox) {
+    public String createSimpleUserAccount(String username, String password, String mailbox) {
         DeepaMehtaTransaction tx = dm4.beginTx();
         try {
             if (isUsernameTaken(username)) {
@@ -687,6 +573,130 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             throw new RuntimeException("Creating simple user account FAILED!", e);
         } finally {
             tx.finish();
+        }
+    }
+
+    @Override
+    public boolean isMailboxTaken(String email) {
+        String value = email.toLowerCase().trim();
+        return dm4.getAccessControl().emailAddressExists(value);
+    }
+
+    @Override
+    public boolean isUsernameTaken(String username) {
+        String value = username.trim();
+        Topic userNameTopic = acService.getUsernameTopic(value);
+        return (userNameTopic != null);
+    }
+
+    @Override
+    public boolean isValidEmailAddress(String value) {
+        if (value == null) return false;
+        boolean result = true;
+        try {
+            new InternetAddress(value);
+            String[] tokens = value.split("@");
+            if (tokens.length != 2 || (tokens[0].isEmpty() || tokens[1].isEmpty())) {
+                result = false;
+            }
+        } catch (AddressException ex) {
+            result = false;
+        }
+        return result;
+    }
+
+    // --- Private Helpers --- //
+
+    private void handleAccountCreatedRedirect(String username) throws URISyntaxException {
+        if (DM4_ACCOUNTS_ENABLED) {
+            log.info("DeepaMehta 4 Setting: The new account is now ENABLED, redirecting to OK page.");
+            // redirecting user to the "your account is now active" page
+            throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/"+username+"/ok")).build());
+        } else {
+            log.info("DeepaMehta 4 Setting: The new account is now DISABLED, redirecting to PENDING page.");
+            // redirecting to page displaying "your account was created but needs to be activated"
+            throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/pending")).build());
+        }
+    }
+
+    private boolean isAdministrationWorkspaceMember() {
+        String username = acService.getUsername();
+        if (username != null) {
+            long administrationWorkspaceId = dm4.getAccessControl().getAdministrationWorkspaceId();
+            if (acService.isMember(username, administrationWorkspaceId)
+                || acService.getWorkspaceOwner(administrationWorkspaceId).equals(username)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isApiWorkspaceMember() {
+        String username = acService.getUsername();
+        if (username != null) {
+            String apiWorkspaceUri = activeModuleConfiguration.getChildTopics().getString(CONFIG_API_WORKSPACE_URI);
+            if (!apiWorkspaceUri.isEmpty() && !apiWorkspaceUri.equals("undefined")) {
+                Topic apiWorkspace = dm4.getAccessControl().getWorkspace(apiWorkspaceUri);
+                if (apiWorkspace != null) {
+                    return acService.isMember(username, apiWorkspace.getId());
+                }
+            } else {
+                Topic usernameTopic = acService.getUsernameTopic();
+                Topic apiMembershipRequestNote = dm4.getTopicByUri("org.deepamehta.signup.api_membership_requests");
+                Association requestRelation = getDefaultAssociation(usernameTopic.getId(), apiMembershipRequestNote.getId());
+                if (requestRelation != null) return true;
+            }
+        }
+        return false;
+    }
+
+    private void sendUserValidationToken(String username, String password, String mailbox) {
+        String tokenKey = createUserValidationToken(username, password, mailbox);
+        sendConfirmationMail(tokenKey, username, mailbox.trim());
+    }
+
+    private void sendPasswordResetToken(String mailbox) {
+        String username = dm4.getAccessControl().getUsername(mailbox);
+        String tokenKey = createPasswordResetToken(username, mailbox);
+        sendPasswordResetMail(tokenKey, username, mailbox.trim());
+    }
+
+    private String createUserValidationToken(String username, String password, String mailbox) {
+        try {
+            String tokenKey = UUID.randomUUID().toString();
+            long valid = new Date().getTime() + 3600000; // Token is valid fo 60 min
+            JSONObject tokenValue = new JSONObject()
+                    .put("username", username.trim())
+                    .put("mailbox", mailbox.trim())
+                    .put("password", password)
+                    .put("expiration", valid);
+            token.put(tokenKey, tokenValue);
+            log.log(Level.INFO, "Set up key {0} for {1} sending confirmation mail valid till {3}",
+                    new Object[]{tokenKey, mailbox, new Date(valid).toString()});
+            // ### TODO: if sending confirmation mail fails users should know about that and
+            // get to see the "failure" screen next (with a proper message)
+            return tokenKey;
+        } catch (JSONException ex) {
+            Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
+        }
+    }
+
+    private String createPasswordResetToken(String username, String mailbox) {
+        try {
+            String tokenKey = UUID.randomUUID().toString();
+            long valid = new Date().getTime() + 3600000; // Token is valid fo 60 min
+            JSONObject tokenValue = new JSONObject()
+                    .put("username", username.trim())
+                    .put("mailbox", mailbox.trim())
+                    .put("expiration", valid);
+            pwToken.put(tokenKey, tokenValue);
+            log.log(Level.INFO, "Set up pwToken {0} for {1} send passwort reset mail valid till {3}",
+                    new Object[]{tokenKey, mailbox, new Date(valid).toString()});
+            return tokenKey;
+        } catch (JSONException ex) {
+            Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
+            throw new RuntimeException(ex);
         }
     }
 

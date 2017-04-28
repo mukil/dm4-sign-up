@@ -2,6 +2,7 @@ package org.deepamehta.plugins.signup.service;
 
 
 import com.sun.jersey.api.view.Viewable;
+import org.codehaus.jettison.json.JSONObject;
 import org.osgi.framework.Bundle;
 
 /**
@@ -41,9 +42,20 @@ public interface SignupPluginService {
      */
     Viewable handleSignupRequest(String username, String password, String mailbox);
 
+    /**
+     * Creates a new user account with mailbox. If configured, a custom workspace assignment is created too.
+     * @param username
+     * @param password
+     * @param mailbox
+     * @return 
+     */
+    String createSimpleUserAccount(String username, String password, String mailbox);
+
     boolean isValidEmailAddress(String value);
 
     boolean isMailboxTaken(String value);
+
+    boolean isUsernameTaken(String value);
 
     /** Send notification email to system administrator mailbox configured in current \"Sign-up Configuration\" topic.*/
     void sendSystemMailboxNotification(String subject, String message);
