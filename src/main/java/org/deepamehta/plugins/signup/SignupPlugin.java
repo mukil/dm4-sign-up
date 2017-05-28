@@ -769,7 +769,8 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             // Localize "sentence" structure for german, maybe via Formatter
             String mailSubject = rb.getString("mail_confirmation_subject") + " - " + webAppTitle;
             try {
-                String linkHref = "<a href=\"" + url + "sign-up/confirm/" + key + "\">Kiezatlas Nutzerzugang best&auml;tigen</a>";
+                String linkHref = "<a href=\"" + url + "sign-up/confirm/" + key + "\">"
+                    + rb.getString("mail_confirmation_link_label") + "</a>";
                 if (DM4_ACCOUNTS_ENABLED) {
                     sendSystemMail(mailSubject,
                         rb.getString("mail_hello") + " " + username + ",<br/><br/>"
