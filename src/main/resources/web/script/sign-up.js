@@ -65,7 +65,12 @@
 
             /** Returns value for the "Authorization" header. */
             function authorization() {
-                return "Basic " + btoa(id + ":" + secret)   // ### FIXME: btoa() might not work in IE
+                try {
+                    // See https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/btoa
+                    return "Basic " + window.btoa(id + ":" + secret) // IE >= 10 compatible
+                } catch (error) {
+                    console.error("Error encoding Auth-Header", error)
+                }
             }
         }
 
