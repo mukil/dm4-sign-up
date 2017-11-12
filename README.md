@@ -6,6 +6,7 @@ This plugin introduces a configurable user registration process for DeepaMehta 4
 Most (if not all) user facing message are translatable by now. A german language version of this bundle can be build from source after setting the language option to `de` using the `plugin.properties` file.
 
 This plugin adds:
+*   A "User Mailbox" association type to associate "Email Address" w. "User Accounts".
 *   A `Sign-up`-link next to the `Login`-button in the DeepaMehta 4 Webclient
 *   A `Sign-up Configuration` topic associated to the `DeepaMehta 4 Sign up` Plugin
      (part of the "System" workspace and thus editable by all members of it)
@@ -30,6 +31,8 @@ The **special logic** of this plugin is comprised of:
 *   Optionally: If the email based confirmation workflow is used a "Passwort reset" workflow is available
 
 **Note:** If `Email Confirmation Required` is set to _true_ the confirmation tokens the system sends out are **not persisted** and get lost after a bundle/system restart. Once a token was send out the link containing it is valid for sixty minutes.
+
+Each "Sign-up Plugin Configuration" topic allows you to control 13 settings to adapt the sign-up process to your look & needs..
 
 ## Requirements
 
