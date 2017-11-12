@@ -2,6 +2,9 @@ package org.deepamehta.plugins.signup.service;
 
 
 import com.sun.jersey.api.view.Viewable;
+import java.net.URISyntaxException;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.core.Response;
 import org.codehaus.jettison.json.JSONObject;
 import org.osgi.framework.Bundle;
 
@@ -41,9 +44,33 @@ public interface SignupPluginService {
      * @return  String  username
      */
     Viewable handleSignupRequest(String username, String password, String mailbox);
+    
+    /** 
+     * Handles a sign-up request in regards to whether an Email based confirmation process is configured (true|false)
+     * in the resp. <code>Sign-up Configuration</code> topic.
+     *
+     * To check whether a username is already taken you *must* use the getUsernameAvailability() call before issueing
+     * an account creation request via this method.
+     *
+     * @param   username    String Unique username.
+     * @param   password    String SHA256 encoded password with a prefix of "-SHA26-"
+     * @param   mailbox     String containing a valid Email address related to the account creation request.
+     * @param   skipConfirmation    Boolean if true skips email verification transaction and creates user immediately.
+     * 
+     * @return  String  username
+     */
+    Viewable handleSignupRequest(String username, String password, String mailbox, boolean skipConfirmation);
 
     /**
-     * Creates a new user account with mailbox. If configured, a custom workspace assignment is created too.
+     * Sends out a valid password-reset token (if the email address is known to the system).
+     * @throws URISyntaxException
+     * @param email
+     * @return Redirects the request to either "/sign-up/token-info" or "/sign-up/error", depending on the address.
+     */
+    Response initiatePasswordReset(String email) throws URISyntaxException;
+
+    /**
+     * Creates a new user account with mailbox. If configured, a custom workspace membership is created automatically.
      * @param username
      * @param password
      * @param mailbox

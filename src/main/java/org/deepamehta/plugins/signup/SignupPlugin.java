@@ -218,6 +218,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @GET
     @Path("/password-token/{email}")
     @Produces(MediaType.TEXT_HTML)
+    @Override
     public Response initiatePasswordReset(@PathParam("email") String email) throws URISyntaxException {
         log.info("Password reset requested for user with Email: \"" + email + "\"");
         try {
@@ -321,6 +322,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
      */
     @GET
     @Path("/handle/{username}/{pass-one}/{mailbox}/{skipConfirmation}")
+    @Override
     public Viewable handleSignupRequest(@PathParam("username") String username, @PathParam("pass-one") String password,
                                         @PathParam("mailbox") String mailbox,
                                         @PathParam("skipConfirmation") boolean skipConfirmation) {
@@ -355,6 +357,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
      */
     @GET
     @Path("/handle/{username}/{pass-one}/{mailbox}")
+    @Override
     public Viewable handleSignupRequest(@PathParam("username") String username,
             @PathParam("pass-one") String password, @PathParam("mailbox") String mailbox) {
         return handleSignupRequest(username, password, mailbox, false);
