@@ -136,6 +136,11 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     // --- Plugin Service Implementation --- //
 
+    /** 
+     * Fetch all ui-labels in the language the plugins source code was compiled.
+     * @param language
+     * @return A String containing a JSONObject with key-value pairs of all multilingual labels.
+     */
     @GET
     @Path("/translation/{locale}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -156,6 +161,12 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return response.toString();
     }
 
+    /**
+     * A HTTP resource allowing existence checks for given username strings.
+     * @param username
+     * @return A String being a JSONObject with an "isAvailable" property being either "true" or "false".
+     * If the username is already taken isAvailable is set to false.
+     */
     @GET
     @Path("/check/{username}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -173,6 +184,12 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         }
     }
 
+    /**
+     * A HTTP resource allowing existence check fors the given email address string.
+     * @param email
+     * @return A String being a JSONObject with an "isAvailable" property being either "true" or "false".
+     * If the email address is already known in the system isAvailable is set to false.
+     */
     @GET
     @Path("/check/mailbox/{email}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -189,6 +206,15 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         }
     }
 
+    /**
+     * A HTTP Resource to initiate a password-reset sequence. Creates a password-reset token
+     * and sends it out as link via Email. Redirects the request to either the "token info"
+     * or the "error message" page.
+     * @param email
+     * @return A Response.temporaryRedirect to either the "token info"
+     * or the "error message" page.
+     * @throws URISyntaxException 
+     */
     @GET
     @Path("/password-token/{email}")
     @Produces(MediaType.TEXT_HTML)
@@ -210,6 +236,12 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return Response.temporaryRedirect(new URI("/sign-up/error")).build();
     }
 
+    /** 
+     * Checks the given password-reset token for validity and return either the
+     * password-reset dialog or the error message page.
+     * @param token
+     * @return The correct dialog/template for the given password-reset token value.
+     */
     @GET
     @Path("/password-reset/{token}")
     @Produces(MediaType.TEXT_HTML)
@@ -244,6 +276,12 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         }
     }
 
+    /**
+     * Updates the user password.
+     * @param token
+     * @param password
+     * @return Returns the correct template for the input.
+     */
     @GET
     @Path("/password-reset/{token}/{password}")
     @Transactional
@@ -272,6 +310,15 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         }
     }
 
+    /**
+     * A HTTP resource to create a new user account.
+     * @param username  String must be unique
+     * @param password  String must be SHA-256 encoded
+     * @param mailbox   String must be unique
+     * @param skipConfirmation  Flag if "true" skips intiating the email verification process
+     * (useful to allow admins to create new accounts without verifying users).
+     * @return 
+     */
     @GET
     @Path("/handle/{username}/{pass-one}/{mailbox}/{skipConfirmation}")
     public Viewable handleSignupRequest(@PathParam("username") String username, @PathParam("pass-one") String password,
@@ -299,6 +346,13 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return getFailureView("created");
     }
 
+    /**
+     * A HTTP resource to create a new user account.
+     * @param username  String must be unique
+     * @param password  String must be SHA-256 encoded
+     * @param mailbox   String must be unique
+     * @return 
+     */
     @GET
     @Path("/handle/{username}/{pass-one}/{mailbox}")
     public Viewable handleSignupRequest(@PathParam("username") String username,
@@ -306,6 +360,11 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return handleSignupRequest(username, password, mailbox, false);
     }
 
+    /**
+     * The HTTP resource to confirm the email address and acutally create an account.
+     * @param key String must be a valid token
+     * @return 
+     */
     @GET
     @Path("/confirm/{token}")
     public Viewable processSignupRequest(@PathParam("token") String key) {
@@ -346,6 +405,11 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return getAccountCreationOKView(username);
     }
 
+    /**
+     * A HTTP resource to associate the requesting username with
+     * the "Custom Membership Request" note topic and to inform the administrators by email.
+     * @return String containing a JSONObject with an "membership_created" r´property representing the relation.
+     */
     @POST
     @Path("/confirm/membership/custom")
     @Transactional
@@ -409,6 +473,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     // --- Sign-up Plugin Routes --- //
 
+    /**
+     * The root resource, routing either the sign-up or the logout dialog.
+     * @return 
+     */
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Viewable getSignupFormView() {
@@ -420,6 +488,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return view("sign-up");
     }
 
+    /**
+     * The login resource, routing either the login or the logout dialog.
+     * @return 
+     */
     @GET
     @Path("/login")
     @Produces(MediaType.TEXT_HTML)
@@ -432,6 +504,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return view("login");
     }
 
+    /**
+     * The route for the password forgotton page to initiate a reset sequence.
+     * @return 
+     */
     @GET
     @Path("/request-password")
     @Produces(MediaType.TEXT_HTML)
@@ -440,6 +516,11 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return view("request-password");
     }
 
+    /**
+     * The route to the confirmation page for the account creation.
+     * @param username
+     * @return 
+     */
     @GET
     @Path("/{username}/ok")
     @Produces(MediaType.TEXT_HTML)
@@ -449,6 +530,11 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return view("ok");
     }
 
+    /**
+     * The route to the pending page, informing the user to wait for an
+     * administrator to activate the account.
+     * @return 
+     */
     @GET
     @Path("/pending")
     @Produces(MediaType.TEXT_HTML)
@@ -457,6 +543,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return view("pending");
     }
 
+    /**
+     * The route to the error message page.
+     * @return 
+     */
     @GET
     @Path("/error")
     @Produces(MediaType.TEXT_HTML)
@@ -478,6 +568,11 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return view("failure");
     }
 
+    /**
+     * The route informing users to please check their mail in
+     * the next 60mins to verify and activate their new account.
+     * @return 
+     */
     @GET
     @Path("/token-info")
     @Produces(MediaType.TEXT_HTML)
@@ -486,6 +581,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return view("account-confirmation");
     }
 
+    /**
+     * The route to the users account edit page.
+     * @return 
+     */
     @GET
     @Path("/edit")
     @Produces(MediaType.TEXT_HTML)
