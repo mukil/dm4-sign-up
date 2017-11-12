@@ -32,7 +32,11 @@ The **special logic** of this plugin is comprised of:
 
 **Note:** If `Email Confirmation Required` is set to _true_ the confirmation tokens the system sends out are **not persisted** and get lost after a bundle/system restart. Once a token was send out the link containing it is valid for sixty minutes.
 
-Each "Sign-up Plugin Configuration" topic allows you to control 13 settings to adapt the sign-up process to your look & needs. The standard sign-up configuration topic initially resides in the "Administration" workspace and the "Custom Workspace Membership Request" note resides in the "System" workspace. Email addresses of new user accounts are all placed in the "System" workspace too.
+Each "Sign-up Plugin Configuration" topic allows you to control 13 settings to adapt the sign-up process to your look & needs.
+
+The standard sign-up configuration topic initially resides in the "Administration" workspace and the "Custom Workspace Membership Request" note resides in the "System" workspace.
+
+Email addresses of new user accounts are all placed in the "System" workspace too.
 
 ## Requirements
 
