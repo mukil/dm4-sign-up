@@ -46,8 +46,10 @@ import org.apache.commons.mail.HtmlEmail;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.deepamehta.plugins.signup.events.SignupResourceRequestedListener;
 import org.deepamehta.plugins.signup.service.SignupPluginService;
 import org.osgi.framework.Bundle;
+import org.thymeleaf.context.AbstractContext;
 
 /**
  * This plugin enables anonymous users to create themselves a user account in DeepaMehta 4
@@ -129,6 +131,16 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         @Override
         public void dispatch(EventListener listener, Object... params) {
             ((UserAccountCreateListener) listener).userAccountCreated((Topic) params[0]);
+        }
+    };
+
+    /**
+     * Custom event fired by sign-up module whenever a template resource is requested.
+     **/
+    static DeepaMehtaEvent SIGNUP_RESOURCE_REQUESTED = new DeepaMehtaEvent(SignupResourceRequestedListener.class) {
+        @Override
+        public void dispatch(EventListener listener, Object... params) {
+            ((SignupResourceRequestedListener) listener).signupResourceRequested((AbstractContext) params[0], (String) params[1]);
         }
     };
 
@@ -1038,6 +1050,9 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     private void prepareSignupPage(String templateName) {
         if (activeModuleConfiguration != null) {
+            // Notify 3rd party plugins about template preparation
+            dm4.fireEvent(SIGNUP_RESOURCE_REQUESTED, context(), templateName);
+            // Build up sign-up template variabls
             ChildTopics configuration = activeModuleConfiguration.getChildTopics();
             viewData("title", configuration.getTopic(CONFIG_WEBAPP_TITLE).getSimpleValue().toString());
             viewData("logo_path", configuration.getTopic(CONFIG_LOGO_PATH).getSimpleValue().toString());

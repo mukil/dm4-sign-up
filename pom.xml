@@ -84,7 +84,8 @@
                         find the @mukil/dm4-mail repo on github.com -->
                         <Embed-Dependency>jsoup,mail,commons-email</Embed-Dependency>
                         <Import-Package>
-                            sun.security.util;resolution:=optional,*
+                            sun.security.util;resolution:=optional,
+                            org.thymeleaf.context;version="2.1.3.RELEASE",*
                         </Import-Package>
                         <Bundle-SymbolicName>
                             org.deepamehta.sign-up
