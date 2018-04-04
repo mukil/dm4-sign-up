@@ -61,46 +61,48 @@
                 </div>
             </div>
 
-            <div id="sign-up-view" class="dialog-body ui padded segment vertical blue2bg">
-                <div class="ui container">
-                    <!--h2 th:text="${signup_title}">Sign up</h2-->
-                    <form class="sign-up-form ui form" action="javascript:voidFunction();" onsubmit="javascript:createAccount();">
-                        <div class="ui input">
-                            <input id="username" type="text" name="username" th:placeholder="${label_username}" title="Username"
-                               onblur="checkUserNameAvailability()" class="sign-up username" />
-                        </div>
-                        <div class="ui input">
-                            <input type="password" id="pass-one" name="pass-one" th:placeholder="${label_password}" title="Password"
-                                   onblur="checkPassword()" class="sign-up password" />
-                        </div>
-                        <div class="ui input">
-                            <!-- label for="pass-two">Password (Repeat)</label-->
-                            <input type="password" id="pass-two" name="pass-two" th:placeholder="${label_password_repeat}" title="Password (Repeat)"
-                                   onblur="comparePasswords()" class="sign-up password" />
-                        </div>
-                        <div class="ui input">
-                            <input type="text" id="mailbox" name="mailbox" th:placeholder="${label_email}" title="Email Address"
-                                   onblur="checkMailboxAvailability()" class="sign-up mailbox" />
-                        </div>
-                        <div id="message-view"><span id="message"></span></div>
-                    </form>
-                </div>
-            </div>
+            <form class="sign-up-form ui form" action="javascript:voidFunction();" onsubmit="javascript:createAccount();">
 
-            <div id="sign-up-view" class="dialog-body ui padded segment vertical">
-                <div class="ui container">
-                    <div th:if="${administration_workspace_member}">
-                        <input id="skip-confirmation" name="skip-confirmation" type="checkbox"
-                               title="Skip the confirmation process" class="ui input checkbox"/>
-                        <label for="skip-confirmation" th:text="${skip_confirmation_mail_label}">
-                            Do not send confirmation mail (i know what i am doing).
-                        </label>
+                <div id="sign-up-view" class="dialog-body ui padded segment vertical blue2bg">
+                    <div class="ui container">
+                        <!--h2 th:text="${signup_title}">Sign up</h2-->
+                            <div class="ui input">
+                                <input id="username" type="text" name="username" th:placeholder="${label_username}" title="Username"
+                                   onblur="checkUserNameAvailability()" class="sign-up username" />
+                            </div>
+                            <div class="ui input">
+                                <input type="password" id="pass-one" name="pass-one" th:placeholder="${label_password}" title="Password"
+                                       onblur="checkPassword()" class="sign-up password" />
+                            </div>
+                            <div class="ui input">
+                                <!-- label for="pass-two">Password (Repeat)</label-->
+                                <input type="password" id="pass-two" name="pass-two" th:placeholder="${label_password_repeat}" title="Password (Repeat)"
+                                       onblur="comparePasswords()" class="sign-up password" />
+                            </div>
+                            <div class="ui input">
+                                <input type="text" id="mailbox" name="mailbox" th:placeholder="${label_email}" title="Email Address"
+                                       onblur="checkMailboxAvailability()" class="sign-up mailbox" />
+                            </div>
+                            <div id="message-view"><span id="message"></span></div>
                     </div>
-                    <input type="submit" id="create" th:value="${create_account}" title="Create Account" class="ui button white sign-up ok" />
-                    &nbsp;
-                    <span th:text="${or_label}">or</span> <a href="/sign-up/login" th:text="${log_in_small}" title="log in">log in</a>.
                 </div>
-            </div>
+
+                <div id="sign-up-view" class="dialog-body ui padded segment vertical">
+                    <div class="ui container">
+                        <div th:if="${administration_workspace_member}">
+                            <input id="skip-confirmation" name="skip-confirmation" type="checkbox"
+                                   title="Skip the confirmation process" class="ui input checkbox"/>
+                            <label for="skip-confirmation" th:text="${skip_confirmation_mail_label}">
+                                Do not send confirmation mail (i know what i am doing).
+                            </label>
+                        </div>
+                        <input type="submit" id="create" th:value="${create_account}" title="Create Account" class="ui button white sign-up ok" />
+                        &nbsp;
+                        <span th:text="${or_label}">or</span> <a href="/sign-up/login" th:text="${log_in_small}" title="log in">log in</a>.
+                    </div>
+                </div>
+
+            </form>
 
             <div th:replace="fragments/footer :: footer-new"></div>
 
