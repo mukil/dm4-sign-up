@@ -17,6 +17,10 @@
             signupConfig.appStartPageURL = /*[[${start_url}]]*/ '/';
         /*]]>*/
         </script>
+        <script defer="true" src="/de.kiezatlas.website/vendor/jquery/jquery-3.2.1.min.js"></script>
+        <script defer="true" src="/de.kiezatlas.website/css/semantic-ui/2.3/dist/semantic.min.js"></script>
+        <script defer="true" src="/de.kiezatlas.website/ka-restclient.js"></script>
+        <script defer="true" src="/de.kiezatlas.website/ka-startseite.js" onload="init_page('sign-up')"></script>
         <meta th:replace="fragments/tracker" />
     </head>
 
@@ -26,7 +30,8 @@
             <div class="top-menu" th:include="fragments/navigation :: top-menu (publisher=${is_publisher})"></div>
         </div>
 
-        <div class="ui vertical left menu sidebar" th:include="fragments/navigation :: vertical (publisher=${is_publisher})"></div>
+        <!-- Sidebar Menu -->
+        <div th:replace="fragments/navigation :: vertical-nav (publisher=${is_publisher})"></div>
 
         <div class="ui pusher">
 
