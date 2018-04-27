@@ -49,8 +49,8 @@
         </dependency>
         <dependency>
             <groupId>de.mikromedia</groupId>
-            <artifactId>dm48-sendgrid</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>dm49-sendgrid</artifactId>
+            <version>1.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
