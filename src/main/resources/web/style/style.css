@@ -261,3 +261,29 @@ body.sign-up p {
 .ui-dialog .ui-dialog-content .password-reset a {
     color: rgba(39, 99, 140, 1.0);
 }
+
+/**
+Adressing issue #7
+Using answer by fuxia adapted to semantic-ui rules:
+Source: https://stackoverflow.com/questions/2610497/change-an-html5-inputs-placeholder-color-with-css#2610741
+**/
+.ui.input > input::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+    color: rgba(100,100,100,.95);
+}
+.ui.input > input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+    color: rgb(100,100,100);
+    opacity: .95;
+}
+.ui.input > input::-moz-placeholder { /* Mozilla Firefox 19+ */
+    color: rgb(100,100,100);
+    opacity: .95;
+}
+.ui.input > input:-ms-input-placeholder { /* Internet Explorer 10-11 */
+    color: rgba(100,100,100,.95);
+}
+.ui.input > input::-ms-input-placeholder { /* Microsoft Edge */
+    color: rgba(100,100,100,.95);
+}
+.ui.input > input::placeholder { /* Most modern browsers support this now. */
+    color: rgba(100,100,100,.95);
+}
