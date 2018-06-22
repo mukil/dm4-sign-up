@@ -1051,6 +1051,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             // messages used on login and registration dialogs
             viewData("password_length_hint", rb.getString("password_length_hint"));
             viewData("password_match_hint", rb.getString("password_match_hint"));
+            viewData("check_terms_tos", rb.getString("check_terms_tos"));
             viewData("check_terms_hint", rb.getString("check_terms_hint"));
             viewData("username_invalid_hint", rb.getString("username_invalid_hint"));
             viewData("username_taken_hint", rb.getString("username_taken_hint"));

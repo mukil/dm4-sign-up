@@ -227,16 +227,28 @@
         return OK_STRING
     }
 
-    function checkAgreements() {
+    function checkTOSAgreement() {
         var tosCheck = document.getElementById("toscheck").checked
-        var privateOk = document.getElementById("privateinfo").checked
         //
-        if (tosCheck && privateOk) {
+        if (tosCheck) {
             renderWarning(EMPTY_STRING)
             enableSignupForm()
             return OK_STRING
         }
         renderWarning(signupConfig.checkTerms)
+        disableSignupForm()
+        return null
+    }
+
+    function checkHintAgreement() {
+        var privateOk = document.getElementById("privateinfo").checked
+        //
+        if (privateOk) {
+            renderWarning(EMPTY_STRING)
+            enableSignupForm()
+            return OK_STRING
+        }
+        renderWarning(signupConfig.checkHint)
         disableSignupForm()
         return null
     }

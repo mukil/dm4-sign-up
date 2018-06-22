@@ -14,7 +14,8 @@
             signupConfig.appStartPageURL = /*[[${start_url}]]*/ '/';
             signupConfig.passwordLength = /*[[${password_length_hint}]]*/ "Your password must be at least 8 characters long.";
             signupConfig.passwordMatch = /*[[${password_match_hint}]]*/ "Your passwords do not match.";
-            signupConfig.checkTerms = /*[[${check_terms_hint}]]*/ "First, please check our terms and conditions.";
+            signupConfig.checkHint = /*[[${check_terms_hint}]]*/ "Please note our hint on how the information you enter may be public.";
+            signupConfig.checkTerms = /*[[${check_terms_tos}]]*/ "First, please check our terms and conditions.";
             signupConfig.usernameInvalid = /*[[${username_invalid_hint}]]*/ "This username would be invalid.";
             signupConfig.usernameTaken = /*[[${username_taken_hint}]]*/ "This username is already taken.";
             signupConfig.emailInvalid = /*[[${email_invalid_hint}]]*/ "This Email Address would be invalid.";
@@ -51,13 +52,13 @@
                 <div class="ui container">
                     <form name="aggreement" class="ui form">
                         <div class="part">
-                            <input id="toscheck" type="checkbox" onclick="javascript:checkAgreements()" class="ui checkbox tos-check"></input>
+                            <input id="toscheck" type="checkbox" onclick="javascript:checkTOSAgreement()" class="ui checkbox tos-check"></input>
                             <label for="toscheck" th:text="${tos_label}">I agree with the projects Terms of use.</label>
                             <a href="javascript:showLabsTermsText()" title="Read Details" th:text="${read_more}">Read more</a>
                             <div id="tos-details" th:utext="${tos_details}"></div>
                         </div>
                         <div class="part">
-                            <input id="privateinfo" type="checkbox" onclick="javascript:checkAgreements()" class="ui checkbox private-info-check"></input>
+                            <input id="privateinfo" type="checkbox" onclick="javascript:checkHintAgreement()" class="ui checkbox private-info-check"></input>
                             <label for="privateinfo" th:text="${pd_label}">I understand that any private information I give to this site may be made publicly available.</label>
                             <a href="javascript:showLabsPrivateText()" title="Read Details" th:text="${read_more}">Read more</a>
                             <div id="private-details" th:utext="${pd_details}"></div>
