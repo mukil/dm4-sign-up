@@ -117,7 +117,8 @@
         if (checkPassword() !== OK_STRING) return false
         if (comparePasswords() !== OK_STRING) return false
         if (checkMailbox() === null) return false
-        if (checkAgreements() !== OK_STRING) return false
+        if (checkHintAgreement() !== OK_STRING) return false
+        if (checkTOSAgreement() !== OK_STRING) return false
         if (inputInvalidated) {
             checkUserNameAvailability(function(response) {
                 if (response) {
