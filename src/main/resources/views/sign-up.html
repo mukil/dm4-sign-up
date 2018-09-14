@@ -52,22 +52,22 @@
                 <div class="ui container">
                     <form name="aggreement" class="ui form">
                         <div class="part">
-                            <input id="toscheck" type="checkbox" onclick="javascript:checkTOSAgreement()" class="ui checkbox tos-check"></input>
+                            <input id="toscheck" type="checkbox" onclick="checkTOSAgreement()" class="ui checkbox tos-check"></input>
                             <label for="toscheck" th:text="${tos_label}">I agree with the projects Terms of use.</label>
-                            <a href="javascript:showLabsTermsText()" title="Read Details" th:text="${read_more}">Read more</a>
+                            <a href="showLabsTermsText()" title="Read Details" th:text="${read_more}">Read more</a>
                             <div id="tos-details" th:utext="${tos_details}"></div>
                         </div>
                         <div class="part">
-                            <input id="privateinfo" type="checkbox" onclick="javascript:checkHintAgreement()" class="ui checkbox private-info-check"></input>
+                            <input id="privateinfo" type="checkbox" onclick="checkHintAgreement()" class="ui checkbox private-info-check"></input>
                             <label for="privateinfo" th:text="${pd_label}">I understand that any private information I give to this site may be made publicly available.</label>
-                            <a href="javascript:showLabsPrivateText()" title="Read Details" th:text="${read_more}">Read more</a>
+                            <a href="showLabsPrivateText()" title="Read Details" th:text="${read_more}">Read more</a>
                             <div id="private-details" th:utext="${pd_details}"></div>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <form class="sign-up-form ui form" action="javascript:voidFunction();" onsubmit="javascript:createAccount();">
+            <form class="sign-up-form ui form" action="voidFunction();" onsubmit="createAccount()">
 
                 <div id="sign-up-view" class="dialog-body ui padded segment vertical blue2bg">
                     <div class="ui container">
@@ -102,7 +102,7 @@
                                 Do not send confirmation mail (i know what i am doing).
                             </label>
                         </div>
-                        <input type="submit" id="create" th:value="${create_account}" title="Create Account" class="ui button white sign-up ok" />
+                        <input type="submit" id="create" th:value="${create_account}" onclick="createAccount()" title="Create Account" class="ui button white sign-up ok" />
                         &nbsp;
                         <span th:text="${or_label}">or</span> <a href="/sign-up/login" th:text="${log_in_small}" title="log in">log in</a>.
                     </div>

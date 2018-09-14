@@ -46,8 +46,8 @@
                         <div id="message-view">
                             <span th:text="${logged_in_as}">Eingelogged als </span>&nbsp;<span th:text="${username}" id="message"></span>
                         </div>
-                        <form class="logout-form" action="javascript:doLogout()">
-                            <input type="submit" th:value="${logout}" class="ok ui button red sign-up" />
+                        <form class="logout-form" onsubmit="doLogout()">
+                            <input type="submit" onclick="doLogout()" th:value="${logout}" class="ok ui button red sign-up" />
                         </form>
                     </div>
 

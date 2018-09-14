@@ -52,7 +52,7 @@
 
                     <div id="log-in-view" class="dialog-body">
                         <!--h2 th:text="${login_title}">Log in</h2-->
-                        <form class="log-in-form ui form" id="login-form" action="javascript:voidFunction();" onsubmit="javascript:doLogin()">
+                        <form class="log-in-form ui form" id="login-form" onsubmit="doLogin()">
                             <div class="ui input">
                                 <input id="username" type="text" name="username" th:placeholder="${label_username}" title="Username" class="log-in sign-up username" />
                                 <input type="password" id="password" name="password" th:placeholder="${label_password}" title="Password" class="log-in sign-up password" />
@@ -75,7 +75,7 @@
 
                     <div class="hints">
                         <div class="ui input">
-                            <input type="submit" form="login-form" th:value="${login}" class="log-in sign-up ok ui button" />
+                            <input type="submit" form="login-form" onclick="doLogin()" th:value="${login}" class="log-in sign-up ok ui button" />
                         </div>
                     </div>
 
