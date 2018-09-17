@@ -7,7 +7,7 @@
         <title th:text="${signup_title} + ' - ' + ${title}">Sign up</title>
         <link rel="stylesheet" th:href="${css_path}" type="text/css" />
         <script type="text/javascript" src="/de.deepamehta.accesscontrol/script/vendor/sha256.js"></script>
-        <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
+        <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js"/>
         <script th:inline="javascript">
         /*<![CDATA[*/
             signupConfig.appLoadingMessage = /*[[${loading_app_hint}]]*/ 'Loading Webclient';
@@ -67,7 +67,7 @@
                 </div>
             </div>
 
-            <form class="sign-up-form ui form" action="voidFunction();" onsubmit="createAccount()">
+            <form class="sign-up-form ui form" id="account-creation">
 
                 <div id="sign-up-view" class="dialog-body ui padded segment vertical blue2bg">
                     <div class="ui container">
@@ -102,7 +102,7 @@
                                 Do not send confirmation mail (i know what i am doing).
                             </label>
                         </div>
-                        <input type="submit" id="create" th:value="${create_account}" onclick="createAccount()" title="Create Account" class="ui button white sign-up ok" />
+                        <input type="submit" id="create" th:value="${create_account}" title="Create Account" class="ui button white sign-up ok" />
                         &nbsp;
                         <span th:text="${or_label}">or</span> <a href="/sign-up/login" th:text="${log_in_small}" title="log in">log in</a>.
                     </div>
@@ -113,6 +113,12 @@
             <div th:replace="fragments/footer :: footer-new"></div>
 
         </div>
+
+        <script th:inline="javascript">
+        /*<![CDATA[*/
+            registerSubmitHandler()
+        /*]]>*/
+        </script>
 
     </body>
 

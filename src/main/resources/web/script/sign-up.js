@@ -95,6 +95,27 @@
 
     // --- Plain JavaScript form validation used by "/sign-up/" page. --- //
 
+    function registerSubmitHandler() {
+        document.querySelector("#account-creation").addEventListener("submit", function(e){
+            e.preventDefault()
+            createAccount()
+        })
+    }
+
+    function registerResetSubmitHandler() {
+        document.querySelector("#request-password").addEventListener("submit", function(e){
+            e.preventDefault()
+            resetPassword()
+        })
+    }
+
+    function registerUpdatePasswordHandler() {
+        document.querySelector("#update-password").addEventListener("submit", function(e){
+            e.preventDefault()
+            updatePassword()
+        })
+    }
+
     // ### empty passwords and crazy mailbox-domains.
     // This is the form.onsubmit() implementation.
     function createAccount() {
@@ -125,6 +146,8 @@
                     checkMailboxAvailability(function(response) {
                         if (response) doCreateRequest()
                     })
+                } else {
+                    return false
                 }
             })
         } else {
