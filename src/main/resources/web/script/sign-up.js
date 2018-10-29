@@ -95,6 +95,13 @@
 
     // --- Plain JavaScript form validation used by "/sign-up/" page. --- //
 
+    function registerLoginHandler() {
+        document.querySelector("#login-form").addEventListener("submit", function(e){
+            e.preventDefault()
+            doLogin()
+        })
+    }
+
     function registerSubmitHandler() {
         document.querySelector("#account-creation").addEventListener("submit", function(e){
             e.preventDefault()
@@ -358,7 +365,7 @@
     function redirectToStartPageURL() {
         setTimeout(function (e) {
             window.location.href = signupConfig.appStartPageURL
-        }, 1500)
+        }, 500)
     }
 
     function redirectToTokenInfoPage() {
