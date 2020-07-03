@@ -1,16 +1,16 @@
-package org.deepamehta.plugins.signup.migrations;
+package systems.dmx.signup.migrations;
 
-import de.deepamehta.core.Topic;
-import de.deepamehta.core.service.Inject;
-import de.deepamehta.core.service.Migration;
-import de.deepamehta.core.Association;
-import de.deepamehta.core.RelatedTopic;
-import de.deepamehta.core.TopicType;
-import de.deepamehta.core.model.SimpleValue;
-import de.deepamehta.workspaces.WorkspacesService;
 import java.util.List;
 
 import java.util.logging.Logger;
+import systems.dmx.core.Assoc;
+import systems.dmx.core.RelatedTopic;
+import systems.dmx.core.Topic;
+import systems.dmx.core.TopicType;
+import systems.dmx.core.model.SimpleValue;
+import systems.dmx.core.service.Inject;
+import systems.dmx.core.service.Migration;
+import systems.dmx.workspaces.WorkspacesService;
 
 /**
  * Extends the Sign-up Plugin Configuration about all "API" related configuration options.
@@ -26,9 +26,9 @@ public class Migration10 extends Migration {
     public void run() {
 
         logger.info("###### Migrate all relevant Sign-up Configration Topics to \"Administration\" Workspace");
-        long administrationWsId = dm4.getAccessControl().getAdministrationWorkspaceId();
+        long administrationWsId = dmx.getPrivilegedAccess().getAdministrationWorkspaceId();
         // 1 Re-Assign "Standard Configuration" Composition Topic to "Administration"
-        Topic standardConfiguration = dm4.getTopicByUri("org.deepamehta.signup.default_configuration");
+        Topic standardConfiguration = dmx.getTopicByUri("org.deepamehta.signup.default_configuration");
         wsService.assignToWorkspace(standardConfiguration, administrationWsId);
         RelatedTopic webAppTitle = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_webapp_title");
         RelatedTopic logoPath = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_webapp_logo_path");
@@ -48,67 +48,67 @@ public class Migration10 extends Migration {
         RelatedTopic apiEnabled = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_enabled");
         RelatedTopic apiWsURI = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_workspace_uri");
         wsService.assignToWorkspace(webAppTitle, administrationWsId);
-        wsService.assignToWorkspace(webAppTitle.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(webAppTitle.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(logoPath, administrationWsId);
-        wsService.assignToWorkspace(logoPath.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(logoPath.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(cssPath, administrationWsId);
-        wsService.assignToWorkspace(cssPath.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(cssPath.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(projectTitle, administrationWsId);
-        wsService.assignToWorkspace(projectTitle.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(projectTitle.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(tosLabel, administrationWsId);
-        wsService.assignToWorkspace(tosLabel.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(tosLabel.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(tosDetail, administrationWsId);
-        wsService.assignToWorkspace(tosDetail.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(tosDetail.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(pdLabel, administrationWsId);
-        wsService.assignToWorkspace(pdLabel.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(pdLabel.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(pdDetail, administrationWsId);
-        wsService.assignToWorkspace(pdDetail.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(pdDetail.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(readMoreUrl, administrationWsId);
-        wsService.assignToWorkspace(readMoreUrl.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(readMoreUrl.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(pagesFooter, administrationWsId);
-        wsService.assignToWorkspace(pagesFooter.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(pagesFooter.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(adminMailbox, administrationWsId);
-        wsService.assignToWorkspace(adminMailbox.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(adminMailbox.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(fromMailbox, administrationWsId);
-        wsService.assignToWorkspace(fromMailbox.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(fromMailbox.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(emailConfirmaton, administrationWsId);
-        wsService.assignToWorkspace(emailConfirmaton.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(emailConfirmaton.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(apiDescr, administrationWsId);
-        wsService.assignToWorkspace(apiDescr.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(apiDescr.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(apiDetails, administrationWsId);
-        wsService.assignToWorkspace(apiDetails.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(apiDetails.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(apiEnabled, administrationWsId);
-        wsService.assignToWorkspace(apiEnabled.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(apiEnabled.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(apiWsURI, administrationWsId);
-        wsService.assignToWorkspace(apiWsURI.getRelatingAssociation(), administrationWsId);
+        wsService.assignToWorkspace(apiWsURI.getRelatingAssoc(), administrationWsId);
         // 2 Delete Child Topic Type "System" Workspace Assignment
-        TopicType tokenConfirmationType = dm4.getTopicType("org.deepamehta.signup.config_email_confirmation");
-        List<Association> tokenConfirmationTypeAssignments = tokenConfirmationType.getAssociations();
-        for (Association assoc : tokenConfirmationTypeAssignments) {
-            if (assoc.getPlayer1().getTypeUri().equals("dm4.workspaces.workspace") ||
-                assoc.getPlayer2().getTypeUri().equals("dm4.workspaces.workspace")) {
+        TopicType tokenConfirmationType = dmx.getTopicType("org.deepamehta.signup.config_email_confirmation");
+        List<Assoc> tokenConfirmationTypeAssignments = tokenConfirmationType.getAssocs();
+        for (Assoc assoc : tokenConfirmationTypeAssignments) {
+            if (assoc.getPlayer1().getDMXObject().getTypeUri().equals("dmx.workspaces.workspace") ||
+                assoc.getPlayer2().getDMXObject().getTypeUri().equals("dmx.workspaces.workspace")) {
                 assoc.delete();
             }
         }
         // 3 Create Plugin <-> Standard Configuration Association to "Administration"
-        Topic pluginTopic = dm4.getTopicByUri("org.deepamehta.sign-up");
-        List<Association> configs = pluginTopic.getAssociations();
-        for (Association assoc : configs) {
-            if (assoc.getPlayer1().getTypeUri().equals("org.deepamehta.signup.configuration") ||
-                assoc.getPlayer2().getTypeUri().equals("org.deepamehta.signup.configuration")) {
+        Topic pluginTopic = dmx.getTopicByUri("org.deepamehta.sign-up");
+        List<Assoc> configs = pluginTopic.getAssocs();
+        for (Assoc assoc : configs) {
+            if (assoc.getPlayer1().getDMXObject().getTypeUri().equals("org.deepamehta.signup.configuration") ||
+                assoc.getPlayer2().getDMXObject().getTypeUri().equals("org.deepamehta.signup.configuration")) {
                 wsService.assignToWorkspace(assoc, administrationWsId);
                 assoc.setSimpleValue(new SimpleValue("Active Configuration"));
             }
         }
         // 4 Move Topic "Api Membership Request Helper Note" to "Administration"
-        Topic apiMembershipNote = dm4.getTopicByUri("org.deepamehta.signup.api_membership_requests");
+        Topic apiMembershipNote = dmx.getTopicByUri("org.deepamehta.signup.api_membership_requests");
         wsService.assignToWorkspace(apiMembershipNote, administrationWsId);
         // 5 Move all email address into "administration" workspace
         logger.info("###### Migrate all users Email Addresses to \"Administration\" Workspace");
-        List<Topic> emails = dm4.getTopicsByType("dm4.contacts.email_address");
+        List<Topic> emails = dmx.getTopicsByType("dmx.contacts.email_address");
         for (Topic email : emails) {
-            RelatedTopic username = email.getRelatedTopic("org.deepamehta.signup.user_mailbox", "dm4.core.child",
-                "dm4.core.parent", "dm4.accesscontrol.username");
+            RelatedTopic username = email.getRelatedTopic("org.deepamehta.signup.user_mailbox", "dmx.core.child",
+                "dmx.core.parent", "dmx.accesscontrol.username");
             if (username != null) wsService.assignToWorkspace(email, administrationWsId);
         }
         logger.info("###### Email Address topic migration to \"Administration\" Workspace complete");

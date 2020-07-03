@@ -1,11 +1,10 @@
-package org.deepamehta.plugins.signup.migrations;
-
-import de.deepamehta.core.Topic;
-import de.deepamehta.core.service.Inject;
-import de.deepamehta.core.service.Migration;
-import de.deepamehta.workspaces.WorkspacesService;
+package systems.dmx.signup.migrations;
 
 import java.util.logging.Logger;
+import systems.dmx.core.Topic;
+import systems.dmx.core.service.Inject;
+import systems.dmx.core.service.Migration;
+import systems.dmx.workspaces.WorkspacesService;
 
 public class Migration12 extends Migration {
 
@@ -17,8 +16,8 @@ public class Migration12 extends Migration {
     @Override
     public void run() {
         logger.info("###### Move Topic \"Api Membership Request Helper Note\" to \"System\" workspace");
-        Topic apiMembershipNote = dm4.getTopicByUri("org.deepamehta.signup.api_membership_requests");
-        wsService.assignToWorkspace(apiMembershipNote, dm4.getAccessControl().getSystemWorkspaceId());
+        Topic apiMembershipNote = dmx.getTopicByUri("org.deepamehta.signup.api_membership_requests");
+        wsService.assignToWorkspace(apiMembershipNote, dmx.getPrivilegedAccess().getSystemWorkspaceId());
         logger.info("###### \"Api Membership Request Helper Note\" topic migration to \"System\" workspace complete");
     }
 

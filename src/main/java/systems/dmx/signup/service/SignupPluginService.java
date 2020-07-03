@@ -1,11 +1,9 @@
-package org.deepamehta.plugins.signup.service;
+package systems.dmx.signup.service;
 
 
 import com.sun.jersey.api.view.Viewable;
 import java.net.URISyntaxException;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Response;
-import org.codehaus.jettison.json.JSONObject;
 import org.osgi.framework.Bundle;
 
 /**

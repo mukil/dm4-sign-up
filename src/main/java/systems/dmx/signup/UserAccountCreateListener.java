@@ -1,11 +1,11 @@
-package org.deepamehta.plugins.signup;
+package systems.dmx.signup;
 
-import de.deepamehta.core.Topic;
-import de.deepamehta.core.service.EventListener;
+import systems.dmx.core.Topic;
+import systems.dmx.core.service.EventListener;
 
 /**
  *
- * @author malte
+ * @author mukil
  */
 public interface UserAccountCreateListener extends EventListener {
     

@@ -1,29 +1,11 @@
-package org.deepamehta.plugins.signup;
+package systems.dmx.signup;
 
 import com.sun.jersey.api.view.Viewable;
-import de.deepamehta.core.Association;
-import de.deepamehta.core.ChildTopics;
-import de.deepamehta.core.Topic;
-import de.deepamehta.core.model.*;
-import de.deepamehta.core.service.DeepaMehtaEvent;
-import de.deepamehta.core.service.CoreService;
-import de.deepamehta.core.service.EventListener;
-import de.deepamehta.core.service.Inject;
-import de.deepamehta.core.service.Transactional;
-import de.deepamehta.core.service.accesscontrol.AccessControl;
-import de.deepamehta.core.service.accesscontrol.Credentials;
-import de.deepamehta.core.service.event.PostUpdateTopicListener;
-import de.deepamehta.core.storage.spi.DeepaMehtaTransaction;
-import de.deepamehta.accesscontrol.AccessControlService;
-import de.deepamehta.thymeleaf.ThymeleafPlugin;
-import de.deepamehta.workspaces.WorkspacesService;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -34,41 +16,54 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import org.apache.commons.mail.HtmlEmail;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-import org.deepamehta.plugins.signup.events.SignupResourceRequestedListener;
-import org.deepamehta.plugins.signup.service.SignupPluginService;
 import org.osgi.framework.Bundle;
 import org.thymeleaf.context.AbstractContext;
+import systems.dmx.accesscontrol.AccessControlService;
+import systems.dmx.core.Assoc;
+import systems.dmx.core.ChildTopics;
+import systems.dmx.core.Topic;
+import systems.dmx.core.model.SimpleValue;
+import systems.dmx.core.model.TopicModel;
+import systems.dmx.core.service.DMXEvent;
+import systems.dmx.core.service.EventListener;
+import systems.dmx.core.service.Inject;
+import systems.dmx.core.service.Transactional;
+import systems.dmx.core.service.accesscontrol.Credentials;
+import systems.dmx.core.service.accesscontrol.PrivilegedAccess;
+import systems.dmx.core.service.event.PostUpdateTopic;
+import systems.dmx.core.storage.spi.DMXTransaction;
+import systems.dmx.signup.events.SignupResourceRequestedListener;
+import systems.dmx.signup.service.SignupPluginService;
+import systems.dmx.thymeleaf.ThymeleafPlugin;
+import systems.dmx.workspaces.WorkspacesService;
 
 /**
- * This plugin enables anonymous users to create themselves a user account in DeepaMehta 4
- * through an (optional) Email based confirmation workflow and thus it critically depends on a e.g. postfix
- * like "internet" installation for "localhost". Source code available at: https://github.com/mukil/dm4-sign-up
- * @version 1.5.1
+ * This plugin enables anonymous users to create themselves a user account in DMX
+ * through an (optional) Email based confirmation workflow and thus it depends on the dmx-sendmail plugin and e.g. postfix
+ * like "internet" installation for "localhost". Source code available at: https://git.dmx.systems/dmx-plugins/dmx-sign-up
+ * @version 2.0.0-SNAPSHOT
  * @author Malte Rei&szlig;
 **/
 @Path("/sign-up")
-public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService, PostUpdateTopicListener {
+public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService, PostUpdateTopic {
 
     private static Logger log = Logger.getLogger(SignupPlugin.class.getName());
 
     // --- DeepaMehta 4 related URIs --- //
-    public static final String MAILBOX_TYPE_URI = "dm4.contacts.email_address";
-    public static final String DM4_HOST_URL = System.getProperty("dm4.host.url");
-    public static final boolean DM4_ACCOUNTS_ENABLED = Boolean.parseBoolean(System.getProperty("dm4.security" +
+    public static final String MAILBOX_TYPE_URI = "dmx.contacts.email_address";
+    public static final String DMX_HOST_URL = System.getProperty("dmx.host.url");
+    public static final boolean DMX_ACCOUNTS_ENABLED = Boolean.parseBoolean(System.getProperty("dmx.security" +
             ".new_accounts_are_enabled"));
-    public static final String CONFIG_TOPIC_ACCOUNT_ENABLED = "dm4.accesscontrol.login_enabled";
+    public static final String CONFIG_TOPIC_ACCOUNT_ENABLED = "dmx.accesscontrol.login_enabled";
 
     // --- Sign-up related type URIs (Configuration, Template Data) --- //
     private final String SIGN_UP_CONFIG_TYPE_URI    = "org.deepamehta.signup.configuration";
@@ -127,7 +122,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
      * @return Topic	The username topic (related to newly created user account
      * topic).
      */
-    static DeepaMehtaEvent USER_ACCOUNT_CREATE_LISTENER = new DeepaMehtaEvent(UserAccountCreateListener.class) {
+    static DMXEvent USER_ACCOUNT_CREATE_LISTENER = new DMXEvent(UserAccountCreateListener.class) {
         @Override
         public void dispatch(EventListener listener, Object... params) {
             ((UserAccountCreateListener) listener).userAccountCreated((Topic) params[0]);
@@ -137,7 +132,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     /**
      * Custom event fired by sign-up module whenever a template resource is requested.
      **/
-    static DeepaMehtaEvent SIGNUP_RESOURCE_REQUESTED = new DeepaMehtaEvent(SignupResourceRequestedListener.class) {
+    static DMXEvent SIGNUP_RESOURCE_REQUESTED = new DMXEvent(SignupResourceRequestedListener.class) {
         @Override
         public void dispatch(EventListener listener, Object... params) {
             ((SignupResourceRequestedListener) listener).signupResourceRequested((AbstractContext) params[0], (String) params[1]);
@@ -235,7 +230,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         log.info("Password reset requested for user with Email: \"" + email + "\"");
         try {
             String emailAddressValue = email.trim();
-            boolean emailExists = dm4.getAccessControl().emailAddressExists(emailAddressValue);
+            boolean emailExists = dmx.getPrivilegedAccess().emailAddressExists(emailAddressValue);
             if (emailExists) {
                 log.info("Email based password reset workflow do'able, sending out passwort reset mail.");
                 sendPasswordResetToken(emailAddressValue);
@@ -306,7 +301,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     Credentials newCreds = new Credentials("dummy", "pass");
                     newCreds.username = entry.getString("username");
                     newCreds.password = password;
-                    dm4.getAccessControl().changePassword(newCreds);
+                    dmx.getPrivilegedAccess().changePassword(newCreds);
                     pwToken.remove(token);
                     log.info("Credentials for user " + newCreds.username + " were changed succesfully.");
                     viewData("message", rb.getString("reset_password_ok"));
@@ -413,7 +408,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         }
         log.log(Level.INFO, "Account succesfully created for username: {0}", username);
         viewData("message", rb.getString("account_created"));
-        if (!DM4_ACCOUNTS_ENABLED) {
+        if (!DMX_ACCOUNTS_ENABLED) {
             log.log(Level.INFO, "> Account activation by an administrator remains PENDING ");
             return getAccountCreationPendingView();
         }
@@ -430,13 +425,13 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Transactional
     @Override
     public String createAPIWorkspaceMembershipRequest() {
-        Topic apiMembershipRequestNote = dm4.getTopicByUri("org.deepamehta.signup.api_membership_requests");
+        Topic apiMembershipRequestNote = dmx.getTopicByUri("org.deepamehta.signup.api_membership_requests");
         if (apiMembershipRequestNote != null && acService.getUsername() != null) {
             Topic usernameTopic = acService.getUsernameTopic(acService.getUsername());
             // 1) Try to manage workspace membership directly (success depends on ACL and the SharingMode of the configured workspace)
             createApiWorkspaceMembership(usernameTopic); // might fail silently
             // 2) Store API Membership Request in a Note (residing in the "System" workspace) association
-            Association requestRelation = getDefaultAssociation(usernameTopic.getId(), apiMembershipRequestNote.getId());
+            Assoc requestRelation = getDefaultAssociation(usernameTopic.getId(), apiMembershipRequestNote.getId());
             if (requestRelation == null) {
                 // ### Fixme: For the moment it depends on (your web application, more specifically) the workspace cookie
                 // set (at the requesting client) which workspace this assoc will be assigned to
@@ -447,7 +442,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     + usernameTopic.getSimpleValue().toString() + " just revoked his/her acceptance to your Terms of Service for API-Usage."
                             + "<br/><br/>Just wanted to let you know.<br/>Cheers!");
                 // 2.1) fails in all cases where user has no write access to the workspace the association was created in
-                // dm4.deleteAssociation(requestRelation.getId());
+                // dmx.deleteAssociation(requestRelation.getId());
                 // For now: API Usage Membership must be revoked per Email but personally and confirmed by the administrator
                 // A respective hint was place in the "API Usage" dialog on the users account (/sign-up/edit) page.
             }
@@ -465,10 +460,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             // Account status
             boolean status = Boolean.parseBoolean(topic.getSimpleValue().toString());
             // Account involved
-            Topic username = topic.getRelatedTopic("dm4.config.configuration", null,
-                    null, "dm4.accesscontrol.username");
+            Topic username = topic.getRelatedTopic("dmx.config.configuration", null,
+                    null, "dmx.accesscontrol.username");
             // Perform notification
-            if (status && !DM4_ACCOUNTS_ENABLED) { // Enabled=true && new_accounts_are_enabled=false
+            if (status && !DMX_ACCOUNTS_ENABLED) { // Enabled=true && new_accounts_are_enabled=false
                 log.info("Sign-up Notification: User Account \"" + username.getSimpleValue()+"\" is now ENABLED!");
                 //
                 String webAppTitle = activeModuleConfiguration.getChildTopics().getTopic(CONFIG_WEBAPP_TITLE)
@@ -478,7 +473,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     String mailboxValue = mailbox.getSimpleValue().toString();
                     sendSystemMail("Your account on " + webAppTitle + " is now active",
                             rb.getString("mail_hello") + " " + username.getSimpleValue()
-                                    + ",<br/><br/>your account on <a href=\"" + DM4_HOST_URL + "\">" + webAppTitle + "</a> is now " +
+                                    + ",<br/><br/>your account on <a href=\"" + DMX_HOST_URL + "\">" + webAppTitle + "</a> is now " +
                                     "active.<br/><br/>" + rb.getString("mail_ciao"), mailboxValue);
                     log.info("Send system notification mail to " + mailboxValue + " - The account is now active!");
                 }
@@ -637,7 +632,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     @Override
     public String createSimpleUserAccount(String username, String password, String mailbox) {
-        DeepaMehtaTransaction tx = dm4.beginTx();
+        DMXTransaction tx = dmx.beginTx();
         try {
             if (isUsernameTaken(username)) {
                 // Might be thrown if two users compete for registration (of the same username)
@@ -651,21 +646,21 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             final Topic usernameTopic = acService.createUserAccount(creds);
             final String eMailAddressValue = mailbox;
             // 2) create and associate e-mail address topic
-            dm4.getAccessControl().runWithoutWorkspaceAssignment(new Callable<Topic>() {
+            dmx.getPrivilegedAccess().runWithoutWorkspaceAssignment(new Callable<Topic>() {
                 @Override
                 public Topic call() {
-                    Topic eMailAddress = dm4.createTopic(mf.newTopicModel(MAILBOX_TYPE_URI,
+                    Topic eMailAddress = dmx.createTopic(mf.newTopicModel(MAILBOX_TYPE_URI,
                         new SimpleValue(eMailAddressValue)));
                     // 3) fire custom event ### this is useless since fired by "anonymous" (this request scope)
-                    dm4.fireEvent(USER_ACCOUNT_CREATE_LISTENER, usernameTopic);
-                    AccessControl acCore = dm4.getAccessControl();
+                    dmx.fireEvent(USER_ACCOUNT_CREATE_LISTENER, usernameTopic);
+                    PrivilegedAccess acCore = dmx.getPrivilegedAccess();
                     // 4) assign new e-mail address topic to admins "Private workspace" // ### administration workspace
-                    long adminWorkspaceId = dm4.getAccessControl().getAdministrationWorkspaceId();
+                    long adminWorkspaceId = acCore.getAdministrationWorkspaceId();
                     acCore.assignToWorkspace(eMailAddress, adminWorkspaceId);
                     // 5) associate email address to "username" topic too
-                    Association assoc = dm4.createAssociation(mf.newAssociationModel(USER_MAILBOX_EDGE_TYPE,
-                        mf.newTopicRoleModel(eMailAddress.getId(), "dm4.core.child"),
-                        mf.newTopicRoleModel(usernameTopic.getId(), "dm4.core.parent")));
+                    Assoc assoc = dmx.createAssoc(mf.newAssocModel(USER_MAILBOX_EDGE_TYPE,
+                        mf.newTopicPlayerModel(eMailAddress.getId(), "dmx.core.child"),
+                        mf.newTopicPlayerModel(usernameTopic.getId(), "dmx.core.parent")));
                     // 6) assign that association also to admins "Private Workspace"
                     acCore.assignToWorkspace(assoc, adminWorkspaceId);
                     // 7) create membership to custom workspace topic
@@ -693,7 +688,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Override
     public boolean isMailboxTaken(String email) {
         String value = email.toLowerCase().trim();
-        return dm4.getAccessControl().emailAddressExists(value);
+        return dmx.getPrivilegedAccess().emailAddressExists(value);
     }
 
     @Override
@@ -705,29 +700,21 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     @Override
     public boolean isValidEmailAddress(String value) {
-        if (value == null) return false;
-        boolean result = true;
-        try {
-            new InternetAddress(value);
-            String[] tokens = value.split("@");
-            if (tokens.length != 2 || (tokens[0].isEmpty() || tokens[1].isEmpty())) {
-                result = false;
-            }
-        } catch (AddressException ex) {
-            result = false;
-        }
-        return result;
+        // ### Todo: Implement email-valid check into dmx-sendmail Service, utilizing
+        // import javax.mail.internet.AddressException;
+        // import javax.mail.internet.InternetAddress;
+        return true;
     }
 
     // --- Private Helpers --- //
 
     private void handleAccountCreatedRedirect(String username) throws URISyntaxException {
-        if (DM4_ACCOUNTS_ENABLED) {
-            log.info("DeepaMehta 4 Setting: The new account is now ENABLED, redirecting to OK page.");
+        if (DMX_ACCOUNTS_ENABLED) {
+            log.info("DMX Config: The new account is now ENABLED, redirecting to OK page.");
             // redirecting user to the "your account is now active" page
             throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/"+username+"/ok")).build());
         } else {
-            log.info("DeepaMehta 4 Setting: The new account is now DISABLED, redirecting to PENDING page.");
+            log.info("DMX Config: The new account is now DISABLED, redirecting to PENDING page.");
             // redirecting to page displaying "your account was created but needs to be activated"
             throw new WebApplicationException(Response.temporaryRedirect(new URI("/sign-up/pending")).build());
         }
@@ -736,7 +723,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     private boolean isAdministrationWorkspaceMember() {
         String username = acService.getUsername();
         if (username != null) {
-            long administrationWorkspaceId = dm4.getAccessControl().getAdministrationWorkspaceId();
+            long administrationWorkspaceId = dmx.getPrivilegedAccess().getAdministrationWorkspaceId();
             if (acService.isMember(username, administrationWorkspaceId)
                 || acService.getWorkspaceOwner(administrationWorkspaceId).equals(username)) {
                 return true;
@@ -750,14 +737,14 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         if (username != null) {
             String apiWorkspaceUri = activeModuleConfiguration.getChildTopics().getString(CONFIG_API_WORKSPACE_URI);
             if (!apiWorkspaceUri.isEmpty() && !apiWorkspaceUri.equals("undefined")) {
-                Topic apiWorkspace = dm4.getAccessControl().getWorkspace(apiWorkspaceUri);
+                Topic apiWorkspace = dmx.getPrivilegedAccess().getWorkspace(apiWorkspaceUri);
                 if (apiWorkspace != null) {
                     return acService.isMember(username, apiWorkspace.getId());
                 }
             } else {
                 Topic usernameTopic = acService.getUsernameTopic();
-                Topic apiMembershipRequestNote = dm4.getTopicByUri("org.deepamehta.signup.api_membership_requests");
-                Association requestRelation = getDefaultAssociation(usernameTopic.getId(), apiMembershipRequestNote.getId());
+                Topic apiMembershipRequestNote = dmx.getTopicByUri("org.deepamehta.signup.api_membership_requests");
+                Assoc requestRelation = getDefaultAssociation(usernameTopic.getId(), apiMembershipRequestNote.getId());
                 if (requestRelation != null) return true;
             }
         }
@@ -770,7 +757,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     }
 
     private void sendPasswordResetToken(String mailbox) {
-        String username = dm4.getAccessControl().getUsername(mailbox);
+        String username = dmx.getPrivilegedAccess().getUsername(mailbox);
         String tokenKey = createPasswordResetToken(username, mailbox);
         sendPasswordResetMail(tokenKey, username, mailbox.trim());
     }
@@ -815,10 +802,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     }
 
     private void createApiMembershipRequestNoteAssociation(Topic usernameTopic, Topic membershipNote) {
-        Association apiRequest = dm4.createAssociation(mf.newAssociationModel("dm4.core.association",
-                mf.newTopicRoleModel(usernameTopic.getId(), "dm4.core.default"),
-                mf.newTopicRoleModel(membershipNote.getId(), "dm4.core.default")));
-        dm4.getAccessControl().assignToWorkspace(apiRequest, dm4.getAccessControl().getSystemWorkspaceId());
+        Assoc apiRequest = dmx.createAssoc(mf.newAssocModel("dmx.core.association",
+                mf.newTopicPlayerModel(usernameTopic.getId(), "dmx.core.default"),
+                mf.newTopicPlayerModel(membershipNote.getId(), "dmx.core.default")));
+        dmx.getPrivilegedAccess().assignToWorkspace(apiRequest, dmx.getPrivilegedAccess().getSystemWorkspaceId());
         log.info("Request for new custom API Workspace Membership by user \"" + usernameTopic.getSimpleValue().toString() + "\"");
         sendSystemMailboxNotification("API Usage Requested", "<br/>Hi admin,<br/><br/>"
             + usernameTopic.getSimpleValue().toString() + " accepted the Terms of Service for API Usage."
@@ -828,7 +815,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     private void createApiWorkspaceMembership(Topic usernameTopic) {
         String apiWorkspaceUri = activeModuleConfiguration.getChildTopics().getString(CONFIG_API_WORKSPACE_URI);
         if (!apiWorkspaceUri.isEmpty() && !apiWorkspaceUri.equals("undefined")) { // do not rely or use this option in production
-            Topic apiWorkspace = dm4.getAccessControl().getWorkspace(apiWorkspaceUri);
+            Topic apiWorkspace = dmx.getPrivilegedAccess().getWorkspace(apiWorkspaceUri);
             if (apiWorkspace != null) {
                 log.info("Request for new custom API Workspace Membership by user \""
                         + usernameTopic.getSimpleValue().toString() + "\"");
@@ -837,8 +824,8 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             } else {
                 log.info("Revoke Request for API Workspace Membership by user \"" + usernameTopic.getSimpleValue().toString() + "\"");
                 if (acService.isMember(usernameTopic.getSimpleValue().toString(), apiWorkspace.getId())) {
-                    Association assoc = getMembershipAssociation(usernameTopic.getId(), apiWorkspace.getId());
-                    dm4.deleteAssociation(assoc.getId());
+                    Assoc assoc = getMembershipAssociation(usernameTopic.getId(), apiWorkspace.getId());
+                    dmx.deleteAssoc(assoc.getId());
                 } else {
                     log.info("Skipped Revoke Request for non-existent API Workspace Membership for \""
                             + usernameTopic.getSimpleValue().toString() + "\"");
@@ -866,7 +853,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             log.info("Configured Custom Sign-up Workspace => \""
                     + customWorkspaceAssignmentTopic.getSimpleValue() + "\"");
         }
-        if (activeModuleConfiguration.getChildTopics().getStringOrNull(CONFIG_ADMIN_MAILBOX) != null) {
+        if (activeModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX, null) != null) {
             systemEmailContact = activeModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX);
         }
         log.log(Level.INFO, "Sign-up Configuration Loaded (URI=\"{0}\"), Name=\"{1}\"",
@@ -877,7 +864,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     private void sendConfirmationMail(String key, String username, String mailbox) {
         try {
             String webAppTitle = activeModuleConfiguration.getChildTopics().getString(CONFIG_WEBAPP_TITLE);
-            URL url = new URL(DM4_HOST_URL);
+            URL url = new URL(DMX_HOST_URL);
             log.info("The confirmation mails token request URL should be:"
                 + "\n" + url + "sign-up/confirm/" + key);
             // Localize "sentence" structure for german, maybe via Formatter
@@ -885,7 +872,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             try {
                 String linkHref = "<a href=\"" + url + "sign-up/confirm/" + key + "\">"
                     + rb.getString("mail_confirmation_link_label") + "</a>";
-                if (DM4_ACCOUNTS_ENABLED) {
+                if (DMX_ACCOUNTS_ENABLED) {
                     sendSystemMail(mailSubject,
                         rb.getString("mail_hello") + " " + username + ",<br/><br/>"
                             +rb.getString("mail_confirmation_active_body")+"<br/><br/>"
@@ -909,7 +896,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     private void sendPasswordResetMail(String key, String username, String mailbox) {
         try {
             String webAppTitle = activeModuleConfiguration.getChildTopics().getString(CONFIG_WEBAPP_TITLE);
-            URL url = new URL(DM4_HOST_URL);
+            URL url = new URL(DMX_HOST_URL);
             log.info("The password reset mails token request URL should be:"
                 + "\n" + url + "sign-up/password-reset/" + key);
             String href = url + "sign-up/password-reset/" + key;
@@ -952,25 +939,23 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
      * @param recipient     String of Email Address message is sent to **must not** be NULL.
      */
     private void sendSystemMail(String subject, String message, String recipient) {
-        // Hot Fix: Classloader issue we have in OSGi since using Pax web
-        Thread.currentThread().setContextClassLoader(SignupPlugin.class.getClassLoader());
-        log.info("BeforeSend: Set classloader to " + Thread.currentThread().getContextClassLoader().toString());
-        HtmlEmail email = new HtmlEmail();
-        email.setDebug(true); // => System.out.println(SMTP communication);
-        email.setHostName("localhost"); // ### use getBaseUri() from HTTP Context?
+        // HtmlEmail email = new HtmlEmail();
+        // email.setDebug(true); // => System.out.println(SMTP communication);
+        // email.setHostName("localhost"); // ### use getBaseUri() from HTTP Context?
         try {
             // ..) Set Senders of Mail
             String projectName = activeModuleConfiguration.getChildTopics().getString(CONFIG_PROJECT_TITLE);
             String sender = activeModuleConfiguration.getChildTopics().getString(CONFIG_FROM_MAILBOX);
-            email.setFrom(sender.trim(), projectName.trim());
+            // email.setFrom(sender.trim(), projectName.trim());
             // ..) Set Subject of Mail
-            email.setSubject(subject);
+            // email.setSubject(subject);
             // ..) Set Message Body and append the Host URL
-            message += "\n\n" + DM4_HOST_URL + "\n\n";
-            email.setTextMsg(message);
+            message += "\n\n" + DMX_HOST_URL + "\n\n";
+            // email.setTextMsg(message);
             // ..) Set recipient of notification mail
             String recipientValue = recipient.trim();
-            log.info("Loaded current configuration topic, sending notification mail to " + recipientValue);
+            /** ### Todo: Switch to sending mails using dmx-sendmail Service
+             * log.info("Loaded current configuration topic, sending notification mail to " + recipientValue);
             Collection<InternetAddress> recipients = new ArrayList<InternetAddress>();
             if (recipientValue.contains(";")) {
                 // ..) Many Recipients
@@ -983,22 +968,19 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             }
             email.setTo(recipients);
             email.send();
-            log.info("Mail was SUCCESSFULLY sent to " + email.getToAddresses() + " mail addresses");
+            log.info("Mail was SUCCESSFULLY sent to " + email.getToAddresses() + " mail addresses"); 
+            * **/
         } catch (Exception ex) {
             throw new RuntimeException("Sending notification mail FAILED", ex);
-        } finally {
-            // Fix: Classloader issue we have in OSGi since using Pax web
-            Thread.currentThread().setContextClassLoader(CoreService.class.getClassLoader());
-            log.info("AfterSend: Set Classloader back " + Thread.currentThread().getContextClassLoader().toString());
         }
     }
 
-    private Association getDefaultAssociation(long topic1, long topic2) {
-        return dm4.getAssociation("dm4.core.association",  topic1, topic2, "dm4.core.default", "dm4.core.default");
+    private Assoc getDefaultAssociation(long topic1, long topic2) {
+        return dmx.getAssocBetweenTopicAndTopic("dmx.core.association",  topic1, topic2, "dmx.core.default", "dmx.core.default");
     }
 
-    private Association getMembershipAssociation(long id, long idTwo) {
-        return dm4.getAssociation("dm4.accesscontrol.membership",  id, idTwo, "dm4.core.default", "dm4.core.default");
+    private Assoc getMembershipAssociation(long id, long idTwo) {
+        return dmx.getAssocBetweenTopicAndTopic("dmx.accesscontrol.membership",  id, idTwo, "dmx.core.default", "dmx.core.default");
     }
 
     /**
@@ -1037,21 +1019,21 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
      * @see reloadConfiguration()
      */
     private Topic getCurrentSignupConfiguration() {
-        Topic pluginTopic = dm4.getTopicByUri(SIGN_UP_PLUGIN_TOPIC_URI);
-        return pluginTopic.getRelatedTopic("dm4.core.association", "dm4.core.default", "dm4.core.default",
+        Topic pluginTopic = dmx.getTopicByUri(SIGN_UP_PLUGIN_TOPIC_URI);
+        return pluginTopic.getRelatedTopic("dmx.core.association", "dmx.core.default", "dmx.core.default",
                 SIGN_UP_CONFIG_TYPE_URI);
     }
 
     private Topic getCustomWorkspaceAssignmentTopic() {
         // Note: It must always be just ONE workspace related to the current module configuration
-        return activeModuleConfiguration.getRelatedTopic("dm4.core.association", "dm4.core.default",
-                "dm4.core.default","dm4.workspaces.workspace");
+        return activeModuleConfiguration.getRelatedTopic("dmx.core.association", "dmx.core.default",
+                "dmx.core.default","dmx.workspaces.workspace");
     }
 
     private void prepareSignupPage(String templateName) {
         if (activeModuleConfiguration != null) {
             // Notify 3rd party plugins about template preparation
-            dm4.fireEvent(SIGNUP_RESOURCE_REQUESTED, context(), templateName);
+            dmx.fireEvent(SIGNUP_RESOURCE_REQUESTED, context(), templateName);
             // Build up sign-up template variabls
             ChildTopics configuration = activeModuleConfiguration.getChildTopics();
             viewData("title", configuration.getTopic(CONFIG_WEBAPP_TITLE).getSimpleValue().toString());
@@ -1133,7 +1115,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             viewData("authenticated", (username != null));
             viewData("username", username);
             viewData("template", templateName);
-            viewData("hostUrl", DM4_HOST_URL);
+            viewData("hostUrl", DMX_HOST_URL);
         } else {
             log.severe("Could not load module configuration of sign-up plugin during page preparation!");
         }
@@ -1145,7 +1127,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             // Make use of the new privileged getEmailAddress call for users to see their own
             String eMailAddressValue = "None";
             try {
-                eMailAddressValue = dm4.getAccessControl().getEmailAddress(username);
+                eMailAddressValue = dmx.getPrivilegedAccess().getEmailAddress(username);
             } catch (Exception e) {
                 log.warning("Username has no Email Address topic related via \""+USER_MAILBOX_EDGE_TYPE+"\"");
             }

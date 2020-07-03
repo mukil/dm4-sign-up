@@ -1,7 +1,7 @@
-package org.deepamehta.plugins.signup.events;
+package systems.dmx.signup.events;
 
-import de.deepamehta.core.service.EventListener;
 import org.thymeleaf.context.AbstractContext;
+import systems.dmx.core.service.EventListener;
 
 /**
  *

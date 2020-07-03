@@ -1,13 +1,14 @@
-package org.deepamehta.plugins.signup.migrations;
+package systems.dmx.signup.migrations;
 
-import de.deepamehta.core.Association;
-import de.deepamehta.core.Topic;
-import de.deepamehta.core.service.Inject;
-import de.deepamehta.core.service.Migration;
-import de.deepamehta.accesscontrol.AccessControlService;
-import de.deepamehta.workspaces.WorkspacesService;
+import com.sun.nio.sctp.Association;
 import java.util.List;
 import java.util.logging.Logger;
+import systems.dmx.accesscontrol.AccessControlService;
+import systems.dmx.core.Assoc;
+import systems.dmx.core.Topic;
+import systems.dmx.core.service.Inject;
+import systems.dmx.core.service.Migration;
+import systems.dmx.workspaces.WorkspacesService;
 
 public class Migration2 extends Migration {
 
@@ -19,19 +20,19 @@ public class Migration2 extends Migration {
     @Override
     public void run() {
 
-        Topic pluginTopic = dm4.getTopicByUri("org.deepamehta.sign-up");
-        Topic standardConfiguration = dm4.getTopicByUri("org.deepamehta.signup.default_configuration");
+        Topic pluginTopic = dmx.getTopicByUri("org.deepamehta.sign-up");
+        Topic standardConfiguration = dmx.getTopicByUri("org.deepamehta.signup.default_configuration");
         // 1) Assign the (default) "Sign-up Configuration" to the Plugin topic
-        List<Association> configs = pluginTopic.getAssociations();
+        List<Assoc> configs = pluginTopic.getAssocs();
         boolean hasConfiguration = false;
-        for (Association assoc : configs) {
-            if (assoc.getPlayer1().getTypeUri().equals("org.deepamehta.signup.configuration")) hasConfiguration = true;
+        for (Assoc assoc : configs) {
+            if (assoc.getPlayer1().getDMXObject().getTypeUri().equals("org.deepamehta.signup.configuration")) hasConfiguration = true;
         }
         if (!hasConfiguration) {
             logger.info("Sign-up => Assigning default \"Sign-up Configuration\" to \"DeepaMehta 4 Sign up\" Topic");
-            Association assoc = dm4.createAssociation(mf.newAssociationModel("dm4.core.association",
-                    mf.newTopicRoleModel(pluginTopic.getId(), "dm4.core.default"),
-                    mf.newTopicRoleModel(standardConfiguration.getId(), "dm4.core.default")
+            Assoc assoc = dmx.createAssoc(mf.newAssocModel("dmx.core.association",
+                    mf.newTopicPlayerModel(pluginTopic.getId(), "dmx.core.default"),
+                    mf.newTopicPlayerModel(standardConfiguration.getId(), "dmx.core.default")
             ));
             Topic systemWorkspace = wsService.getWorkspace(AccessControlService.SYSTEM_WORKSPACE_URI);
             wsService.assignToWorkspace(assoc, systemWorkspace.getId());
