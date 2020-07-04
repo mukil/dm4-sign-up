@@ -160,7 +160,7 @@
         {
             "value": "Sign-up Configuration",
             "uri": "org.deepamehta.signup.configuration",
-            "dataTypeUri": "dmx.core.composite",
+            "dataTypeUri": "dmx.core.entity",
             "compDefs": [
                 {
                     "childTypeUri":           "org.deepamehta.signup.config_project_title",

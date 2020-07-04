@@ -43,14 +43,32 @@ public class Migration5 extends Migration {
                 "org.deepamehta.signup.configuration", "org.deepamehta.signup.loading_app_hint", "dmx.core.one"));
         signupConfigType.addCompDef(mf.newCompDefModel(
                 "org.deepamehta.signup.configuration", "org.deepamehta.signup.logging_out_hint", "dmx.core.one"));
-
+        // Set new default config values
         Topic defaultConfiguration = dmx.getTopicByUri("org.deepamehta.signup.default_configuration");
-        defaultConfiguration.loadChildTopics();
-        // ### defaultConfiguration.getChildTopics().set("org.deepamehta.signup.start_page_url", "/de.deepamehta.webclient/");
-        // defaultConfiguration.getChildTopics().set("org.deepamehta.signup.home_page_url", "/de.deepamehta.webclient/");
-        // defaultConfiguration.getChildTopics().set("org.deepamehta.signup.loading_app_hint", "Loading Webclient..");
-        // defaultConfiguration.getChildTopics().set("org.deepamehta.signup.logging_out_hint", "Logging out..");
-
+        dmx.updateTopic(
+                mf.newTopicModel(defaultConfiguration.getId(), 
+                        mf.newChildTopicsModel()
+                                .set("org.deepamehta.signup.start_page_url", "/systems.dmx.webclient/")
+                )
+        );
+        dmx.updateTopic(
+                mf.newTopicModel(defaultConfiguration.getId(), 
+                        mf.newChildTopicsModel()
+                                .set("org.deepamehta.signup.home_page_url", "/systems.dmx.webclient/")
+                )
+        );
+        dmx.updateTopic(
+                mf.newTopicModel(defaultConfiguration.getId(), 
+                        mf.newChildTopicsModel()
+                                .set("org.deepamehta.signup.loading_app_hint", "Loading DMX Webclient")
+                )
+        );
+        dmx.updateTopic(
+                mf.newTopicModel(defaultConfiguration.getId(), 
+                        mf.newChildTopicsModel()
+                                .set("org.deepamehta.signup.logging_out_hint", "Logging out..")
+                )
+        );
     }
 
 }

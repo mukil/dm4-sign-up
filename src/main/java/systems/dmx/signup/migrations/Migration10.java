@@ -10,6 +10,7 @@ import systems.dmx.core.TopicType;
 import systems.dmx.core.model.SimpleValue;
 import systems.dmx.core.service.Inject;
 import systems.dmx.core.service.Migration;
+import systems.dmx.signup.SignupPlugin;
 import systems.dmx.workspaces.WorkspacesService;
 
 /**
@@ -24,12 +25,13 @@ public class Migration10 extends Migration {
 
     @Override
     public void run() {
-
-        logger.info("###### Migrate all relevant Sign-up Configration Topics to \"Administration\" Workspace");
         long administrationWsId = dmx.getPrivilegedAccess().getAdministrationWorkspaceId();
+
+        /** logger.info("###### Migrate all relevant Sign-up Configration Topics to \"Administration\" Workspace");
         // 1 Re-Assign "Standard Configuration" Composition Topic to "Administration"
         Topic standardConfiguration = dmx.getTopicByUri("org.deepamehta.signup.default_configuration");
         wsService.assignToWorkspace(standardConfiguration, administrationWsId);
+        standardConfiguration.loadChildTopics();
         RelatedTopic webAppTitle = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_webapp_title");
         RelatedTopic logoPath = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_webapp_logo_path");
         RelatedTopic cssPath = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_custom_css_path");
@@ -49,14 +51,14 @@ public class Migration10 extends Migration {
         RelatedTopic apiWsURI = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_workspace_uri");
         wsService.assignToWorkspace(webAppTitle, administrationWsId);
         wsService.assignToWorkspace(webAppTitle.getRelatingAssoc(), administrationWsId);
-        wsService.assignToWorkspace(logoPath, administrationWsId);
-        wsService.assignToWorkspace(logoPath.getRelatingAssoc(), administrationWsId);
+        // wsService.assignToWorkspace(logoPath, administrationWsId);
+        // wsService.assignToWorkspace(logoPath.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(cssPath, administrationWsId);
         wsService.assignToWorkspace(cssPath.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(projectTitle, administrationWsId);
         wsService.assignToWorkspace(projectTitle.getRelatingAssoc(), administrationWsId);
-        wsService.assignToWorkspace(tosLabel, administrationWsId);
-        wsService.assignToWorkspace(tosLabel.getRelatingAssoc(), administrationWsId);
+        // wsService.assignToWorkspace(tosLabel, administrationWsId);
+        // wsService.assignToWorkspace(tosLabel.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(tosDetail, administrationWsId);
         wsService.assignToWorkspace(tosDetail.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(pdLabel, administrationWsId);
@@ -91,7 +93,7 @@ public class Migration10 extends Migration {
             }
         }
         // 3 Create Plugin <-> Standard Configuration Association to "Administration"
-        Topic pluginTopic = dmx.getTopicByUri("org.deepamehta.sign-up");
+        Topic pluginTopic = dmx.getTopicByUri(SignupPlugin.SIGNUP_SYMOBILIC_NAME);
         List<Assoc> configs = pluginTopic.getAssocs();
         for (Assoc assoc : configs) {
             if (assoc.getPlayer1().getDMXObject().getTypeUri().equals("org.deepamehta.signup.configuration") ||
@@ -111,7 +113,7 @@ public class Migration10 extends Migration {
                 "dmx.core.parent", "dmx.accesscontrol.username");
             if (username != null) wsService.assignToWorkspace(email, administrationWsId);
         }
-        logger.info("###### Email Address topic migration to \"Administration\" Workspace complete");
+        logger.info("###### Email Address topic migration to \"Administration\" Workspace complete"); **/
     }
 
 }

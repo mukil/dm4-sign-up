@@ -32,9 +32,12 @@ public class Migration4 extends Migration {
                 "org.deepamehta.signup.configuration", "org.deepamehta.signup.config_email_confirmation", "dmx.core.one"));
 
         Topic standardConfig = dmx.getTopicByUri("org.deepamehta.signup.default_configuration");
-        standardConfig.loadChildTopics();
-        // ### standardConfig.getChildTopics().set("org.deepamehta.signup.config_email_confirmation", false);
-
+        dmx.updateTopic(
+                mf.newTopicModel(standardConfig.getId(), 
+                        mf.newChildTopicsModel()
+                                .set("org.deepamehta.signup.config_email_confirmation", false)
+                )
+        );
         logger.info("### Setup new Sign-up Config Default: No Email confirmation required during account creation");
 
     }

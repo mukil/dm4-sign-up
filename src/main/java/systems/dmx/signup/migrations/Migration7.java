@@ -39,12 +39,32 @@ public class Migration7 extends Migration {
                 "org.deepamehta.signup.configuration",
                 "org.deepamehta.signup.config_api_details", "dmx.core.one"));
 
+        // Set new default config values
         Topic defaultConfiguration = dmx.getTopicByUri("org.deepamehta.signup.default_configuration");
-        defaultConfiguration.loadChildTopics();
-        // ### defaultConfiguration.getChildTopics().set("org.deepamehta.signup.config_api_description", "API unavailable");
-        // defaultConfiguration.getChildTopics().set("org.deepamehta.signup.config_api_details", "No API, no Terms of service.");
-        // defaultConfiguration.getChildTopics().set("org.deepamehta.signup.config_api_enabled", false);
-        // defaultConfiguration.getChildTopics().set("org.deepamehta.signup.config_api_workspace_uri", "undefined");
+        dmx.updateTopic(
+                mf.newTopicModel(defaultConfiguration.getId(), 
+                        mf.newChildTopicsModel()
+                                .set("org.deepamehta.signup.config_api_details", "No API, no Terms of service.")
+                )
+        );
+        dmx.updateTopic(
+                mf.newTopicModel(defaultConfiguration.getId(), 
+                        mf.newChildTopicsModel()
+                                .set("org.deepamehta.signup.config_api_enabled", false)
+                )
+        );
+        dmx.updateTopic(
+                mf.newTopicModel(defaultConfiguration.getId(), 
+                        mf.newChildTopicsModel()
+                                .set("org.deepamehta.signup.config_api_description", "API unavailable")
+                )
+        );
+        dmx.updateTopic(
+                mf.newTopicModel(defaultConfiguration.getId(), 
+                        mf.newChildTopicsModel()
+                                .set("org.deepamehta.signup.config_api_workspace_uri", "undefined")
+                )
+        );
 
     }
 
