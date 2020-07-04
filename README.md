@@ -1,23 +1,23 @@
 
-# DeepaMehta 4 Sign-up
+# DMX Sign-up
 
-This plugin introduces a configurable user registration process for DeepaMehta 4 _User Accounts_.
+This plugin introduces a configurable user registration process for DMX _User Accounts_.
 
 Most (if not all) user facing message are translatable by now. A german language version of this bundle can be build from source after setting the language option to `de` using the `plugin.properties` file.
 
 This plugin adds:
 *   A "User Mailbox" association type to associate "Email Address" w. "User Accounts".
-*   A `Sign-up`-link next to the `Login`-button in the DeepaMehta 4 Webclient
-*   A `Sign-up Configuration` topic associated to the `DeepaMehta 4 Sign up` Plugin
+*   **DEFUNCT:** A `Sign-up`-link next to the `Login`-button in the DeepaMehta 4 Webclient
+*   A `Sign-up Configuration` topic associated to the `DMX Sign up` Plugin
      (part of the "System" workspace and thus editable by all members of it)
 
-The special features of the **registration ui** is comprised of:
+The special **DEFUNCT** features of the **registration ui** is comprised of:
 *   Username existence check
 *   Email existence check
 *   Simple GUI-Notification mechanism
 *   Minimal CSS Definition
 
-The special features of the **login ui** is comprised of:
+The special **DEFUNCT** features of the **login ui** is comprised of:
 *   Simple GUI-Notification mechanism
 *   Automatic redirect
 *   Minimal CSS Definition
@@ -28,7 +28,7 @@ The **special logic** of this plugin is comprised of:
     Allows for the password reset functionality to take place also via an Email based confirmation workflow
 *   Optionally: Send notifications to system administrator after a new user account was sucessfully created
 *   Optionally: If `new_accounts_are_enabled=true`, an account activation notice is sent
-*   Optionally: If the email based confirmation workflow is used a "Passwort reset" workflow is available
+*   Optionally: If the email based confirmation workflow is used a **DEFUNCT** "Passwort reset" workflow is available
 
 **Note:** If `Email Confirmation Required` is set to _true_ the confirmation tokens the system sends out are **not persisted** and get lost after a bundle/system restart. Once a token was send out the link containing it is valid for sixty minutes.
 
@@ -40,42 +40,49 @@ Email addresses of new user accounts are all placed in the "System" workspace to
 
 ## Requirements
 
-DeepaMehta 4 is a platform for collaboration and knowledge management.
+DMX is a platform for collaboration and knowledge management.
 https://github.com/jri/deepamehta
 
-To be able to install this module you first and additionally have to install the following DeepaMehta 4 Plugins.
+To be able to install this module you first and additionally have to install the following DMX Plugins.
 
-*    `dm48-thymeleaf-0.6.1`-Bundle - Build from [sources](https://github.com/jri/dm4-thymeleaf)
+*    `dmx-thymeleaf-0.9.1`-Bundle - Build from [sources](https://git.dmx.systems/dmx-plugins/dmx-thymeleaf)
+*    `dmx-sendmail-2.0.0`-Bundle - Build from [sources](https://git.dmx.systems/dmx-plugins/dmx-sendmail)
 
-**Operations:** For the plugins mailbox validation process to run you must install this plugin with deepamehta4 on a web server with a 
+
+**Operations:** For the plugins mailbox validation process to run you must install these plugins with DMX on a web server with a 
 `postfix` -> `Internet Site` like mail send functionality.
 
 ## Download & Installation
 
-You can find the latest stable version of this plugin bundled for download at [http://download.deepamehta.de/](http://download.deepamehta.de/).
+You can find the latest stable version of this plugin bundled for download at [https://download.dmx.systems/](https://download.dmx.systems/).
 
-As mentioned above, you currently need to download and install the aditonally required `dm48-thymeleaf-0.6
+As mentioned above, you currently need to download and install the aditonally required `dmx-thymeleaf-0.9
 .1`-Bundle, too.
 
-After downloading the two bundle-files, place them in the `bundle-deploy` folder of your DeepaMehta installation and restart DeepaMehta 4.
+After downloading the two bundle-files, place them in the `bundle-deploy` folder of your DMX installation and restart DMX.
 
 ## Plugin Configuration
 
-The central topic for configuring the sign-up dialog for your DeepaMehta 4 installation is of type `Sign-up Configuration`. Editing this topic via your dm4-webclient allows you to interactively control/adapt many options.
+The central topic for configuring the sign-up dialog for your DMX installation is of type `Sign-up Configuration`. Editing this topic via your dm4-webclient allows you to interactively control/adapt many options.
 
 Setting a configuration option to an empty value usually means deactivating the features depending on it.
 
-The sign-up configuration is associated with the "Plugin" topic representing this plugin ("DeepaMehta 4 Sign up"). It can be edited by all members of the `Administration` workspace.
+The sign-up configuration is associated with the "Plugin" topic representing this plugin ("DMX Sign up"). It can be edited by all members of the `Administration` workspace.
 
 ### Setup Custom Workspace Assignment
 
 There is currently just one special configuration option. To setup a workspace which self-registering users should automatically join (become members of) you need to associate that very workspace topic with your active sign-up configuration. And here comes the pitfall: To take this "custom workspace assignment" into effect you must either restart the platform or press "Edit" on your sign-up configuration topic once (in both cases the configuration is reloaded and therewith comes into immediate effect, see [#1](https://github.com/mukil/dm4-sign-up/issues/1)).
 
-## Licensed under the GPL License 3.0
+## License
 
-GPL v3 - https://www.gnu.org/licenses/gpl.html
+AGPL v3 - https://www.gnu.org/licenses/agpl-3.0.html
 
 ## Version history
+
+**2.0.0** -- Upcoming
+
+* Compatible with DMX 5.0
+* Changed License to AGPL 3.0
 
 **1.6.0** -- Mar 31, 2018
 
