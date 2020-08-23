@@ -22,7 +22,7 @@
     }
 
 
-    // --- Plain DeepaMehta 4 login method used by "/sign-up/login" page. --- //
+    // --- Plain DMX login method used by "/sign-up/login" page. --- //
 
     function doLogout() {
         xhr = new XMLHttpRequest()
@@ -34,7 +34,7 @@
                 renderWarning(xhr.response)
             }
         }
-        xhr.open("POST", "/accesscontrol/logout", false)
+        xhr.open("POST", "/access-control/logout", false)
         xhr.send()
     }
 
@@ -52,6 +52,7 @@
 
             xhr = new XMLHttpRequest()
             xhr.onload = function(e) {
+                console.log("Auth response", e, "XHR", xhr)
                 if (xhr.response === "") {
                     renderFriendlyMessage(signupConfig.appLoadingMessage)
                     redirectToStartPageURL()
@@ -59,7 +60,7 @@
                     renderWarning(signupConfig.notAuthorized)
                 }
             }
-            xhr.open("POST", "/accesscontrol/login", false)
+            xhr.open("POST", "/access-control/login", false)
             xhr.setRequestHeader("Authorization", authorization)
             xhr.send()
 

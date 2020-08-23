@@ -1,5 +1,5 @@
 
-dm4c.add_plugin('org.deepamehta.sign-up', function() {
+/** dm4c.add_plugin('org.deepamehta.sign-up', function() {
 
     var aclPlugin
 
@@ -43,4 +43,4 @@ dm4c.add_plugin('org.deepamehta.sign-up', function() {
         jQuery('#sign-up-button').remove()
     }
 
-})
+}) **/

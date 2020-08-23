@@ -20,7 +20,7 @@ public class Migration11 extends Migration {
     @Override
     public void run() {
         logger.info("###### Assign four more Sign-up Configration child topics to \"Administration\" Workspace");
-        long administrationWsId = dmx.getPrivilegedAccess().getAdministrationWorkspaceId();
+        long administrationWsId = dmx.getPrivilegedAccess().getAdminWorkspaceId();
         Topic standardConfiguration = dmx.getTopicByUri("org.deepamehta.signup.default_configuration");
         wsService.assignToWorkspace(standardConfiguration, administrationWsId);
         RelatedTopic loadingAppHint = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.loading_app_hint");

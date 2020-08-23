@@ -11,13 +11,13 @@ This plugin adds:
 *   A `Sign-up Configuration` topic associated to the `DMX Sign up` Plugin
      (part of the "System" workspace and thus editable by all members of it)
 
-The special **DEFUNCT** features of the **registration ui** is comprised of:
+The special features of the **registration ui** is comprised of:
 *   Username existence check
 *   Email existence check
 *   Simple GUI-Notification mechanism
 *   Minimal CSS Definition
 
-The special **DEFUNCT** features of the **login ui** is comprised of:
+The special features of the **login ui** is comprised of:
 *   Simple GUI-Notification mechanism
 *   Automatic redirect
 *   Minimal CSS Definition
@@ -56,14 +56,13 @@ To be able to install this module you first and additionally have to install the
 
 You can find the latest stable version of this plugin bundled for download at [https://download.dmx.systems/](https://download.dmx.systems/).
 
-As mentioned above, you currently need to download and install the aditonally required `dmx-thymeleaf-0.9
-.1`-Bundle, too.
+As mentioned above, you currently need to download and install the aditonally required `dmx-thymeleaf-0.9.1`-Bundle, too.
 
 After downloading the two bundle-files, place them in the `bundle-deploy` folder of your DMX installation and restart DMX.
 
 ## Plugin Configuration
 
-The central topic for configuring the sign-up dialog for your DMX installation is of type `Sign-up Configuration`. Editing this topic via your dm4-webclient allows you to interactively control/adapt many options.
+The central topic for configuring the sign-up dialog for your DMX installation is of type `Sign-up Configuration`. Editing this topic via the DMX Webclient allows you to interactively control/adapt many options.
 
 Setting a configuration option to an empty value usually means deactivating the features depending on it.
 

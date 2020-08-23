@@ -25,9 +25,9 @@ public class Migration10 extends Migration {
 
     @Override
     public void run() {
-        long administrationWsId = dmx.getPrivilegedAccess().getAdministrationWorkspaceId();
+        long administrationWsId = dmx.getPrivilegedAccess().getAdminWorkspaceId();
 
-        /** logger.info("###### Migrate all relevant Sign-up Configration Topics to \"Administration\" Workspace");
+        logger.info("###### Migrate all relevant Sign-up Configration Topics to \"Administration\" Workspace");
         // 1 Re-Assign "Standard Configuration" Composition Topic to "Administration"
         Topic standardConfiguration = dmx.getTopicByUri("org.deepamehta.signup.default_configuration");
         wsService.assignToWorkspace(standardConfiguration, administrationWsId);
@@ -42,13 +42,13 @@ public class Migration10 extends Migration {
         RelatedTopic pdDetail = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_pd_detail");
         RelatedTopic readMoreUrl = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_read_more_url");
         RelatedTopic pagesFooter = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_pages_footer");
-        RelatedTopic adminMailbox = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_admin_mailbox");
-        RelatedTopic fromMailbox = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_from_mailbox");
-        RelatedTopic emailConfirmaton = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_email_confirmation");
-        RelatedTopic apiDescr = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_description");
-        RelatedTopic apiDetails = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_details");
-        RelatedTopic apiEnabled = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_enabled");
-        RelatedTopic apiWsURI = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_workspace_uri");
+        RelatedTopic emailConfirmaton = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_email_confirmation");       
+        // RelatedTopic adminMailbox = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_admin_mailbox");
+        // RelatedTopic fromMailbox = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_from_mailbox");
+        // RelatedTopic apiDescr = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_description");
+        // RelatedTopic apiDetails = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_details");
+        // RelatedTopic apiEnabled = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_enabled");
+        // RelatedTopic apiWsURI = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_workspace_uri");
         wsService.assignToWorkspace(webAppTitle, administrationWsId);
         wsService.assignToWorkspace(webAppTitle.getRelatingAssoc(), administrationWsId);
         // wsService.assignToWorkspace(logoPath, administrationWsId);
@@ -69,7 +69,7 @@ public class Migration10 extends Migration {
         wsService.assignToWorkspace(readMoreUrl.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(pagesFooter, administrationWsId);
         wsService.assignToWorkspace(pagesFooter.getRelatingAssoc(), administrationWsId);
-        wsService.assignToWorkspace(adminMailbox, administrationWsId);
+        /**wsService.assignToWorkspace(adminMailbox, administrationWsId);
         wsService.assignToWorkspace(adminMailbox.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(fromMailbox, administrationWsId);
         wsService.assignToWorkspace(fromMailbox.getRelatingAssoc(), administrationWsId);
@@ -82,7 +82,7 @@ public class Migration10 extends Migration {
         wsService.assignToWorkspace(apiEnabled, administrationWsId);
         wsService.assignToWorkspace(apiEnabled.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(apiWsURI, administrationWsId);
-        wsService.assignToWorkspace(apiWsURI.getRelatingAssoc(), administrationWsId);
+        wsService.assignToWorkspace(apiWsURI.getRelatingAssoc(), administrationWsId); **/
         // 2 Delete Child Topic Type "System" Workspace Assignment
         TopicType tokenConfirmationType = dmx.getTopicType("org.deepamehta.signup.config_email_confirmation");
         List<Assoc> tokenConfirmationTypeAssignments = tokenConfirmationType.getAssocs();
@@ -94,12 +94,15 @@ public class Migration10 extends Migration {
         }
         // 3 Create Plugin <-> Standard Configuration Association to "Administration"
         Topic pluginTopic = dmx.getTopicByUri(SignupPlugin.SIGNUP_SYMOBILIC_NAME);
-        List<Assoc> configs = pluginTopic.getAssocs();
-        for (Assoc assoc : configs) {
-            if (assoc.getPlayer1().getDMXObject().getTypeUri().equals("org.deepamehta.signup.configuration") ||
-                assoc.getPlayer2().getDMXObject().getTypeUri().equals("org.deepamehta.signup.configuration")) {
-                wsService.assignToWorkspace(assoc, administrationWsId);
-                assoc.setSimpleValue(new SimpleValue("Active Configuration"));
+        // 3.1) Fixme: Probably not yet there on a fresh install.
+        if (pluginTopic != null) {
+            List<Assoc> configs = pluginTopic.getAssocs();
+            for (Assoc assoc : configs) {
+                if (assoc.getPlayer1().getDMXObject().getTypeUri().equals("org.deepamehta.signup.configuration") ||
+                    assoc.getPlayer2().getDMXObject().getTypeUri().equals("org.deepamehta.signup.configuration")) {
+                    wsService.assignToWorkspace(assoc, administrationWsId);
+                    assoc.setSimpleValue(new SimpleValue("Active Configuration"));
+                }
             }
         }
         // 4 Move Topic "Api Membership Request Helper Note" to "Administration"
@@ -113,7 +116,7 @@ public class Migration10 extends Migration {
                 "dmx.core.parent", "dmx.accesscontrol.username");
             if (username != null) wsService.assignToWorkspace(email, administrationWsId);
         }
-        logger.info("###### Email Address topic migration to \"Administration\" Workspace complete"); **/
+        logger.info("###### Email Address topic migration to \"Administration\" Workspace complete");
     }
 
 }

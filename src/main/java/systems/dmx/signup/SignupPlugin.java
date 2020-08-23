@@ -30,6 +30,10 @@ import org.thymeleaf.context.AbstractContext;
 import systems.dmx.accesscontrol.AccessControlService;
 import systems.dmx.core.Assoc;
 import systems.dmx.core.ChildTopics;
+import static systems.dmx.core.Constants.ASSOCIATION;
+import static systems.dmx.core.Constants.CHILD;
+import static systems.dmx.core.Constants.DEFAULT;
+import static systems.dmx.core.Constants.PARENT;
 import systems.dmx.core.Topic;
 import systems.dmx.core.model.SimpleValue;
 import systems.dmx.core.model.TopicModel;
@@ -45,6 +49,7 @@ import systems.dmx.sendmail.SendmailService;
 import systems.dmx.signup.events.SignupResourceRequestedListener;
 import systems.dmx.signup.service.SignupPluginService;
 import systems.dmx.thymeleaf.ThymeleafPlugin;
+import static systems.dmx.workspaces.Constants.WORKSPACE;
 import systems.dmx.workspaces.WorkspacesService;
 
 /**
@@ -240,7 +245,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                 sendPasswordResetToken(emailAddressValue);
                 return Response.temporaryRedirect(new URI("/sign-up/token-info")).build();
             } else {
-                log.info("Email based password reset workflow not do'able, Email Addresses does not exist.");
+                log.info("Email based password reset workflow not do'able, Email Address does not exist.");
             }
         } catch (URISyntaxException ex) {
             Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
@@ -647,7 +652,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                 .put("username", username.trim())
                 .put("password", password.trim()));
             // 1) Create new user (in which workspace), just within the private one, no?
-            final Topic usernameTopic = acService.createUserAccount(creds);
+            final Topic usernameTopic = acService._createUserAccount(creds);
             final String eMailAddressValue = mailbox;
             // 2) create and associate e-mail address topic
             dmx.getPrivilegedAccess().runWithoutWorkspaceAssignment(new Callable<Topic>() {
@@ -659,12 +664,12 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     dmx.fireEvent(USER_ACCOUNT_CREATE_LISTENER, usernameTopic);
                     PrivilegedAccess acCore = dmx.getPrivilegedAccess();
                     // 4) assign new e-mail address topic to admins "Private workspace" // ### administration workspace
-                    long adminWorkspaceId = acCore.getAdministrationWorkspaceId();
+                    long adminWorkspaceId = acCore.getAdminWorkspaceId();
                     acCore.assignToWorkspace(eMailAddress, adminWorkspaceId);
                     // 5) associate email address to "username" topic too
                     Assoc assoc = dmx.createAssoc(mf.newAssocModel(USER_MAILBOX_EDGE_TYPE,
-                        mf.newTopicPlayerModel(eMailAddress.getId(), "dmx.core.child"),
-                        mf.newTopicPlayerModel(usernameTopic.getId(), "dmx.core.parent")));
+                        mf.newTopicPlayerModel(eMailAddress.getId(), CHILD),
+                        mf.newTopicPlayerModel(usernameTopic.getId(), PARENT)));
                     // 6) assign that association also to admins "Private Workspace"
                     acCore.assignToWorkspace(assoc, adminWorkspaceId);
                     // 7) create membership to custom workspace topic
@@ -727,7 +732,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     private boolean isAdministrationWorkspaceMember() {
         String username = acService.getUsername();
         if (username != null) {
-            long administrationWorkspaceId = dmx.getPrivilegedAccess().getAdministrationWorkspaceId();
+            long administrationWorkspaceId = dmx.getPrivilegedAccess().getAdminWorkspaceId();
             if (acService.isMember(username, administrationWorkspaceId)
                 || acService.getWorkspaceOwner(administrationWorkspaceId).equals(username)) {
                 return true;
@@ -806,9 +811,9 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     }
 
     private void createApiMembershipRequestNoteAssociation(Topic usernameTopic, Topic membershipNote) {
-        Assoc apiRequest = dmx.createAssoc(mf.newAssocModel("dmx.core.association",
-                mf.newTopicPlayerModel(usernameTopic.getId(), "dmx.core.default"),
-                mf.newTopicPlayerModel(membershipNote.getId(), "dmx.core.default")));
+        Assoc apiRequest = dmx.createAssoc(mf.newAssocModel(ASSOCIATION,
+                mf.newTopicPlayerModel(usernameTopic.getId(), DEFAULT),
+                mf.newTopicPlayerModel(membershipNote.getId(), DEFAULT)));
         dmx.getPrivilegedAccess().assignToWorkspace(apiRequest, dmx.getPrivilegedAccess().getSystemWorkspaceId());
         log.info("Request for new custom API Workspace Membership by user \"" + usernameTopic.getSimpleValue().toString() + "\"");
         sendSystemMailboxNotification("API Usage Requested", "<br/>Hi admin,<br/><br/>"
@@ -950,11 +955,11 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     }
 
     private Assoc getDefaultAssociation(long topic1, long topic2) {
-        return dmx.getAssocBetweenTopicAndTopic("dmx.core.association",  topic1, topic2, "dmx.core.default", "dmx.core.default");
+        return dmx.getAssocBetweenTopicAndTopic(ASSOCIATION,  topic1, topic2, DEFAULT, DEFAULT);
     }
 
     private Assoc getMembershipAssociation(long id, long idTwo) {
-        return dmx.getAssocBetweenTopicAndTopic("dmx.accesscontrol.membership",  id, idTwo, "dmx.core.default", "dmx.core.default");
+        return dmx.getAssocBetweenTopicAndTopic("dmx.accesscontrol.membership",  id, idTwo, DEFAULT, DEFAULT);
     }
 
     /**
@@ -997,14 +1002,14 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return dmx.getTopicByUri("org.deepamehta.signup.default_configuration");
         /** 
         Topic pluginTopic = dmx.getTopicByUri(SIGNUP_SYMOBILIC_NAME);
-        return pluginTopic.getRelatedTopic("dmx.core.association", "dmx.core.default", "dmx.core.default",
+        return pluginTopic.getRelatedTopic(ASSOCIATION, DEFAULT, DEFAULT,
                 SIGN_UP_CONFIG_TYPE_URI); **/
     }
 
     private Topic getCustomWorkspaceAssignmentTopic() {
         // Note: It must always be just ONE workspace related to the current module configuration
-        return activeModuleConfiguration.getRelatedTopic("dmx.core.association", "dmx.core.default",
-                "dmx.core.default","dmx.workspaces.workspace");
+        return activeModuleConfiguration.getRelatedTopic(ASSOCIATION, DEFAULT,
+                DEFAULT, WORKSPACE);
     }
 
     private void prepareSignupPage(String templateName) {

@@ -6,8 +6,8 @@
         <meta charset="utf-8"></meta>
         <title th:text="${signup_title} + ' - ' + ${title}">Sign up</title>
         <link rel="stylesheet" th:href="${css_path}" type="text/css" />
-        <script type="text/javascript" src="/de.deepamehta.accesscontrol/script/vendor/sha256.js"></script>
-        <script type="text/javascript" src="/org.deepamehta.sign-up/script/sign-up.js" />
+        <script type="text/javascript" src="/systems.dmx.sign-up/script/vendor/sha256.js"></script>
+        <script type="text/javascript" src="/systems.dmx.sign-up/script/sign-up.js" />
         <script th:inline="javascript">
         /*<![CDATA[*/
             signupConfig.appLoadingMessage = /*[[${loading_app_hint}]]*/ 'Loading Webclient';
@@ -38,8 +38,8 @@
             <!-- Teaser Area -->
             <div th:replace="fragments/widgets :: teaser-small" />
 
-            <div class="ui container vertical padded segment first">
-                <h2>Registrieren</h2>
+            <div class="ui container vertical padded segment first dialog-header">
+                <h2>Create Account</h2>
             </div>
 
             <div id="preamble" class="ui container vertical padded segment">
@@ -104,7 +104,7 @@
 
             </form>
 
-            <div th:replace="fragments/footer :: footer-new"></div>
+            <!--div th:replace="fragments/footer :: footer-new"></div-->
 
         </div>
 

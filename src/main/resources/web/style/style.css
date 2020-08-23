@@ -17,6 +17,15 @@ body.sign-up p {
     padding-left: 5px;
 }
 
+.sign-up .logo {
+    max-width: 400px;
+}
+
+.sign-up .teaser-small,
+.sign-up .dialog-header {
+    text-align: center;
+}
+
 .sign-up label,
 .sign-up .label {
     color: #a9a9a9;

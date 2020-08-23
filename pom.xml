@@ -13,29 +13,28 @@
     <parent>
 	<groupId>systems.dmx</groupId>
         <artifactId>dmx-plugin</artifactId>
-        <version>5.0-SNAPSHOT</version>
+        <version>5.0</version>
     </parent>
 
     <!--properties>
-        <dm4.deploy.dir>/home/malted/source/mikro/deepamehta/bundle-deploy</dm4.deploy.dir>
-        <dm4.deploy.dir>/home/malted/Downloads/deepamehta-4.8.1/bundle-deploy</dm4.deploy.dir>
+        <dmx.deploy.dir>/c/Users/MRG/Downloads/dmx-5.0/dmx-5.0/bundle-deploy</dmx.deploy.dir>
     </properties-->
 
     <dependencies>
         <dependency>
             <groupId>systems.dmx</groupId>
             <artifactId>dmx-workspaces</artifactId>
-            <version>5.0-SNAPSHOT</version>
+            <version>5.0</version>
         </dependency>
         <dependency>
             <groupId>systems.dmx</groupId>
             <artifactId>dmx-contacts</artifactId>
-            <version>5.0-SNAPSHOT</version>
+            <version>5.0</version>
         </dependency>
         <dependency>
             <groupId>systems.dmx</groupId>
             <artifactId>dmx-accesscontrol</artifactId>
-            <version>5.0-SNAPSHOT</version>
+            <version>5.0</version>
         </dependency>
         <dependency>
             <groupId>systems.dmx</groupId>
@@ -57,7 +56,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>
-                            sytems.dmx.sign-up
+                            systems.dmx.sign-up
                         </Bundle-SymbolicName>
                         <Bundle-Activator>
                             systems.dmx.signup.SignupPlugin

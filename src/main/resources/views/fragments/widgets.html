@@ -1,0 +1,7 @@
+
+<div th:fragment="teaser-small" class="teaser-small">
+
+  <img class="logo" th:title="${title} + ' Frontpage'"
+       th:if="${not #strings.isEmpty(logo_path)}" th:src="${logo_path}" />
+
+</div>
