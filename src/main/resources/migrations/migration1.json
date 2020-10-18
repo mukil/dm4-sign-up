@@ -237,7 +237,7 @@
                 "org.deepamehta.signup.config_tos_detail"       : "...",
                 "org.deepamehta.signup.config_read_more_url"    : "...",
                 "org.deepamehta.signup.config_pages_footer"     : "standard",
-                "org.deepamehta.signup.config_webapp_logo_path" : "/system.dmx.sign-up/dmx-logo.svg"
+                "org.deepamehta.signup.config_webapp_logo_path" : "/systems.dmx.sign-up/dmx-logo.svg"
             }
         }
     ]

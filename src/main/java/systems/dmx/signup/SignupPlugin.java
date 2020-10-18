@@ -663,14 +663,14 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                     // 3) fire custom event ### this is useless since fired by "anonymous" (this request scope)
                     dmx.fireEvent(USER_ACCOUNT_CREATE_LISTENER, usernameTopic);
                     PrivilegedAccess acCore = dmx.getPrivilegedAccess();
-                    // 4) assign new e-mail address topic to admins "Private workspace" // ### administration workspace
+                    // 4) assign new e-mail address topic to administration workspace
                     long adminWorkspaceId = acCore.getAdminWorkspaceId();
                     acCore.assignToWorkspace(eMailAddress, adminWorkspaceId);
                     // 5) associate email address to "username" topic too
                     Assoc assoc = dmx.createAssoc(mf.newAssocModel(USER_MAILBOX_EDGE_TYPE,
                         mf.newTopicPlayerModel(eMailAddress.getId(), CHILD),
                         mf.newTopicPlayerModel(usernameTopic.getId(), PARENT)));
-                    // 6) assign that association also to admins "Private Workspace"
+                    // 6) assign that association also to administration"
                     acCore.assignToWorkspace(assoc, adminWorkspaceId);
                     // 7) create membership to custom workspace topic
                     if (customWorkspaceAssignmentTopic != null) {
