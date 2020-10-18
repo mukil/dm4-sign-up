@@ -18,7 +18,15 @@
         {
             "uri": "org.deepamehta.signup.user_mailbox",
             "dataTypeUri": "dmx.core.text",
-            "value": "User Mailbox"
+            "value": "User Mailbox",
+            "viewConfigTopics": [
+                {
+                    "typeUri": "dmx.webclient.view_config",
+                    "children": {
+                        "dmx.webclient.color": "#4BC3C3"
+                    }
+                }
+            ]
         }
     ]
 }

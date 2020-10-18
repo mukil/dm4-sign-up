@@ -2,7 +2,7 @@ body.sign-up {
     margin: 20px;
     font-family: -apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Oxygen-Sans", "Ubuntu", "Cantarell", "Helvetica Neue", sans-serif;
     color: rgb(64, 158, 255);
-    font-size: 16px;
+    font-size: 14px;
     line-height: 1.4em;
 }
 
@@ -21,6 +21,10 @@ body.sign-up p {
     max-width: 400px;
 }
 
+.sign-up .teaser-small {
+    margin-top: 8%;
+}
+
 .sign-up .teaser-small,
 .sign-up .dialog-header {
     text-align: center;
@@ -29,6 +33,7 @@ body.sign-up p {
 .sign-up label,
 .sign-up .label {
     color: #a9a9a9;
+    font-size: 14px;
 }
 
 .sign-up .value {
@@ -46,7 +51,7 @@ body.sign-up p {
 }
 
 .sign-up #preamble {
-    width: 400px;
+    width: 343px;
     margin-top: 20px;
 }
 
@@ -112,13 +117,7 @@ body.sign-up p {
 .sign-up #receipt-view,
 .sign-up #sign-up-view,
 .sign-up #log-in-view {
-    background-color: #fafafa;
-    padding: 30px;
-    margin: 30px auto 0 auto;
     border-radius: 3px;
-    -webkit-box-shadow: 0 0 2px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(0, 0, 0, .2);
-    -moz-box-shadow: 0 0 2px rgba(0, 0, 0, 0.2), 1px 1px 0 rgba(0, 0, 0, .1);
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.2), 0 1px 1px rgba(0, 0, 0, .2);
     text-align: center;
 }
 
@@ -142,6 +141,10 @@ body.sign-up p {
 .sign-up .dialog-body.login-view,
 .sign-up #log-in-view {
     max-width: 320px;
+}
+
+.sign-up .dialog-body.login-view .hints {
+    padding-left: .5em;
 }
 
 .reset-page #sign-up-view p {
@@ -203,7 +206,7 @@ body.sign-up p {
 }
 
 .sign-up input {
-    font-size: 20px;
+    font-size: 16px;
     padding: 10px 15px 10px 15px;
     margin: 0 0 15px 0;
     border: 1px solid #ccc;
