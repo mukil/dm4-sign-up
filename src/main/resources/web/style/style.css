@@ -171,10 +171,6 @@ body.sign-up p {
     max-width: 380px;
 }
 
-.sign-up #receipt-view {
-    max-width: 420px;
-}
-
 .sign-up #log-in-view form input[type="text"],
 .sign-up #log-in-view form input[type="password"] {
     width: 90%;

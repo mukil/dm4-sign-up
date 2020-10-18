@@ -28,6 +28,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.thymeleaf.context.AbstractContext;
 import systems.dmx.accesscontrol.AccessControlService;
+import systems.dmx.contacts.Constants;
 import systems.dmx.core.Assoc;
 import systems.dmx.core.ChildTopics;
 import static systems.dmx.core.Constants.ASSOCIATION;
@@ -245,7 +246,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                 sendPasswordResetToken(emailAddressValue);
                 return Response.temporaryRedirect(new URI("/sign-up/token-info")).build();
             } else {
-                log.info("Email based password reset workflow not do'able, Email Address does not exist.");
+                log.info("Email based password reset workflow not do'able, Email Address does NOT EXIST => " + dmx.getTopicByValue(Constants.EMAIL_ADDRESS, new SimpleValue(emailAddressValue)));
             }
         } catch (URISyntaxException ex) {
             Logger.getLogger(SignupPlugin.class.getName()).log(Level.SEVERE, null, ex);
