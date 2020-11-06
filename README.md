@@ -7,7 +7,7 @@ Most (if not all) user facing message are translatable by now. A german language
 
 This plugin adds:
 *   A "User Mailbox" association type to associate "Email Address" w. "User Accounts".
-*   **DEFUNCT:** A `Sign-up`-link next to the `Login`-button in the DeepaMehta 4 Webclient
+*   A `Sign-up`-link next to the `Login`-button in the DMX Webclient
 *   A `Sign-up Configuration` topic associated to the `DMX Sign up` Plugin
      (part of the "System" workspace and thus editable by all members of it)
 
