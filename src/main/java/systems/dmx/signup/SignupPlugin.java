@@ -68,6 +68,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     // --- DeepaMehta 4 related URIs --- //
     public static final String MAILBOX_TYPE_URI = "dmx.contacts.email_address";
     public static final String DMX_HOST_URL = System.getProperty("dmx.host.url");
+    public static final boolean CONFIG_SELF_REGISTRATION = Boolean.parseBoolean(System.getProperty("dmx.signup.self_registration"));
+    public static final boolean CONFIG_EMAIL_CONFIRMATION = Boolean.parseBoolean(System.getProperty("dmx.signup.confirm_email_address"));
+    public static final String CONFIG_ADMIN_MAILBOX = System.getProperty("dmx.signup.admin_mailbox");
+    public static final String CONFIG_FROM_MAILBOX = System.getProperty("dmx.signup.system_mailbox");
     public static final boolean DMX_ACCOUNTS_ENABLED = Boolean.parseBoolean(System.getProperty("dmx.security" +
             ".new_accounts_are_enabled"));
     public static final String CONFIG_TOPIC_ACCOUNT_ENABLED = "dmx.accesscontrol.login_enabled";
@@ -84,9 +88,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     private final String CONFIG_TOS_DETAILS         = "org.deepamehta.signup.config_tos_detail";
     private final String CONFIG_PD_LABEL            = "org.deepamehta.signup.config_pd_label";
     private final String CONFIG_PD_DETAILS          = "org.deepamehta.signup.config_pd_detail";
-    private final String CONFIG_FROM_MAILBOX        = "org.deepamehta.signup.config_from_mailbox";
-    private final String CONFIG_ADMIN_MAILBOX       = "org.deepamehta.signup.config_admin_mailbox";
-    private final String CONFIG_EMAIL_CONFIRMATION  = "org.deepamehta.signup.config_email_confirmation";
     private final String CONFIG_START_PAGE_URL      = "org.deepamehta.signup.start_page_url";
     private final String CONFIG_HOME_PAGE_URL       = "org.deepamehta.signup.home_page_url";
     private final String CONFIG_LOADING_HINT        = "org.deepamehta.signup.loading_app_hint";
@@ -343,8 +344,11 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     public Viewable handleSignupRequest(@PathParam("username") String username, @PathParam("pass-one") String password,
                                         @PathParam("mailbox") String mailbox,
                                         @PathParam("skipConfirmation") boolean skipConfirmation) {
+        if (!CONFIG_SELF_REGISTRATION) {
+            throw new WebApplicationException(Response.noContent().build());
+        }
         try {
-            if (activeModuleConfiguration.getChildTopics().getBoolean(CONFIG_EMAIL_CONFIRMATION)) {
+            if (CONFIG_EMAIL_CONFIRMATION) {
                 if (skipConfirmation && isAdministrationWorkspaceMember()) {
                     log.info("Sign-up Configuration: Email based confirmation workflow active, Administrator skipping confirmation mail.");
                     createSimpleUserAccount(username, password, mailbox);
@@ -499,7 +503,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
      */
     @GET
     @Produces(MediaType.TEXT_HTML)
-    public Viewable getSignupFormView() {
+    public Viewable getSignupFormView() throws URISyntaxException {
+        if (!CONFIG_SELF_REGISTRATION) {
+            throw new WebApplicationException(Response.temporaryRedirect(new URI("/systems.dmx.webclient/")).build());
+        }
         if (acService.getUsername() != null && !isAdministrationWorkspaceMember()) {
             prepareSignupPage("logout");
             return view("logout");
