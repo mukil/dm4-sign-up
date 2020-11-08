@@ -1,7 +1,7 @@
 stages:
   - build
   - deploy
-  - copy
+  - install
 
 # 1) Build every commit on every branch and add the COMMIT SHORT SHA as suffix
 maven-build:
@@ -46,18 +46,17 @@ copy-to-release:
   only:
     - tags
 
-# 4) Copy to signup-test-container
-deploy-to-container:
-  stage: copy
+# 4) Install in signup-test-container
+install-in-container:
+  stage: install
   script:
     - CONTAINER='signup-test-container'
     - WEBCGI='https://download.dmx.systems/cgi-bin/v1/latest-version.cgi?'
     - CIDIR='/var/www/download.dmx.systems/ci'
     - DESTDIR="${CIDIR}/${CI_PROJECT_NAME}"
-    - JARFILE="$(basename $(ls target/*.jar | tail -n1))"
     - docker exec ${CONTAINER} sh -c "rm -f /usr/share/dmx/bundle-deploy/${CI_PROJECT_NAME}-*.jar"
     - latest_version="$( /usr/bin/wget -q -O - "${WEBCGI}/ci/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-latest.jar&basename=true" )"
-    - echo "Copy ${latest_version} to ${CONTAINER}"
+    - echo "Install ${latest_version} in ${CONTAINER}"
     - docker cp ${DESTDIR}/${latest_version} ${CONTAINER}:/usr/share/dmx/bundle-deploy/
   only:
     - master
