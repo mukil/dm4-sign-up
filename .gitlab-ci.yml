@@ -16,7 +16,7 @@ install-in-container:
     - docker cp ${DESTDIR}/${latest_version} ${CONTAINER}:/usr/share/dmx/bundle-deploy/
     - sleep 10
     - LOGFILE='/var/log/dmx/dmx.log'
-    - LINE="$( cat ${LOGFILE} | grep -B1 -n SEVERE | tail -n2 | head -n1 )"
+    - LINE="$( docker exec ${CONTAINER} sh -c "cat ${LOGFILE} | grep -B1 -n SEVERE | tail -n2 | head -n1" )"
     - echo ${NUNC}
     - echo ${LINE}
   only:
