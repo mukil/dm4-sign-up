@@ -53,7 +53,9 @@ deploy-to-container:
     - NUNC="$(date +%F)"
     - DESTJARFILE="$(basename ${JARFILE} .jar)_${NUNC}_${CI_PIPELINE_ID}.jar"
     - docker exec ${CONTAINER} sh -c "rm -f /usr/share/dmx/bundle-deploy/${CI_PROJECT_NAME}-*.jar"
-    - latest_version="$( wget -q -O - ${WEBCGI}/ci/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-latest.jar?basename=true )"
+    # https://download.dmx.systems/cgi-bin/v1/latest-version.cgi?/ci/dmx-sign-up/dmx-sign-up-latest.jar&basename=true
+    - /usr/bin/wget -q -O - ${WEBCGI}/ci/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-latest.jar?basename=true
+    - latest_version="$( /usr/bin/wget -q -O - ${WEBCGI}/ci/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-latest.jar?basename=true )"
     - echo "Copy ${latest_version} to ${CONTAINER}"
     - docker cp ${DESTDIR}/${latest_version} ${CONTAINER}:/usr/share/dmx/bundle-deploy/
   only:
