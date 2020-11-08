@@ -17,7 +17,11 @@ install-in-container:
     - sleep 10
     - LOGFILE='/var/log/dmx/dmx.log'
     - LINE="$( docker exec ${CONTAINER} sh -c "cat ${LOGFILE} | grep -B1 -n SEVERE | tail -n2 | head -n1" )"
-    - echo ${NUNC}
-    - echo ${LINE}
+    - LINE_NR="$( echo "${LINE}" | cut -d'-' -f1 )"
+    - LINE_DATE="$( echo "${LINE}" | cut -d'-' -f2 | cut -d' ' -f1,2,3,4,5 )"
+    - echo "${NUNC}"
+    - echo "${LINE_NR}"
+    - echo "${LINE_DATE}"
+      
   only:
     - master
