@@ -12,7 +12,7 @@ install-in-container:
     - docker exec ${CONTAINER} sh -c "rm -f /usr/share/dmx/bundle-deploy/${CI_PROJECT_NAME}-*.jar"
     - latest_version="$( /usr/bin/wget -q -O - "${WEBCGI}/ci/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-latest.jar&basename=true" )"
     - echo "Install ${latest_version} in ${CONTAINER}"
-    - NUNC="$( date "+%b %d, %Y %I:%M:%S %p" )"
+    - NUNC="$( docker exec ${CONTAINER} sh -c "date \"+%b %d, %Y %I:%M:%S %p\"" )"
     - docker cp ${DESTDIR}/${latest_version} ${CONTAINER}:/usr/share/dmx/bundle-deploy/
     - sleep 10
     - LOGFILE='/var/log/dmx/dmx.log'
