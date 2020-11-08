@@ -1,5 +1,50 @@
 stages:
+  - build
+  - deploy
   - install
+
+# 1) Build every commit on every branch and add the COMMIT SHORT SHA as suffix
+maven-build:
+  stage: build
+  script:
+    - export MAVEN_OPTS='-Xmx128m'
+    - mvn clean package
+  artifacts:
+    paths:
+      - target/*.jar
+    name: ${CI_PROJECT_NAME}-${CI_COMMIT_SHORT_SHA}
+
+# 2) Copies SNAPSHOT builds on 'master' and 'dm4' branch into download.dmx.systems/ci/ directory
+copy-to-ci:
+  stage: deploy
+  script:
+    - CIDIR='/var/www/download.dmx.systems/ci'
+    - DESTDIR="${CIDIR}/${CI_PROJECT_NAME}"
+    - JARFILE="$( basename $( ls target/*.jar | tail -n1) )"
+    - NUNC="$( date +%F )"
+    - DESTJARFILE="$( basename ${JARFILE} .jar )_${NUNC}_${CI_PIPELINE_ID}.jar"
+    - if [ ! -d  ${DESTDIR} ]; then mkdir ${DESTDIR}; fi
+    - cp target/${JARFILE} ${DESTDIR}/${DESTJARFILE}
+    - ln -sf  ${DESTDIR}/${DESTJARFILE} ${DESTDIR}/${CI_PROJECT_NAME}-latest.jar
+  dependencies:
+    - maven-build
+  only:
+    - master
+    - dm4
+
+# 3) Copies tagged RELEASE builds into download.dmx.systems/plugins/ directory
+copy-to-release:
+  stage: deploy
+  script:
+    - RELEASEDIR='/var/www/download.dmx.systems/plugins'
+    - DESTDIR="${RELEASEDIR}/${CI_PROJECT_NAME}"
+    - JARFILE="$( basename $( ls target/*.jar | tail -n1) )"
+    - if [ ! -d  ${DESTDIR} ]; then mkdir ${DESTDIR}; fi
+    - cp target/${JARFILE} ${DESTDIR}/
+  dependencies:
+    - maven-build
+  only:
+    - tags
 
 # 4) Install in signup-test-container
 install-in-container:
@@ -24,7 +69,7 @@ install-in-container:
        if [ $( date --date "${LINE_DATE}" +%s) -gt $( date --date "${NUNC}" +%s) ]; then
          LINE_NR="$( echo "${LINE}" | cut -d'-' -f1 )"
          echo "${LINE_NR}"
-         LOG="$( docker exec ${CONTAINER} sh -c "tail -n +${LINE_NR} ${LOGFILE}" )"
+         LOG="$( docker exec ${CONTAINER} sh -c "tail -n +${LINE_NR} ${LOGFILE} | grep -v 'INFO:'" )"
        fi
     - echo "${LOG}"
   only:
