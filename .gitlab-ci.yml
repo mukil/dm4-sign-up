@@ -23,7 +23,7 @@ install-in-container:
     - |
        if [ $( date --date "${LINE_DATE}" +%s) -gt $( date --date "${NUNC}" +%s) ]; then
          LINE_NR="$( echo "${LINE}" | cut -d'-' -f1 )"
-         LOG="$( docker exec ${CONTAINER} sh -c "tail -n -${LINE_NR} ${LOGFILE}"
+         LOG="$( docker exec ${CONTAINER} sh -c "tail -n -${LINE_NR} ${LOGFILE}" )"
        fi
     - echo "${LOG}"
   only:
