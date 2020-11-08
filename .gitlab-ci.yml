@@ -51,7 +51,7 @@ deploy-to-container:
     - DESTDIR="${CIDIR}/${CI_PROJECT_NAME}"
     - JARFILE="$(basename $(ls target/*.jar | tail -n1))"
     - docker exec ${CONTAINER} sh -c "rm -f /usr/share/dmx/bundle-deploy/${CI_PROJECT_NAME}-*.jar"
-    - latest_version="$( /usr/bin/wget -q -O - "${WEBCGI}/ci/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-latest.jar?basename=true" )"
+    - latest_version=($( /usr/bin/wget -q -O - "${WEBCGI}/ci/${CI_PROJECT_NAME}/${CI_PROJECT_NAME}-latest.jar?basename=true" ))
     - echo "Copy ${latest_version} to ${CONTAINER}"
     - docker cp ${DESTDIR}/${latest_version} ${CONTAINER}:/usr/share/dmx/bundle-deploy/
   only:
