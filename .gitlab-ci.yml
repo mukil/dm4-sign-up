@@ -20,8 +20,8 @@ install-in-container:
     - LINE_NR="$( echo "${LINE}" | cut -d'-' -f1 )"
     - LINE_DATE="$( echo "${LINE}" | cut -d'-' -f2 | cut -d' ' -f1,2,3,4,5 )"
     - echo "${NUNC}"
-    - echo "${LINE_NR}"
     - echo "${LINE_DATE}"
+    - if [ $( date --date ${LINE_DATE} +%s) -gt $( date --date ${NUNC} +%s) ]; then echo "${LINE_NR}"; fi
       
   only:
     - master
