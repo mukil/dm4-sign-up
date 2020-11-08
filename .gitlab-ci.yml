@@ -71,7 +71,7 @@ install-in-container:
          echo "${LINE_NR}"
          LOG="$( docker exec ${CONTAINER} sh -c "tail -n +${LINE_NR} ${LOGFILE} | grep -v 'INFO:'" )"
        fi
-    - if [ "${LOG} ]; then echo "${LOG}"; ERROR=1; else ERROR=0; fi
+    - if [ "${LOG}" ]; then echo "${LOG}"; ERROR=1; else ERROR=0; fi
     - exit ${ERROR}
   only:
     - master
