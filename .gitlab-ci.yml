@@ -14,7 +14,7 @@ install-in-container:
     - echo "Install ${latest_version} in ${CONTAINER}"
     - NUNC="$( docker exec ${CONTAINER} sh -c "date \"+%b %d, %Y %I:%M:%S %p\"" )"
     - docker cp ${DESTDIR}/${latest_version} ${CONTAINER}:/usr/share/dmx/bundle-deploy/
-    - sleep 10
+    - sleep 30
     - LOGFILE='/var/log/dmx/dmx.log'
     - LINE="$( docker exec ${CONTAINER} sh -c "cat ${LOGFILE} | grep -B1 -n SEVERE | tail -n2 | head -n1" )"
     - LINE_DATE="$( echo "${LINE}" | cut -d'-' -f2 | cut -d' ' -f1,2,3,4,5 )"
@@ -23,6 +23,7 @@ install-in-container:
     - |
        if [ $( date --date "${LINE_DATE}" +%s) -gt $( date --date "${NUNC}" +%s) ]; then
          LINE_NR="$( echo "${LINE}" | cut -d'-' -f1 )"
+         echo "${LINE_NR}"
          LOG="$( docker exec ${CONTAINER} sh -c "tail -n -${LINE_NR} ${LOGFILE}" )"
        fi
     - echo "${LOG}"
