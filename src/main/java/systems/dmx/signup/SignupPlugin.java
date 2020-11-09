@@ -623,9 +623,8 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     @Override
     public void sendSystemMailboxNotification(String subject, String message) {
-        if (activeModuleConfiguration.getChildTopics().getTopicOrNull(CONFIG_ADMIN_MAILBOX) != null && // 4.8 migration
-            !activeModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX).isEmpty()) {
-            String recipient = activeModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX);
+        if (!CONFIG_ADMIN_MAILBOX.isEmpty()) {
+            String recipient = CONFIG_ADMIN_MAILBOX;
             try {
                 sendSystemMail(subject, message, recipient);
             } catch (Exception ex) {
@@ -870,9 +869,6 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             log.info("Configured Custom Sign-up Workspace => \""
                     + customWorkspaceAssignmentTopic.getSimpleValue() + "\"");
         }
-        if (activeModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX, null) != null) {
-            systemEmailContact = activeModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX);
-        }
         log.log(Level.INFO, "Sign-up Configuration Loaded (URI=\"{0}\"), Name=\"{1}\"",
             new Object[]{activeModuleConfiguration.getUri(), activeModuleConfiguration.getSimpleValue()});
         return activeModuleConfiguration;
@@ -933,9 +929,8 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     private void sendNotificationMail(String username, String mailbox) {
         String webAppTitle = activeModuleConfiguration.getChildTopics().getString(CONFIG_WEBAPP_TITLE);
         //
-        if (activeModuleConfiguration.getChildTopics().getTopicOrNull(CONFIG_ADMIN_MAILBOX) != null &&
-            !activeModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX).isEmpty()) {
-            String adminMailbox = activeModuleConfiguration.getChildTopics().getString(CONFIG_ADMIN_MAILBOX);
+        if (!CONFIG_ADMIN_MAILBOX.isEmpty()) {
+            String adminMailbox = CONFIG_ADMIN_MAILBOX;
             try {
                 sendSystemMail("Account registration on " + webAppTitle,
                         "<br/>A user has registered.<br/><br/>Username: " + username + "<br/>Email: " + mailbox, adminMailbox);
@@ -957,7 +952,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
      */
     private void sendSystemMail(String subject, String message, String recipientValues) {
         String projectName = activeModuleConfiguration.getChildTopics().getString(CONFIG_PROJECT_TITLE);
-        String sender = activeModuleConfiguration.getChildTopics().getString(CONFIG_FROM_MAILBOX);
+        String sender = CONFIG_FROM_MAILBOX;
         String mailBody = message + "\n\n" + DMX_HOST_URL + "\n\n";
         sendmail.doEmailRecipientAs(sender, projectName, subject, mailBody, recipientValues);
     }
