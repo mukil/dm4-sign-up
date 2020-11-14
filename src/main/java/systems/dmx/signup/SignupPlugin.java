@@ -255,6 +255,13 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
         return Response.temporaryRedirect(new URI("/sign-up/error")).build();
     }
 
+    @GET
+    @Path("/self-registration-active}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getSelfRegistrationStatus() {
+        return Response.ok(CONFIG_SELF_REGISTRATION).build();
+    }
+
     /** 
      * Checks the given password-reset token for validity and return either the
      * password-reset dialog or the error message page.
@@ -344,7 +351,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     public Viewable handleSignupRequest(@PathParam("username") String username, @PathParam("pass-one") String password,
                                         @PathParam("mailbox") String mailbox,
                                         @PathParam("skipConfirmation") boolean skipConfirmation) {
-        if (!CONFIG_SELF_REGISTRATION) {
+        if (!CONFIG_SELF_REGISTRATION & !isAdministrationWorkspaceMember()) {
             throw new WebApplicationException(Response.noContent().build());
         }
         try {
@@ -504,7 +511,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @GET
     @Produces(MediaType.TEXT_HTML)
     public Viewable getSignupFormView() throws URISyntaxException {
-        if (!CONFIG_SELF_REGISTRATION) {
+        if (!CONFIG_SELF_REGISTRATION && !isAdministrationWorkspaceMember()) {
             throw new WebApplicationException(Response.temporaryRedirect(new URI("/systems.dmx.webclient/")).build());
         }
         if (acService.getUsername() != null && !isAdministrationWorkspaceMember()) {
