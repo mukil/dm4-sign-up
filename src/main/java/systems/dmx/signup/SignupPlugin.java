@@ -256,10 +256,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     }
 
     @GET
-    @Path("/self-registration-active}")
+    @Path("/self-registration-active")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getSelfRegistrationStatus() {
-        return Response.ok(CONFIG_SELF_REGISTRATION).build();
+        return Response.ok("" + CONFIG_SELF_REGISTRATION).build();
     }
 
     /** 

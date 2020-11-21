@@ -1,6 +1,6 @@
 <template>
     <div class="sign-up-menu">
-        <el-button size="mini" v-if="!isLoggedIn">
+        <el-button size="mini" v-if="!isLoggedIn && showSignupButton">
             <el-link href="/sign-up" :underline="false">Sign up</el-link>
         </el-button>
     </div>
@@ -8,11 +8,33 @@
 
 <script>
 export default {
+
+  inject: {
+    http: 'axios'
+  },
+
+  created: function () {
+    this.checkSelfRegistrationActive()
+  },
+
+  data: {
+    showSignupButton: false
+  },
+
   computed: {
     isLoggedIn () {
       return (this.$store.state.accesscontrol.username)
     }
+  },
+
+  methods: {
+    checkSelfRegistrationActive: function() {
+      this.http.get(`/sign-up/self-registration-active`).then(response => {
+        this.showSignupButton = (response.data == true)
+      })
+    }
   }
+
 }
 </script>
 
