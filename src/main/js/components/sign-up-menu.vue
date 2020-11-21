@@ -1,6 +1,8 @@
 <template>
     <div class="sign-up-menu">
-        <el-link v-if="!isLoggedIn" href="/sign-up" :underline="false">Sign-up<!--i class="fa fa-user-plus"></i--></el-link>
+        <el-button size="mini" v-if="!isLoggedIn">
+            <el-link href="/sign-up" :underline="false">Sign up</el-link>
+        </el-button>
     </div>
 </template>
 
@@ -16,8 +18,8 @@ export default {
 
 
 <style>
-.sign-up-menu {
-    font-size: var(--label-font-size) !important;
+.sign-up-menu button {
+    font-size: var(--label-font-size);
     margin-left: 1em;
 }
 </style>
