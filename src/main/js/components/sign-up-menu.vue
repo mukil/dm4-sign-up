@@ -17,8 +17,10 @@ export default {
     this.checkSelfRegistrationActive()
   },
 
-  data: {
-    showSignupButton: false
+  data() {
+    return {
+      showSignupButton: false
+    }
   },
 
   computed: {
