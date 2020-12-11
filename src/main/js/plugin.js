@@ -1,4 +1,4 @@
-export default ({dm5, axios}) => ({
+export default ({dmx, axios}) => ({
 
   components: [
     {
