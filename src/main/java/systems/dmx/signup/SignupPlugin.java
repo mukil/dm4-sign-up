@@ -28,6 +28,9 @@ import org.codehaus.jettison.json.JSONObject;
 import org.osgi.framework.Bundle;
 import org.thymeleaf.context.AbstractContext;
 import systems.dmx.accesscontrol.AccessControlService;
+import static systems.dmx.accesscontrol.Constants.LOGIN_ENABLED;
+import static systems.dmx.accesscontrol.Constants.MEMBERSHIP;
+import static systems.dmx.accesscontrol.Constants.USERNAME;
 import systems.dmx.contacts.Constants;
 import systems.dmx.core.Assoc;
 import systems.dmx.core.ChildTopics;
@@ -47,6 +50,7 @@ import systems.dmx.core.service.accesscontrol.PrivilegedAccess;
 import systems.dmx.core.service.event.PostUpdateTopic;
 import systems.dmx.core.storage.spi.DMXTransaction;
 import systems.dmx.sendmail.SendmailService;
+import static systems.dmx.signup.Constants.*;
 import systems.dmx.signup.events.SignupResourceRequestedListener;
 import systems.dmx.signup.service.SignupPluginService;
 import systems.dmx.thymeleaf.ThymeleafPlugin;
@@ -65,43 +69,14 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
 
     private static Logger log = Logger.getLogger(SignupPlugin.class.getName());
 
-    // --- DeepaMehta 4 related URIs --- //
+    // --- DMX Platform Type URIs --- //
     public static final String MAILBOX_TYPE_URI = "dmx.contacts.email_address";
     public static final String DMX_HOST_URL = System.getProperty("dmx.host.url");
-    public static final boolean CONFIG_SELF_REGISTRATION = Boolean.parseBoolean(System.getProperty("dmx.signup.self_registration"));
-    public static final boolean CONFIG_EMAIL_CONFIRMATION = Boolean.parseBoolean(System.getProperty("dmx.signup.confirm_email_address"));
-    public static final String CONFIG_ADMIN_MAILBOX = System.getProperty("dmx.signup.admin_mailbox");
-    public static final String CONFIG_FROM_MAILBOX = System.getProperty("dmx.signup.system_mailbox");
+
+    // --- DMX Platform Configuration Option
     public static final boolean DMX_ACCOUNTS_ENABLED = Boolean.parseBoolean(System.getProperty("dmx.security" +
             ".new_accounts_are_enabled"));
-    public static final String CONFIG_TOPIC_ACCOUNT_ENABLED = "dmx.accesscontrol.login_enabled";
-
-    // --- Sign-up related type URIs (Configuration, Template Data) --- //
-    private final String SIGN_UP_CONFIG_TYPE_URI    = "org.deepamehta.signup.configuration";
-    private final String CONFIG_PROJECT_TITLE       = "org.deepamehta.signup.config_project_title";
-    private final String CONFIG_WEBAPP_TITLE        = "org.deepamehta.signup.config_webapp_title";
-    private final String CONFIG_LOGO_PATH           = "org.deepamehta.signup.config_webapp_logo_path";
-    private final String CONFIG_CSS_PATH            = "org.deepamehta.signup.config_custom_css_path";
-    private final String CONFIG_READ_MORE_URL       = "org.deepamehta.signup.config_read_more_url";
-    private final String CONFIG_PAGES_FOOTER        = "org.deepamehta.signup.config_pages_footer";
-    private final String CONFIG_TOS_LABEL           = "org.deepamehta.signup.config_tos_label";
-    private final String CONFIG_TOS_DETAILS         = "org.deepamehta.signup.config_tos_detail";
-    private final String CONFIG_PD_LABEL            = "org.deepamehta.signup.config_pd_label";
-    private final String CONFIG_PD_DETAILS          = "org.deepamehta.signup.config_pd_detail";
-    private final String CONFIG_START_PAGE_URL      = "org.deepamehta.signup.start_page_url";
-    private final String CONFIG_HOME_PAGE_URL       = "org.deepamehta.signup.home_page_url";
-    private final String CONFIG_LOADING_HINT        = "org.deepamehta.signup.loading_app_hint";
-    private final String CONFIG_LOGGING_OUT_HINT    = "org.deepamehta.signup.logging_out_hint";
-    private final String CONFIG_API_ENABLED         = "org.deepamehta.signup.config_api_enabled";
-    private final String CONFIG_API_DESCRIPTION     = "org.deepamehta.signup.config_api_description";
-    private final String CONFIG_API_DETAILS         = "org.deepamehta.signup.config_api_details";
-    private final String CONFIG_API_WORKSPACE_URI   = "org.deepamehta.signup.config_api_workspace_uri";
-
-    private final String USER_MAILBOX_EDGE_TYPE     = "org.deepamehta.signup.user_mailbox";
-    private final String SIGN_UP_LANGUAGE_PROPERTY  = "org.deepamehta.sign-up.language";
-
-    public static final String SIGNUP_SYMOBILIC_NAME    = "systems.dmx.sign-up";
-
+ 
     private Topic activeModuleConfiguration = null;
     private Topic customWorkspaceAssignmentTopic = null;
     private String systemEmailContact = null;
@@ -446,7 +421,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Transactional
     @Override
     public String createAPIWorkspaceMembershipRequest() {
-        Topic apiMembershipRequestNote = dmx.getTopicByUri("org.deepamehta.signup.api_membership_requests");
+        Topic apiMembershipRequestNote = dmx.getTopicByUri("dmx.signup.api_membership_requests");
         if (apiMembershipRequestNote != null && acService.getUsername() != null) {
             Topic usernameTopic = acService.getUsernameTopic(acService.getUsername());
             // 1) Try to manage workspace membership directly (success depends on ACL and the SharingMode of the configured workspace)
@@ -477,12 +452,12 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     public void postUpdateTopic(Topic topic, TopicModel tm, TopicModel tm1) {
         if (topic.getTypeUri().equals(SIGN_UP_CONFIG_TYPE_URI)) {
             reloadAssociatedSignupConfiguration();
-        } else if (topic.getTypeUri().equals(CONFIG_TOPIC_ACCOUNT_ENABLED)) {
+        } else if (topic.getTypeUri().equals(LOGIN_ENABLED)) {
             // Account status
             boolean status = Boolean.parseBoolean(topic.getSimpleValue().toString());
             // Account involved
             Topic username = topic.getRelatedTopic("dmx.config.configuration", null,
-                    null, "dmx.accesscontrol.username");
+                    null, USERNAME);
             // Perform notification
             if (status && !DMX_ACCOUNTS_ENABLED) { // Enabled=true && new_accounts_are_enabled=false
                 log.info("Sign-up Notification: User Account \"" + username.getSimpleValue()+"\" is now ENABLED!");
@@ -766,7 +741,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                 }
             } else {
                 Topic usernameTopic = acService.getUsernameTopic();
-                Topic apiMembershipRequestNote = dmx.getTopicByUri("org.deepamehta.signup.api_membership_requests");
+                Topic apiMembershipRequestNote = dmx.getTopicByUri("dmx.signup.api_membership_requests");
                 Assoc requestRelation = getDefaultAssociation(usernameTopic.getId(), apiMembershipRequestNote.getId());
                 if (requestRelation != null) return true;
             }
@@ -869,6 +844,10 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
      */
     private Topic reloadAssociatedSignupConfiguration() {
         activeModuleConfiguration = getCurrentSignupConfiguration();
+        if (activeModuleConfiguration == null) {
+            log.warning("Could not load associated Sign-up Plugin Configuration Topic during init/postUpdate");
+            return null;
+        }
         activeModuleConfiguration.loadChildTopics();
         // check for custom workspace assignment
         customWorkspaceAssignmentTopic = getCustomWorkspaceAssignmentTopic();
@@ -969,7 +948,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     }
 
     private Assoc getMembershipAssociation(long id, long idTwo) {
-        return dmx.getAssocBetweenTopicAndTopic("dmx.accesscontrol.membership",  id, idTwo, DEFAULT, DEFAULT);
+        return dmx.getAssocBetweenTopicAndTopic(MEMBERSHIP,  id, idTwo, DEFAULT, DEFAULT);
     }
 
     /**
@@ -1009,7 +988,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
      */
     private Topic getCurrentSignupConfiguration() {
         // Fixme: ### Allow for multipl sign-up configuration topics to exist and one to be active (configured).
-        return dmx.getTopicByUri("org.deepamehta.signup.default_configuration");
+        return dmx.getTopicByUri("dmx.signup.default_configuration");
         /** 
         Topic pluginTopic = dmx.getTopicByUri(SIGNUP_SYMOBILIC_NAME);
         return pluginTopic.getRelatedTopic(ASSOCIATION, DEFAULT, DEFAULT,

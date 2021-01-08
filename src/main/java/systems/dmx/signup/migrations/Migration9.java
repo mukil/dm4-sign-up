@@ -22,7 +22,7 @@ public class Migration9 extends Migration {
 
         logger.info("### Assigning \"API Workspace Membership Request Topic\" to System Workspace ###");
         Topic systemWorkspace = wsService.getWorkspace(AccessControlService.SYSTEM_WORKSPACE_URI);
-        Topic apiMembershipNote = dmx.getTopicByUri("org.deepamehta.signup.api_membership_requests");
+        Topic apiMembershipNote = dmx.getTopicByUri("dmx.signup.api_membership_requests");
         wsService.assignToWorkspace(apiMembershipNote, systemWorkspace.getId());
 
     }

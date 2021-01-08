@@ -16,7 +16,7 @@ public class Migration12 extends Migration {
     @Override
     public void run() {
         logger.info("###### Move Topic \"Api Membership Request Helper Note\" to \"System\" workspace");
-        Topic apiMembershipNote = dmx.getTopicByUri("org.deepamehta.signup.api_membership_requests");
+        Topic apiMembershipNote = dmx.getTopicByUri("dmx.signup.api_membership_requests");
         wsService.assignToWorkspace(apiMembershipNote, dmx.getPrivilegedAccess().getSystemWorkspaceId());
         logger.info("###### \"Api Membership Request Helper Note\" topic migration to \"System\" workspace complete");
     }

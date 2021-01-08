@@ -2,7 +2,7 @@
     "topic_types": [
         {
             "value": "Sign-up Config: Web-App Title",
-            "uri": "org.deepamehta.signup.config_webapp_title",
+            "uri": "dmx.signup.config_webapp_title",
             "dataTypeUri": "dmx.core.text",
             "viewConfigTopics": [
                 {
@@ -15,7 +15,7 @@
         },
         {
             "value": "Sign-up Config: Web-App Logo Path",
-            "uri": "org.deepamehta.signup.config_webapp_logo_path",
+            "uri": "dmx.signup.config_webapp_logo_path",
             "dataTypeUri": "dmx.core.text",
             "viewConfigTopics": [
                 {
@@ -28,7 +28,7 @@
         },
         {
             "value": "Sign-up Config: Custom CSS Path",
-            "uri": "org.deepamehta.signup.config_custom_css_path",
+            "uri": "dmx.signup.config_custom_css_path",
             "dataTypeUri": "dmx.core.text",
             "viewConfigTopics": [
                 {
@@ -41,7 +41,7 @@
         },
         {
             "value": "Sign-up Config: Project Title",
-            "uri": "org.deepamehta.signup.config_project_title",
+            "uri": "dmx.signup.config_project_title",
             "dataTypeUri": "dmx.core.text",
             "viewConfigTopics": [
                 {
@@ -54,7 +54,7 @@
         },
         {
             "value": "Sign-up Config: ToS Checkbox Label",
-            "uri": "org.deepamehta.signup.config_tos_label",
+            "uri": "dmx.signup.config_tos_label",
             "dataTypeUri": "dmx.core.text",
             "viewConfigTopics": [
                 {
@@ -67,7 +67,7 @@
         },
         {
             "value": "Sign-up Config: ToS Detail Text",
-            "uri": "org.deepamehta.signup.config_tos_detail",
+            "uri": "dmx.signup.config_tos_detail",
             "dataTypeUri": "dmx.core.html",
             "viewConfigTopics": [
                 {
@@ -80,7 +80,7 @@
         },
         {
             "value": "Sign-up Config: Personal Data Checkbox Label",
-            "uri": "org.deepamehta.signup.config_pd_label",
+            "uri": "dmx.signup.config_pd_label",
             "dataTypeUri": "dmx.core.text",
             "viewConfigTopics": [
                 {
@@ -93,7 +93,7 @@
         },
         {
             "value": "Sign-up Config: Personal Data Detail Text",
-            "uri": "org.deepamehta.signup.config_pd_detail",
+            "uri": "dmx.signup.config_pd_detail",
             "dataTypeUri": "dmx.core.html",
             "viewConfigTopics": [
                 {
@@ -106,7 +106,7 @@
         },
         {
             "value": "Sign-up Config: \"Read more\" URL",
-            "uri": "org.deepamehta.signup.config_read_more_url",
+            "uri": "dmx.signup.config_read_more_url",
             "dataTypeUri": "dmx.core.text",
             "index_mode_uris": ["dmx.core.key"],
             "viewConfigTopics": [
@@ -120,7 +120,7 @@
         },
         {
             "value": "Sign-up Config: Sign-up Page Footer",
-            "uri": "org.deepamehta.signup.config_pages_footer",
+            "uri": "dmx.signup.config_pages_footer",
             "dataTypeUri": "dmx.core.html",
             "viewConfigTopics": [
                 {
@@ -132,82 +132,48 @@
             ]
         },
         {
-            "value": "Sign-up Config: System Recipient Mailbox",
-            "uri": "org.deepamehta.signup.config_admin_mailbox",
-            "dataTypeUri": "dmx.core.text",
-            "viewConfigTopics": [
-                {
-                    "typeUri": "dmx.webclient.view_config",
-                    "children": {
-                        "dmx.webclient.add_to_create_menu": false
-                    }
-                }
-            ]
-        },
-        {
-            "value": "Sign-up Config: System From Mailbox",
-            "uri": "org.deepamehta.signup.config_from_mailbox",
-            "dataTypeUri": "dmx.core.text",
-            "viewConfigTopics": [
-                {
-                    "typeUri": "dmx.webclient.view_config",
-                    "children": {
-                        "dmx.webclient.add_to_create_menu": false
-                    }
-                }
-            ]
-        },
-        {
             "value": "Sign-up Configuration",
-            "uri": "org.deepamehta.signup.configuration",
+            "uri": "dmx.signup.configuration",
             "dataTypeUri": "dmx.core.entity",
             "compDefs": [
                 {
-                    "childTypeUri":           "org.deepamehta.signup.config_project_title",
+                    "childTypeUri":           "dmx.signup.config_project_title",
                     "childCardinalityUri":    "dmx.core.one"
                 },
                 {
-                    "childTypeUri":           "org.deepamehta.signup.config_tos_label",
+                    "childTypeUri":           "dmx.signup.config_tos_label",
                     "childCardinalityUri":    "dmx.core.one"
                 },
                 {
-                    "childTypeUri":           "org.deepamehta.signup.config_tos_detail",
+                    "childTypeUri":           "dmx.signup.config_tos_detail",
                     "childCardinalityUri":    "dmx.core.one"
                 },
                 {
-                    "childTypeUri":           "org.deepamehta.signup.config_pd_label",
+                    "childTypeUri":           "dmx.signup.config_pd_label",
                     "childCardinalityUri":    "dmx.core.one"
                 },
                 {
-                    "childTypeUri":           "org.deepamehta.signup.config_pd_detail",
+                    "childTypeUri":           "dmx.signup.config_pd_detail",
                     "childCardinalityUri":    "dmx.core.one"
                 },
                 {
-                    "childTypeUri":           "org.deepamehta.signup.config_webapp_title",
+                    "childTypeUri":           "dmx.signup.config_webapp_title",
                     "childCardinalityUri":    "dmx.core.one"
                 },
                 {
-                    "childTypeUri":           "org.deepamehta.signup.config_webapp_logo_path",
+                    "childTypeUri":           "dmx.signup.config_webapp_logo_path",
                     "childCardinalityUri":    "dmx.core.one"
                 },
                 {
-                    "childTypeUri":           "org.deepamehta.signup.config_custom_css_path",
+                    "childTypeUri":           "dmx.signup.config_custom_css_path",
                     "childCardinalityUri":    "dmx.core.one"
                 },
                 {
-                    "childTypeUri":           "org.deepamehta.signup.config_read_more_url",
+                    "childTypeUri":           "dmx.signup.config_read_more_url",
                     "childCardinalityUri":    "dmx.core.one"
                 },
                 {
-                    "childTypeUri":           "org.deepamehta.signup.config_pages_footer",
-                    "childCardinalityUri":    "dmx.core.one"
-                },
-                {
-                    "childTypeUri":           "org.deepamehta.signup.config_from_mailbox",
-                    "childCardinalityUri":    "dmx.core.one"
-                },
-                {
-                    "childTypeUri":           "org.deepamehta.signup.config_admin_mailbox",
+                    "childTypeUri":           "dmx.signup.config_pages_footer",
                     "childCardinalityUri":    "dmx.core.one"
                 }
             ], "viewConfigTopics": [
@@ -222,19 +188,19 @@
     ],
     "topics": [
         {
-            "typeUri": "org.deepamehta.signup.configuration",
-            "uri": "org.deepamehta.signup.default_configuration",
+            "typeUri": "dmx.signup.configuration",
+            "uri": "dmx.signup.default_configuration",
             "children": {
-                "org.deepamehta.signup.config_project_title"    : "My DMX",
-                "org.deepamehta.signup.config_webapp_title"     : "My DMX",
-                "org.deepamehta.signup.config_custom_css_path"  : "/systems.dmx.sign-up/style/style.css",
-                "org.deepamehta.signup.config_pd_label"         : "I understand that any private information I give to this site may be made publicly available.",
-                "org.deepamehta.signup.config_pd_detail"        : "...",
-                "org.deepamehta.signup.config_tos_label"        : "Terms of Service",
-                "org.deepamehta.signup.config_tos_detail"       : "...",
-                "org.deepamehta.signup.config_read_more_url"    : "...",
-                "org.deepamehta.signup.config_pages_footer"     : "standard",
-                "org.deepamehta.signup.config_webapp_logo_path" : "/systems.dmx.sign-up/dmx-logo.svg"
+                "dmx.signup.config_project_title"    : "My DMX",
+                "dmx.signup.config_webapp_title"     : "My DMX",
+                "dmx.signup.config_custom_css_path"  : "/systems.dmx.sign-up/style/style.css",
+                "dmx.signup.config_pd_label"         : "I understand that any private information I give to this site may be made publicly available.",
+                "dmx.signup.config_pd_detail"        : "...",
+                "dmx.signup.config_tos_label"        : "Terms of Service",
+                "dmx.signup.config_tos_detail"       : "...",
+                "dmx.signup.config_read_more_url"    : "...",
+                "dmx.signup.config_pages_footer"     : "standard",
+                "dmx.signup.config_webapp_logo_path" : "/systems.dmx.sign-up/dmx-logo.svg"
             }
         }
     ]

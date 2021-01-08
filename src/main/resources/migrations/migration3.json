@@ -1,22 +1,7 @@
 {
-    "topic_types": [
-        {
-            "value": "Sign-up Config: Email Confirmation Required",
-            "uri": "org.deepamehta.signup.config_email_confirmation",
-            "dataTypeUri": "dmx.core.boolean",
-            "viewConfigTopics": [
-                {
-                    "typeUri": "dmx.webclient.view_config",
-                    "children": {
-                        "dmx.webclient.add_to_create_menu": false
-                    }
-                }
-            ]
-        }
-    ],
     "assoc_types": [
         {
-            "uri": "org.deepamehta.signup.user_mailbox",
+            "uri": "dmx.signup.user_mailbox",
             "dataTypeUri": "dmx.core.text",
             "value": "User Mailbox",
             "viewConfigTopics": [

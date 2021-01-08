@@ -24,45 +24,45 @@ public class Migration7 extends Migration {
 
         logger.info("### Extending Sign-up Configuration about \"API Workspace\" configuration options ###");
 
-        TopicType signupConfigType = dmx.getTopicType("org.deepamehta.signup.configuration");
+        TopicType signupConfigType = dmx.getTopicType("dmx.signup.configuration");
         //
         signupConfigType.addCompDef(mf.newCompDefModel(
-                "org.deepamehta.signup.configuration",
-                "org.deepamehta.signup.config_api_enabled", "dmx.core.one"));
+                "dmx.signup.configuration",
+                "dmx.signup.config_api_enabled", "dmx.core.one"));
         signupConfigType.addCompDef(mf.newCompDefModel(
-                "org.deepamehta.signup.configuration",
-                "org.deepamehta.signup.config_api_workspace_uri", "dmx.core.one"));
+                "dmx.signup.configuration",
+                "dmx.signup.config_api_workspace_uri", "dmx.core.one"));
         signupConfigType.addCompDef(mf.newCompDefModel(
-                "org.deepamehta.signup.configuration",
-                "org.deepamehta.signup.config_api_description", "dmx.core.one"));
+                "dmx.signup.configuration",
+                "dmx.signup.config_api_description", "dmx.core.one"));
         signupConfigType.addCompDef(mf.newCompDefModel(
-                "org.deepamehta.signup.configuration",
-                "org.deepamehta.signup.config_api_details", "dmx.core.one"));
+                "dmx.signup.configuration",
+                "dmx.signup.config_api_details", "dmx.core.one"));
 
         // Set new default config values
-        Topic defaultConfiguration = dmx.getTopicByUri("org.deepamehta.signup.default_configuration");
+        Topic defaultConfiguration = dmx.getTopicByUri("dmx.signup.default_configuration");
         dmx.updateTopic(
                 mf.newTopicModel(defaultConfiguration.getId(), 
                         mf.newChildTopicsModel()
-                                .set("org.deepamehta.signup.config_api_details", "No API, no Terms of service.")
+                                .set("dmx.signup.config_api_details", "No API, no Terms of service.")
                 )
         );
         dmx.updateTopic(
                 mf.newTopicModel(defaultConfiguration.getId(), 
                         mf.newChildTopicsModel()
-                                .set("org.deepamehta.signup.config_api_enabled", false)
+                                .set("dmx.signup.config_api_enabled", false)
                 )
         );
         dmx.updateTopic(
                 mf.newTopicModel(defaultConfiguration.getId(), 
                         mf.newChildTopicsModel()
-                                .set("org.deepamehta.signup.config_api_description", "API unavailable")
+                                .set("dmx.signup.config_api_description", "API unavailable")
                 )
         );
         dmx.updateTopic(
                 mf.newTopicModel(defaultConfiguration.getId(), 
                         mf.newChildTopicsModel()
-                                .set("org.deepamehta.signup.config_api_workspace_uri", "undefined")
+                                .set("dmx.signup.config_api_workspace_uri", "undefined")
                 )
         );
 

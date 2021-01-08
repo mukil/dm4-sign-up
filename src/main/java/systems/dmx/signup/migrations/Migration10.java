@@ -10,7 +10,7 @@ import systems.dmx.core.TopicType;
 import systems.dmx.core.model.SimpleValue;
 import systems.dmx.core.service.Inject;
 import systems.dmx.core.service.Migration;
-import systems.dmx.signup.SignupPlugin;
+import static systems.dmx.signup.Constants.SIGNUP_SYMOBILIC_NAME;
 import systems.dmx.workspaces.WorkspacesService;
 
 /**
@@ -29,26 +29,26 @@ public class Migration10 extends Migration {
 
         logger.info("###### Migrate all relevant Sign-up Configration Topics to \"Administration\" Workspace");
         // 1 Re-Assign "Standard Configuration" Composition Topic to "Administration"
-        Topic standardConfiguration = dmx.getTopicByUri("org.deepamehta.signup.default_configuration");
+        Topic standardConfiguration = dmx.getTopicByUri("dmx.signup.default_configuration");
         wsService.assignToWorkspace(standardConfiguration, administrationWsId);
         standardConfiguration.loadChildTopics();
-        RelatedTopic webAppTitle = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_webapp_title");
-        RelatedTopic logoPath = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_webapp_logo_path");
-        RelatedTopic cssPath = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_custom_css_path");
-        RelatedTopic projectTitle = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_project_title");
-        RelatedTopic tosLabel = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_tos_label");
-        RelatedTopic tosDetail = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_tos_detail");
-        RelatedTopic pdLabel = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_pd_label");
-        RelatedTopic pdDetail = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_pd_detail");
-        RelatedTopic readMoreUrl = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_read_more_url");
-        RelatedTopic pagesFooter = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_pages_footer");
-        RelatedTopic emailConfirmaton = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_email_confirmation");       
-        // RelatedTopic adminMailbox = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_admin_mailbox");
-        // RelatedTopic fromMailbox = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_from_mailbox");
-        // RelatedTopic apiDescr = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_description");
-        // RelatedTopic apiDetails = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_details");
-        // RelatedTopic apiEnabled = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_enabled");
-        // RelatedTopic apiWsURI = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.config_api_workspace_uri");
+        RelatedTopic webAppTitle = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_webapp_title");
+        RelatedTopic logoPath = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_webapp_logo_path");
+        RelatedTopic cssPath = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_custom_css_path");
+        RelatedTopic projectTitle = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_project_title");
+        RelatedTopic tosLabel = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_tos_label");
+        RelatedTopic tosDetail = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_tos_detail");
+        RelatedTopic pdLabel = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_pd_label");
+        RelatedTopic pdDetail = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_pd_detail");
+        RelatedTopic readMoreUrl = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_read_more_url");
+        RelatedTopic pagesFooter = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_pages_footer");
+        RelatedTopic emailConfirmaton = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_email_confirmation");       
+        // RelatedTopic adminMailbox = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_admin_mailbox");
+        // RelatedTopic fromMailbox = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_from_mailbox");
+        // RelatedTopic apiDescr = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_api_description");
+        // RelatedTopic apiDetails = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_api_details");
+        // RelatedTopic apiEnabled = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_api_enabled");
+        // RelatedTopic apiWsURI = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_api_workspace_uri");
         wsService.assignToWorkspace(webAppTitle, administrationWsId);
         wsService.assignToWorkspace(webAppTitle.getRelatingAssoc(), administrationWsId);
         // wsService.assignToWorkspace(logoPath, administrationWsId);
@@ -84,7 +84,7 @@ public class Migration10 extends Migration {
         wsService.assignToWorkspace(apiWsURI, administrationWsId);
         wsService.assignToWorkspace(apiWsURI.getRelatingAssoc(), administrationWsId); **/
         // 2 Delete Child Topic Type "System" Workspace Assignment
-        TopicType tokenConfirmationType = dmx.getTopicType("org.deepamehta.signup.config_email_confirmation");
+        TopicType tokenConfirmationType = dmx.getTopicType("dmx.signup.config_email_confirmation");
         List<Assoc> tokenConfirmationTypeAssignments = tokenConfirmationType.getAssocs();
         for (Assoc assoc : tokenConfirmationTypeAssignments) {
             if (assoc.getPlayer1().getDMXObject().getTypeUri().equals("dmx.workspaces.workspace") ||
@@ -93,26 +93,26 @@ public class Migration10 extends Migration {
             }
         }
         // 3 Create Plugin <-> Standard Configuration Association to "Administration"
-        Topic pluginTopic = dmx.getTopicByUri(SignupPlugin.SIGNUP_SYMOBILIC_NAME);
+        Topic pluginTopic = dmx.getTopicByUri(SIGNUP_SYMOBILIC_NAME);
         // 3.1) Fixme: Probably not yet there on a fresh install.
         if (pluginTopic != null) {
             List<Assoc> configs = pluginTopic.getAssocs();
             for (Assoc assoc : configs) {
-                if (assoc.getPlayer1().getDMXObject().getTypeUri().equals("org.deepamehta.signup.configuration") ||
-                    assoc.getPlayer2().getDMXObject().getTypeUri().equals("org.deepamehta.signup.configuration")) {
+                if (assoc.getPlayer1().getDMXObject().getTypeUri().equals("dmx.signup.configuration") ||
+                    assoc.getPlayer2().getDMXObject().getTypeUri().equals("dmx.signup.configuration")) {
                     wsService.assignToWorkspace(assoc, administrationWsId);
                     assoc.setSimpleValue(new SimpleValue("Active Configuration"));
                 }
             }
         }
         // 4 Move Topic "Api Membership Request Helper Note" to "Administration"
-        Topic apiMembershipNote = dmx.getTopicByUri("org.deepamehta.signup.api_membership_requests");
+        Topic apiMembershipNote = dmx.getTopicByUri("dmx.signup.api_membership_requests");
         wsService.assignToWorkspace(apiMembershipNote, administrationWsId);
         // 5 Move all email address into "administration" workspace
         logger.info("###### Migrate all users Email Addresses to \"Administration\" Workspace");
         List<Topic> emails = dmx.getTopicsByType("dmx.contacts.email_address");
         for (Topic email : emails) {
-            RelatedTopic username = email.getRelatedTopic("org.deepamehta.signup.user_mailbox", "dmx.core.child",
+            RelatedTopic username = email.getRelatedTopic("dmx.signup.user_mailbox", "dmx.core.child",
                 "dmx.core.parent", "dmx.accesscontrol.username");
             if (username != null) wsService.assignToWorkspace(email, administrationWsId);
         }

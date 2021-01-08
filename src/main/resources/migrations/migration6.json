@@ -2,7 +2,7 @@
     "topic_types": [
         {
             "value": "Sign-up Config: API Description",
-            "uri": "org.deepamehta.signup.config_api_description",
+            "uri": "dmx.signup.config_api_description",
             "dataTypeUri": "dmx.core.html",
             "viewConfigTopics": [
                 {
@@ -15,7 +15,7 @@
         },
         {
             "value": "Sign-up Config: API Details",
-            "uri": "org.deepamehta.signup.config_api_details",
+            "uri": "dmx.signup.config_api_details",
             "dataTypeUri": "dmx.core.html",
             "viewConfigTopics": [
                 {
@@ -28,7 +28,7 @@
         },
         {
             "value": "Sign-up Config: API Enabled",
-            "uri": "org.deepamehta.signup.config_api_enabled",
+            "uri": "dmx.signup.config_api_enabled",
             "dataTypeUri": "dmx.core.boolean",
             "viewConfigTopics": [
                 {
@@ -41,7 +41,7 @@
         },
         {
             "value": "Sign-up Config: API Workspace URI",
-            "uri": "org.deepamehta.signup.config_api_workspace_uri",
+            "uri": "dmx.signup.config_api_workspace_uri",
             "dataTypeUri": "dmx.core.text",
             "viewConfigTopics": [
                 {

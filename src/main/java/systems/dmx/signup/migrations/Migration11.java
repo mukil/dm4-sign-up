@@ -21,12 +21,12 @@ public class Migration11 extends Migration {
     public void run() {
         logger.info("###### Assign four more Sign-up Configration child topics to \"Administration\" Workspace");
         long administrationWsId = dmx.getPrivilegedAccess().getAdminWorkspaceId();
-        Topic standardConfiguration = dmx.getTopicByUri("org.deepamehta.signup.default_configuration");
+        Topic standardConfiguration = dmx.getTopicByUri("dmx.signup.default_configuration");
         wsService.assignToWorkspace(standardConfiguration, administrationWsId);
-        RelatedTopic loadingAppHint = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.loading_app_hint");
-        RelatedTopic loggingOutHint = standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.logging_out_hint");
-        RelatedTopic startPageUrl= standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.start_page_url");
-        RelatedTopic homePageUrl= standardConfiguration.getChildTopics().getTopic("org.deepamehta.signup.home_page_url");
+        RelatedTopic loadingAppHint = standardConfiguration.getChildTopics().getTopic("dmx.signup.loading_app_hint");
+        RelatedTopic loggingOutHint = standardConfiguration.getChildTopics().getTopic("dmx.signup.logging_out_hint");
+        RelatedTopic startPageUrl= standardConfiguration.getChildTopics().getTopic("dmx.signup.start_page_url");
+        RelatedTopic homePageUrl= standardConfiguration.getChildTopics().getTopic("dmx.signup.home_page_url");
         wsService.assignToWorkspace(loadingAppHint, administrationWsId);
         wsService.assignToWorkspace(loadingAppHint.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(loggingOutHint, administrationWsId);

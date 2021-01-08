@@ -16,6 +16,7 @@ The special features of the **registration ui** is comprised of:
 *   Email existence check
 *   Simple GUI-Notification mechanism
 *   Minimal CSS Definition
+*   Administration workspace members can create accounts without email confirmation
 
 The special features of the **login ui** is comprised of:
 *   Simple GUI-Notification mechanism
@@ -27,8 +28,8 @@ The **special logic** of this plugin is comprised of:
     Sends confirmation mail with token to the users registering Email address<br/>
     Allows for the password reset functionality to take place also via an Email based confirmation workflow
 *   Optionally: Send notifications to system administrator after a new user account was sucessfully created
-*   Optionally: If `new_accounts_are_enabled=true`, an account activation notice is sent
-*   Optionally: If the email based confirmation workflow is used a **DEFUNCT** "Passwort reset" workflow is available
+*   Optionally: If `dmx.security.new_accounts_are_enabled` (platform configuration option) is set to `true` an account activation notice is sent
+*   Optionally: If the email based confirmation workflow is used a "Passwort reset" workflow is available
 
 **Note:** If `Email Confirmation Required` is set to _true_ the confirmation tokens the system sends out are **not persisted** and get lost after a bundle/system restart. Once a token was send out the link containing it is valid for sixty minutes.
 
@@ -40,33 +41,43 @@ Email addresses of new user accounts are all placed in the "System" workspace to
 
 ## Requirements
 
-DMX is a platform for collaboration and knowledge management.
-https://github.com/jri/deepamehta
+DMX 5.1: DMX is a platform for collaboration and knowledge management.
+https://github.com/dmx-systems/dmx-platform
 
 To be able to install this module you first and additionally have to install the following DMX Plugins.
 
-*    `dmx-thymeleaf-0.9.1`-Bundle - Build from [sources](https://git.dmx.systems/dmx-plugins/dmx-thymeleaf)
-*    `dmx-sendmail-2.0.0`-Bundle - Build from [sources](https://git.dmx.systems/dmx-plugins/dmx-sendmail)
-
+*    `dmx-thymeleaf-0.9.1+`-Bundle - Build from [sources](https://git.dmx.systems/dmx-plugins/dmx-thymeleaf)
+*    `dmx-sendmail-2.0.0+`-Bundle - Build from [sources](https://git.dmx.systems/dmx-plugins/dmx-sendmail)
 
 **Operations:** For the plugins mailbox validation process to run you must install these plugins with DMX on a web server with a 
 `postfix` -> `Internet Site` like mail send functionality.
 
 ## Download & Installation
 
-You can find the latest stable version of this plugin bundled for download at [https://download.dmx.systems/](https://download.dmx.systems/).
+You can find the latest stable version of this plugin bundled for download at [https://download.dmx.systems/plugins/](https://download.dmx.systems/plugins/).
 
-As mentioned above, you currently need to download and install the aditonally required `dmx-thymeleaf-0.9.1`-Bundle, too.
+As mentioned above, you currently need to download and install the aditonally required `dmx-thymeleaf-0.9.1+`-Bundle, too.
 
 After downloading the two bundle-files, place them in the `bundle-deploy` folder of your DMX installation and restart DMX.
 
 ## Plugin Configuration
 
-The central topic for configuring the sign-up dialog for your DMX installation is of type `Sign-up Configuration`. Editing this topic via the DMX Webclient allows you to interactively control/adapt many options.
+Since the 2.0.0 release, the following options must be configured in either the dmx-platform's `config.properties` (binary release) or `pom.xml` (if you run the platform from sources) file.
+
+```
+dmx.signup.confirm_email_address = true
+dmx.signup.admin_mailbox = signup-test@dmx.systems
+dmx.signup.system_mailbox = nomail@dmx.systems
+dmx.signup.self_registration = false
+```
+
+Legacy wise, the rest of the plugin options are stored in DB. The central topic for configuring the sign-up plugin is of type `Sign-up Configuration`. Editing this topic via the DMX Webclient allows you to interactively control/adapt the finer options.
 
 Setting a configuration option to an empty value usually means deactivating the features depending on it.
 
 The sign-up configuration is associated with the "Plugin" topic representing this plugin ("DMX Sign up"). It can be edited by all members of the `Administration` workspace.
+
+Note: If you want to use the "Password reset" functionality without allowing users to self-register you must make sure "User Account" topics are equipped with an email address. To set this up, see instructions here: https://git.dmx.systems/dmx-plugins/dmx-sign-up/-/issues/2
 
 ### Setup Custom Workspace Assignment
 
@@ -74,14 +85,20 @@ There is currently just one special configuration option. To setup a workspace w
 
 ## License
 
-AGPL v3 - https://www.gnu.org/licenses/agpl-3.0.html
+DMX Sign-up is available freely under the GNU Affero General Public License, version 3 or later (see [License](https://git.dmx.systems/dmx-plugins/dmx-sign-up/-/blob/master/LICENSE)).
 
 ## Version history
 
 **2.0.0** -- Upcoming
 
-* Compatible with DMX 5.0
-* Changed License to AGPL 3.0
+* Compatible with DMX 5.1
+* Adapted dialog styles to resemble DMX 5.1 styling
+* Four core configuration options externalized into `config.properties`
+* New configuration option to de-activate sign-up (e.g. to only use password-reset functionality)
+* Rewritten plugins webclient integration for DMX 5.1
+* Mailservices factored-out into [dmx-sendmail](https://git.dmx.systems/dmx-plugins/dmx-sendmail) plugin
+* Adapted License to AGPL 3.0
+* Adapted all type URIs to new namespace 
 
 **1.6.0** -- Mar 31, 2018
 
@@ -165,6 +182,8 @@ Note: This plugin is not compatible with previous installations of the dm4-sign-
 - compatible with 4.4
 - feature complete
 
--------------------------------
-Author: Malte Reißig, 2013-2016
+Authors
+-------
 
+Copyright (c) 2014-2019 Malte Reißig
+Copyright (c) 2020-2021 DMX Systems
