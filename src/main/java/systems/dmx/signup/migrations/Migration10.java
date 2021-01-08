@@ -42,9 +42,6 @@ public class Migration10 extends Migration {
         RelatedTopic pdDetail = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_pd_detail");
         RelatedTopic readMoreUrl = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_read_more_url");
         RelatedTopic pagesFooter = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_pages_footer");
-        RelatedTopic emailConfirmaton = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_email_confirmation");       
-        // RelatedTopic adminMailbox = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_admin_mailbox");
-        // RelatedTopic fromMailbox = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_from_mailbox");
         // RelatedTopic apiDescr = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_api_description");
         // RelatedTopic apiDetails = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_api_details");
         // RelatedTopic apiEnabled = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_api_enabled");
@@ -69,13 +66,7 @@ public class Migration10 extends Migration {
         wsService.assignToWorkspace(readMoreUrl.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(pagesFooter, administrationWsId);
         wsService.assignToWorkspace(pagesFooter.getRelatingAssoc(), administrationWsId);
-        /**wsService.assignToWorkspace(adminMailbox, administrationWsId);
-        wsService.assignToWorkspace(adminMailbox.getRelatingAssoc(), administrationWsId);
-        wsService.assignToWorkspace(fromMailbox, administrationWsId);
-        wsService.assignToWorkspace(fromMailbox.getRelatingAssoc(), administrationWsId);
-        wsService.assignToWorkspace(emailConfirmaton, administrationWsId);
-        wsService.assignToWorkspace(emailConfirmaton.getRelatingAssoc(), administrationWsId);
-        wsService.assignToWorkspace(apiDescr, administrationWsId);
+        /** wsService.assignToWorkspace(apiDescr, administrationWsId);
         wsService.assignToWorkspace(apiDescr.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(apiDetails, administrationWsId);
         wsService.assignToWorkspace(apiDetails.getRelatingAssoc(), administrationWsId);
@@ -83,15 +74,6 @@ public class Migration10 extends Migration {
         wsService.assignToWorkspace(apiEnabled.getRelatingAssoc(), administrationWsId);
         wsService.assignToWorkspace(apiWsURI, administrationWsId);
         wsService.assignToWorkspace(apiWsURI.getRelatingAssoc(), administrationWsId); **/
-        // 2 Delete Child Topic Type "System" Workspace Assignment
-        TopicType tokenConfirmationType = dmx.getTopicType("dmx.signup.config_email_confirmation");
-        List<Assoc> tokenConfirmationTypeAssignments = tokenConfirmationType.getAssocs();
-        for (Assoc assoc : tokenConfirmationTypeAssignments) {
-            if (assoc.getPlayer1().getDMXObject().getTypeUri().equals("dmx.workspaces.workspace") ||
-                assoc.getPlayer2().getDMXObject().getTypeUri().equals("dmx.workspaces.workspace")) {
-                assoc.delete();
-            }
-        }
         // 3 Create Plugin <-> Standard Configuration Association to "Administration"
         Topic pluginTopic = dmx.getTopicByUri(SIGNUP_SYMOBILIC_NAME);
         // 3.1) Fixme: Probably not yet there on a fresh install.
