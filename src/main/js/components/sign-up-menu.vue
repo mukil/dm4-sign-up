@@ -1,7 +1,7 @@
 <template>
-    <div class="dm5-sign-up">
+    <div class="dmx-sign-up">
         <el-button size="mini" v-if="!isLoggedIn && showSignupButton">
-            Sign up
+            <el-link href="/sign-up" :underline="false">Sign up</el-link>
         </el-button>
     </div>
 </template>
@@ -42,10 +42,19 @@ export default {
 
 
 <style>
-.dm5-sign-up button {
+.dmx-sign-up button {
     margin-left: .75em;
     /** To align with Login State Menu: Padding and Font-Size copied from .dm5-login-state .el-button.sign-in **/
     font-size: 12px !important;
-    padding: 5px 8px !important;
+    padding: 4px 8px !important;
+    position: relative;
+    top: -1px;
+}
+.dmx-sign-up button .el-link {
+    font-size: 12px;
+}
+.dmx-sign-up button .el-link span {
+    position: relative;
+    top: -1px;
 }
 </style>
