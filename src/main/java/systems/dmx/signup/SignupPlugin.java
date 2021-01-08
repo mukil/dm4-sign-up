@@ -643,25 +643,20 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
             // 1) Create new user (in which workspace), just within the private one, no?
             final Topic usernameTopic = acService._createUserAccount(creds);
             final String eMailAddressValue = mailbox;
-            // 2) create and associate e-mail address topic
-            dmx.getPrivilegedAccess().runWithoutWorkspaceAssignment(new Callable<Topic>() {
+            // 2) create and associate e-mail address topic in "Administration" Workspace
+            long adminWorkspaceId = dmx.getPrivilegedAccess().getAdminWorkspaceId();
+            dmx.getPrivilegedAccess().runInWorkspaceContext(adminWorkspaceId, new Callable<Topic>() {
                 @Override
                 public Topic call() {
                     Topic eMailAddress = dmx.createTopic(mf.newTopicModel(MAILBOX_TYPE_URI,
                         new SimpleValue(eMailAddressValue)));
                     // 3) fire custom event ### this is useless since fired by "anonymous" (this request scope)
                     dmx.fireEvent(USER_ACCOUNT_CREATE_LISTENER, usernameTopic);
-                    PrivilegedAccess acCore = dmx.getPrivilegedAccess();
-                    // 4) assign new e-mail address topic to administration workspace
-                    long adminWorkspaceId = acCore.getAdminWorkspaceId();
-                    acCore.assignToWorkspace(eMailAddress, adminWorkspaceId);
-                    // 5) associate email address to "username" topic too
+                    // 4) associate email address to "username" topic too
                     Assoc assoc = dmx.createAssoc(mf.newAssocModel(USER_MAILBOX_EDGE_TYPE,
                         mf.newTopicPlayerModel(eMailAddress.getId(), CHILD),
                         mf.newTopicPlayerModel(usernameTopic.getId(), PARENT)));
-                    // 6) assign that association also to administration"
-                    acCore.assignToWorkspace(assoc, adminWorkspaceId);
-                    // 7) create membership to custom workspace topic
+                    // 5) create membership to custom workspace topic
                     if (customWorkspaceAssignmentTopic != null) {
                         acService.createMembership(usernameTopic.getSimpleValue().toString(),
                                 customWorkspaceAssignmentTopic.getId());
@@ -672,7 +667,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
                 }
             });
             log.info("Created new user account for user \"" + username + "\" and " + eMailAddressValue);
-            // 7) Inform administrations about successfull account creation
+            // 6) Inform administrations about successfull account creation
             sendNotificationMail(username, mailbox.trim());
             tx.success();
             return username;
