@@ -1,5 +1,5 @@
 <template>
-    <div class="dm5-forgot-password label">
+    <div class="dmx-forgot-password label">
         <el-link v-if="showForgotPasswordLink" href="/sign-up/request-password/" :underline="false">Forgot password?</el-link>
     </div>
 </template>
@@ -15,7 +15,7 @@ export default {
 </script>
 
 <style>
-.dm5-forgot-password {
+.dmx-forgot-password {
     margin-top: 1em;
 }
 </style>
