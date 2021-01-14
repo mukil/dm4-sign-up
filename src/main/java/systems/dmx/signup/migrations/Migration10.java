@@ -3,14 +3,20 @@ package systems.dmx.signup.migrations;
 import java.util.List;
 
 import java.util.logging.Logger;
+import static systems.dmx.accesscontrol.Constants.USERNAME;
 import systems.dmx.core.Assoc;
+import static systems.dmx.core.Constants.CHILD;
+import static systems.dmx.core.Constants.PARENT;
 import systems.dmx.core.RelatedTopic;
 import systems.dmx.core.Topic;
-import systems.dmx.core.TopicType;
 import systems.dmx.core.model.SimpleValue;
 import systems.dmx.core.service.Inject;
 import systems.dmx.core.service.Migration;
+import static systems.dmx.signup.Constants.*;
+import static systems.dmx.signup.Constants.CONFIG_CSS_PATH;
 import static systems.dmx.signup.Constants.SIGNUP_SYMOBILIC_NAME;
+import static systems.dmx.signup.Constants.SIGN_UP_CONFIG_TYPE_URI;
+import static systems.dmx.signup.Constants.USER_MAILBOX_EDGE_TYPE;
 import systems.dmx.workspaces.WorkspacesService;
 
 /**
@@ -32,16 +38,16 @@ public class Migration10 extends Migration {
         Topic standardConfiguration = dmx.getTopicByUri("dmx.signup.default_configuration");
         wsService.assignToWorkspace(standardConfiguration, administrationWsId);
         standardConfiguration.loadChildTopics();
-        RelatedTopic webAppTitle = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_webapp_title");
-        RelatedTopic logoPath = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_webapp_logo_path");
-        RelatedTopic cssPath = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_custom_css_path");
-        RelatedTopic projectTitle = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_project_title");
-        RelatedTopic tosLabel = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_tos_label");
-        RelatedTopic tosDetail = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_tos_detail");
-        RelatedTopic pdLabel = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_pd_label");
-        RelatedTopic pdDetail = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_pd_detail");
-        RelatedTopic readMoreUrl = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_read_more_url");
-        RelatedTopic pagesFooter = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_pages_footer");
+        RelatedTopic webAppTitle = standardConfiguration.getChildTopics().getTopic(CONFIG_WEBAPP_TITLE);
+        RelatedTopic logoPath = standardConfiguration.getChildTopics().getTopic(CONFIG_LOGO_PATH);
+        RelatedTopic cssPath = standardConfiguration.getChildTopics().getTopic(CONFIG_CSS_PATH);
+        RelatedTopic projectTitle = standardConfiguration.getChildTopics().getTopic(CONFIG_PROJECT_TITLE);
+        RelatedTopic tosLabel = standardConfiguration.getChildTopics().getTopic(CONFIG_TOS_LABEL);
+        RelatedTopic tosDetail = standardConfiguration.getChildTopics().getTopic(CONFIG_TOS_DETAILS);
+        RelatedTopic pdLabel = standardConfiguration.getChildTopics().getTopic(CONFIG_PD_LABEL);
+        RelatedTopic pdDetail = standardConfiguration.getChildTopics().getTopic(CONFIG_PD_DETAILS);
+        RelatedTopic readMoreUrl = standardConfiguration.getChildTopics().getTopic(CONFIG_READ_MORE_URL);
+        RelatedTopic pagesFooter = standardConfiguration.getChildTopics().getTopic(CONFIG_PAGES_FOOTER);
         // RelatedTopic apiDescr = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_api_description");
         // RelatedTopic apiDetails = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_api_details");
         // RelatedTopic apiEnabled = standardConfiguration.getChildTopics().getTopic("dmx.signup.config_api_enabled");
@@ -80,8 +86,8 @@ public class Migration10 extends Migration {
         if (pluginTopic != null) {
             List<Assoc> configs = pluginTopic.getAssocs();
             for (Assoc assoc : configs) {
-                if (assoc.getPlayer1().getDMXObject().getTypeUri().equals("dmx.signup.configuration") ||
-                    assoc.getPlayer2().getDMXObject().getTypeUri().equals("dmx.signup.configuration")) {
+                if (assoc.getPlayer1().getDMXObject().getTypeUri().equals(SIGN_UP_CONFIG_TYPE_URI) ||
+                    assoc.getPlayer2().getDMXObject().getTypeUri().equals(SIGN_UP_CONFIG_TYPE_URI)) {
                     wsService.assignToWorkspace(assoc, administrationWsId);
                     assoc.setSimpleValue(new SimpleValue("Active Configuration"));
                 }
@@ -94,8 +100,8 @@ public class Migration10 extends Migration {
         logger.info("###### Migrate all users Email Addresses to \"Administration\" Workspace");
         List<Topic> emails = dmx.getTopicsByType("dmx.contacts.email_address");
         for (Topic email : emails) {
-            RelatedTopic username = email.getRelatedTopic("dmx.signup.user_mailbox", "dmx.core.child",
-                "dmx.core.parent", "dmx.accesscontrol.username");
+            RelatedTopic username = email.getRelatedTopic(USER_MAILBOX_EDGE_TYPE, CHILD,
+                PARENT, USERNAME);
             if (username != null) wsService.assignToWorkspace(email, administrationWsId);
         }
         logger.info("###### Email Address topic migration to \"Administration\" Workspace complete");

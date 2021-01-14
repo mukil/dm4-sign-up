@@ -1,7 +1,7 @@
 {
     "assoc_types": [
         {
-            "uri": "dmx.signup.user_mailbox",
+            "uri": "org.deepamehta.signup.user_mailbox",
             "dataTypeUri": "dmx.core.text",
             "value": "User Mailbox",
             "viewConfigTopics": [
