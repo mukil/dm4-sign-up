@@ -8,10 +8,11 @@ Most (if not all) user facing message are translatable by now. A german language
 This plugin adds:
 *   A "User Mailbox" association type to associate "Email Address" w. "User Accounts".
 *   A `Sign-up`-link next to the `Login`-button in the DMX Webclient
-*   A `Sign-up Configuration` topic associated to the `DMX Sign up` Plugin
+*   A `Sign-up Configuration` topic associated to the `DMX Sign up` Plugin topic
      (part of the "System" workspace and thus editable by all members of it)
+*   A `Forgot password?` link to the `Login`-dialog in the DMX Webclient
 
-The special features of the **registration ui** is comprised of:
+The special features of the **self-registration ui** is comprised of:
 *   Username existence check
 *   Email existence check
 *   Simple GUI-Notification mechanism
@@ -24,20 +25,16 @@ The special features of the **login ui** is comprised of:
 *   Minimal CSS Definition
 
 The **special logic** of this plugin is comprised of:
-*   Optionally: Configure a sign-up process with an Email based confirmation workflow<br/>
+*   Optionally: Setup an email based confirmation workflow for new accounts<br/>
     Sends confirmation mail with token to the users registering Email address<br/>
     Allows for the password reset functionality to take place also via an Email based confirmation workflow
-*   Optionally: Send notifications to system administrator after a new user account was sucessfully created
+*   Optionally: Send notifications to system administrator if a new user account was created
 *   Optionally: If `dmx.security.new_accounts_are_enabled` (platform configuration option) is set to `true` an account activation notice is sent
-*   Optionally: If the email based confirmation workflow is used a "Passwort reset" workflow is available
+*   Optionally: If a `User Mailbox` exists a "Passwort reset"-workflow is available
 
 **Note:** If `Email Confirmation Required` is set to _true_ the confirmation tokens the system sends out are **not persisted** and get lost after a bundle/system restart. Once a token was send out the link containing it is valid for sixty minutes.
 
-Each "Sign-up Plugin Configuration" topic allows you to control 13 settings to adapt the sign-up process to your look & needs.
-
-The standard sign-up configuration topic initially resides in the "Administration" workspace and the "Custom Workspace Membership Request" note resides in the "System" workspace.
-
-Email addresses of new user accounts are all placed in the "System" workspace too.
+Email address topics of new user accounts are all placed in the "Administration" workspace too.
 
 ## Requirements
 
@@ -71,17 +68,25 @@ dmx.signup.system_mailbox = nomail@dmx.systems
 dmx.signup.self_registration = false
 ```
 
-Legacy wise, the rest of the plugin options are stored in DB. The central topic for configuring the sign-up plugin is of type `Sign-up Configuration`. Editing this topic via the DMX Webclient allows you to interactively control/adapt the finer options.
+Legacy wise, the rest of the plugin options are stored in DB. The central topic for configuring the sign-up plugin is of type `Sign-up Configuration`. Editing this topic via the DMX Webclient allows you to interactively configure the appearance of the custom login and self-registration dialogs.
 
-Setting a configuration option to an empty value usually means deactivating the features depending on it.
+The sign-up configuration is associated with the "Plugin" topic representing this plugin ("DMX Sign up"). It can be revealed by all members of the `Administration` workspace.
 
-The sign-up configuration is associated with the "Plugin" topic representing this plugin ("DMX Sign up"). It can be edited by all members of the `Administration` workspace.
-
-Note: If you want to use the "Password reset" functionality without allowing users to self-register you must make sure "User Account" topics are equipped with an email address. To set this up, see instructions here: https://git.dmx.systems/dmx-plugins/dmx-sign-up/-/issues/2
+Note: If you want to use the "Password reset" functionality without allowing users to self-register you must make sure "User Account" topics are equipped with a "User Mailbox". To set this up, see instructions here: https://git.dmx.systems/dmx-plugins/dmx-sign-up/-/issues/2
 
 ### Setup Custom Workspace Assignment
 
-There is currently just one special configuration option. To setup a workspace which self-registering users should automatically join (become members of) you need to associate that very workspace topic with your active sign-up configuration. And here comes the pitfall: To take this "custom workspace assignment" into effect you must either restart the platform or press "Edit" on your sign-up configuration topic once (in both cases the configuration is reloaded and therewith comes into immediate effect, see [#1](https://github.com/mukil/dm4-sign-up/issues/1)).
+There is currently just one more special configuration option: You can setup an automatic workspace assignment for self-registering users. If you do so, new users using the sign-up dialog automatically join (become members of) that works. To do so you need to associate that very workspace topic with your active sign-up configuration. 
+
+And here comes the **pitfall**: To take this "custom workspace assignment" into effect you must press "Edit" and "Save" on your current sign-up configuration topic once (or restart the platform). Only in these two cases the sign-up configuration is reloaded and comes into effect, see [#1](https://github.com/mukil/dm4-sign-up/issues/1)).
+
+You'll notice something similar to the following two lines in your server-side log (when editing and Saving your sign-up configuration):
+```
+Jan 15, 2021 01:28:37 AM systems.dmx.signup.SignupPlugin reloadAssociatedSignupConfiguration
+INFORMATION: Configured Custom Sign-up Workspace => "DMX"
+Jan 15, 2021 01:28:37 AM systems.dmx.signup.SignupPlugin reloadAssociatedSignupConfiguration
+INFORMATION: Sign-up Configuration Loaded (URI="dmx.signup.default_configuration"), Name="My DMX"
+```
 
 ## License
 
@@ -89,10 +94,11 @@ DMX Sign-up is available freely under the GNU Affero General Public License, ver
 
 ## Version history
 
-**2.0.0** -- Upcoming
+**2.0.0** -- Jan 15, 2021
 
 * Compatible with DMX 5.1
 * Adapted dialog styles to resemble DMX 5.1 styling
+* Password reset-workflow available without sign-up enabled
 * Four core configuration options externalized into `config.properties`
 * New configuration option to de-activate sign-up (e.g. to only use password-reset functionality)
 * Rewritten plugins webclient integration for DMX 5.1
