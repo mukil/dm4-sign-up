@@ -323,7 +323,7 @@ public class SignupPlugin extends ThymeleafPlugin implements SignupPluginService
     @Override
     public Viewable handleSignupRequest(@PathParam("username") String username, @PathParam("pass-one") String password,
                                         @PathParam("mailbox") String mailbox,
-                                        @PathParam("skipConfirmation") boolean skipConfirmation) {
+                                        @PathParam("skip-confirmation") boolean skipConfirmation) {
         if (!CONFIG_SELF_REGISTRATION & !isAdministrationWorkspaceMember()) {
             throw new WebApplicationException(Response.noContent().build());
         }
